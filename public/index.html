@@ -3,273 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinh Độc Lập - Thuyết Minh Tự Động</title>
-    <!-- Tailwind CSS (CDN) -->
+    <title>Hệ Thống Thuyết Minh - Dinh Độc Lập</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            light: '#f5f0e6',
-                            DEFAULT: '#c19a6b', // Màu vàng đồng/gỗ
-                            dark: '#8b6f4e',
-                            text: '#2c2724'
-                        }
-                    },
-                    fontFamily: {
-                        serif: ['"Playfair Display"', 'serif'],
-                        sans: ['"Inter"', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#1e3a8a', secondary: '#fbbf24', dark: '#0f172a' }
                 }
             }
         }
     </script>
     <style>
-        /* Tùy chỉnh thanh cuộn ẩn cho giao diện mobile mượt mà */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* Glassmorphism */
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-dark { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        /* Smooth transition */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-stone-50 text-brand-text font-sans antialiased flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 font-sans overflow-hidden">
 
-    <!-- Header / Navbar -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- TOP NAVBAR -->
+    <nav class="glass fixed w-full z-50 top-0 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <div class="w-10 h-10 bg-brand rounded-full flex items-center justify-center text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
                         <i class="fa-solid fa-landmark"></i>
                     </div>
-                    <h1 class="font-serif font-bold text-xl tracking-wide text-brand-dark" id="ui-title">Dinh Độc Lập</h1>
+                    <span class="font-bold text-xl tracking-tight text-primary">Dinh Độc Lập <span class="font-light text-slate-500 hidden sm:inline">Audio Guide</span></span>
                 </div>
-                <!-- Language Selector -->
-                <div class="relative">
-                    <select id="languageSelect" class="appearance-none bg-stone-100 border border-stone-200 text-stone-700 py-1.5 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand font-medium cursor-pointer">
-                        <option value="vi">Tiếng Việt</option>
-                        <option value="en">English</option>
-                        <option value="ja">日本語 (Nhật)</option>
-                        <option value="ko">한국어 (Hàn)</option>
-                        <option value="zh">中文 (Trung)</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-500">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                <div class="flex items-center gap-4">
+                    <!-- Language Selector -->
+                    <div class="relative group cursor-pointer">
+                        <div class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition">
+                            <img src="https://flagcdn.com/w20/vn.png" alt="VN" class="w-5 h-5 rounded-full object-cover">
+                            <span class="hidden sm:block">Tiếng Việt</span>
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
                     </div>
+                    <!-- Admin Login Button -->
+                    <a href="/admin" class="bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:block">Quản trị</span>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="relative bg-brand-dark overflow-hidden">
-        <!-- Ảnh nền mờ mờ giả lập (Nếu có ảnh thật, thay vào thẻ src) -->
-        <div class="absolute inset-0 opacity-20 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1540324155974-7523202daa3f?auto=format&fit=crop&q=80');"></div>
-        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 text-center">
-            <h2 class="text-3xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-md" id="ui-hero-title">Khám phá Lịch sử</h2>
-            <p class="text-brand-light text-base md:text-lg max-w-2xl mx-auto font-light" id="ui-hero-desc">Lắng nghe câu chuyện ẩn giấu đằng sau mỗi hiện vật và không gian kiến trúc độc đáo.</p>
-        </div>
-    </header>
+    <!-- MAIN DASHBOARD LAYOUT -->
+    <div class="flex h-screen pt-16">
+        
+        <!-- SIDEBAR (CATEGORIES) -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-full shadow-sm relative z-40">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Khu Vực Tham Quan</h2>
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm công trình..." class="w-full bg-slate-100 text-sm rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary transition">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                </div>
+            </div>
+            
+            <div class="overflow-y-auto flex-1 p-3" id="categorySidebar">
+                <!-- Filter Buttons generated by JS -->
+            </div>
+            
+            <div class="p-4 bg-slate-50 border-t border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 text-primary flex items-center justify-center">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-800">Hỗ trợ kỹ thuật</p>
+                        <p class="text-xs text-slate-500">Hotline: 1900 xxxx</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-    <!-- Floating Action: Scan QR (Nổi lên giữa Hero và Content) -->
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 flex justify-center">
-        <button onclick="openScanner()" class="bg-brand hover:bg-brand-dark text-white rounded-full shadow-lg px-8 py-4 flex items-center gap-3 transition-transform transform hover:scale-105 active:scale-95 border-4 border-stone-50">
-            <i class="fa-solid fa-qrcode text-xl"></i>
-            <span class="font-semibold text-lg" id="ui-btn-scan">Quét Mã QR</span>
-        </button>
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto relative scroll-smooth" id="mainContent">
+            
+            <!-- HERO BANNER -->
+            <div class="relative w-full h-80 bg-slate-900">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Reunification_Palace%2C_Ho_Chi_Minh_City.jpg/1200px-Reunification_Palace%2C_Ho_Chi_Minh_City.jpg" alt="Dinh Doc Lap Banner" class="w-full h-full object-cover opacity-50">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                <div class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+                    <span class="px-3 py-1 text-xs font-semibold bg-secondary text-dark rounded-full mb-4 shadow-lg uppercase tracking-wide">Di tích quốc gia đặc biệt</span>
+                    <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">Hệ Thống Thuyết Minh Đa Ngôn Ngữ</h1>
+                    <p class="text-slate-200 max-w-2xl text-sm md:text-base drop-shadow">Trải nghiệm không gian lịch sử Dinh Độc Lập qua nền tảng số. Quét mã QR tại mỗi khu vực để nghe thuyết minh chi tiết bằng 5 ngôn ngữ.</p>
+                </div>
+            </div>
+
+            <!-- TICKET PRICING SECTION -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="ticket-section">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Bảng Giá Vé Tham Quan</h2>
+                    <p class="text-slate-500 mt-2 text-sm">Áp dụng cho khách tham quan Dinh Độc Lập và sử dụng hệ thống Audio Guide</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                    <!-- Ticket: Student -->
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow border border-slate-100 p-6 flex flex-col relative overflow-hidden group">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Học sinh / Sinh viên</h3>
+                        <p class="text-slate-500 text-sm mb-4">Cần xuất trình thẻ HSSV hợp lệ</p>
+                        <div class="mt-auto">
+                            <span class="text-3xl font-black text-primary">20.000đ</span>
+                            <span class="text-slate-500 text-sm">/ vé</span>
+                        </div>
+                        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tham quan toàn bộ Dinh</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Quét mã Audio Guide</li>
+                        </ul>
+                    </div>
+
+                    <!-- Ticket: Adult (Popular) -->
+                    <div class="bg-primary rounded-2xl shadow-xl p-6 flex flex-col relative overflow-hidden transform md:-translate-y-4 border-2 border-secondary text-white">
+                        <div class="absolute top-0 right-0 bg-secondary text-dark text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wide">Phổ Biến Nhất</div>
+                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-4">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <h3 class="text-lg font-bold">Người Lớn</h3>
+                        <p class="text-blue-100 text-sm mb-4">Khách tham quan trong nước & quốc tế</p>
+                        <div class="mt-auto">
+                            <span class="text-4xl font-black text-secondary">65.000đ</span>
+                            <span class="text-blue-200 text-sm">/ vé</span>
+                        </div>
+                        <ul class="mt-6 space-y-3 text-sm text-blue-50">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Tham quan toàn bộ Dinh</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Truy cập bộ 16 Audio Guide</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Tham quan nhà trưng bày 30/4</li>
+                        </ul>
+                    </div>
+
+                    <!-- Ticket: Child -->
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow border border-slate-100 p-6 flex flex-col relative overflow-hidden group">
+                        <div class="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-child"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Trẻ Em</h3>
+                        <p class="text-slate-500 text-sm mb-4">Trẻ em dưới 16 tuổi</p>
+                        <div class="mt-auto">
+                            <span class="text-3xl font-black text-primary">15.000đ</span>
+                            <span class="text-slate-500 text-sm">/ vé</span>
+                        </div>
+                        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tham quan toàn bộ Dinh</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Trải nghiệm đa phương tiện</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ARTIFACTS GRID SECTION -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-slate-50 rounded-t-3xl border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+                
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800" id="currentCategoryTitle">Tất cả công trình</h2>
+                        <p class="text-slate-500 text-sm mt-1" id="currentCategoryDesc">Khám phá các di tích lịch sử bên trong Dinh Độc Lập</p>
+                    </div>
+                    
+                    <!-- Mobile Category Dropdown (Hidden on Desktop) -->
+                    <div class="md:hidden">
+                        <select id="mobileCategorySelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 shadow-sm">
+                            <option value="all">Tất cả khu vực</option>
+                            <!-- Options generated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Data Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="artifactsGrid">
+                    <!-- Cards will be dynamically injected here by JavaScript -->
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center fade-in">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" alt="Empty" class="w-32 h-32 opacity-50 mb-4 grayscale">
+                    <h3 class="text-lg font-bold text-slate-700">Không tìm thấy công trình</h3>
+                    <p class="text-slate-500 text-sm max-w-sm mt-2">Khu vực này hiện chưa có dữ liệu hoặc không khớp với kết quả tìm kiếm của bạn.</p>
+                    <button onclick="filterArtifacts('all')" class="mt-4 text-primary font-medium hover:underline text-sm">Xem tất cả công trình</button>
+                </div>
+
+            </section>
+
+            <!-- FOOTER -->
+            <footer class="bg-white border-t border-slate-200 mt-12 py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-landmark text-primary text-xl"></i>
+                        <span class="font-bold text-slate-800">Dinh Độc Lập Audio Guide</span>
+                    </div>
+                    <p class="text-slate-500 text-sm text-center md:text-left">
+                        © 2026 Developed by Nhóm 9 - SE SGU. Dự án Đồ án Kiến trúc phần mềm.
+                    </p>
+                    <div class="flex gap-4 text-slate-400">
+                        <a href="#" class="hover:text-primary transition"><i class="fa-brands fa-github text-xl"></i></a>
+                        <a href="#" class="hover:text-primary transition"><i class="fa-brands fa-facebook text-xl"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
     </div>
 
-    <!-- Main Content: Artifacts List -->
-    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div class="flex items-center gap-2 mb-6">
-            <i class="fa-solid fa-map-location-dot text-brand"></i>
-            <h3 class="text-xl font-serif font-bold text-brand-text" id="ui-list-title">Danh sách khu vực tham quan</h3>
-        </div>
-
-        <!-- Trạng thái tải dữ liệu -->
-        <div id="loading" class="flex flex-col items-center justify-center py-12 text-stone-400">
-            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-brand"></i>
-            <span id="ui-loading">Đang tải dữ liệu...</span>
-        </div>
-
-        <!-- Lưới danh sách -->
-        <div id="artifactsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-            <!-- Thẻ mẫu sẽ được render bằng JS -->
-        </div>
-
-        <!-- Thông báo lỗi -->
-        <div id="errorMessage" class="hidden text-center text-red-500 py-8 bg-red-50 rounded-xl border border-red-100"></div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-stone-800 text-stone-400 py-8 text-center mt-auto">
-        <div class="max-w-5xl mx-auto px-4">
-            <p class="mb-2 font-serif text-stone-300">Dinh Độc Lập - Independence Palace</p>
-            <p class="text-sm">Hệ thống Thuyết minh tự động đa ngôn ngữ</p>
-            <p class="text-xs mt-4 opacity-50">&copy; 2026 Đồ án Công nghệ phần mềm - Nhóm 9.</p>
-        </div>
-    </footer>
-
-    <!-- Script xử lý logic -->
-    <script>
-        const API_URL = '/api/artifacts';
-        let currentLang = localStorage.getItem('pref_lang') || 'vi';
+    <!-- AUDIO PLAYER MODAL -->
+    <div id="audioModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal()"></div>
         
-        // Cấu hình ngôn ngữ tĩnh cho UI
-        const uiTranslations = {
-            vi: { title: "Dinh Độc Lập", heroTitle: "Khám phá Lịch sử", heroDesc: "Lắng nghe câu chuyện ẩn giấu đằng sau mỗi hiện vật và không gian kiến trúc độc đáo.", btnScan: "Quét Mã QR", listTitle: "Danh sách khu vực tham quan", loading: "Đang tải dữ liệu...", btnListen: "Nghe thuyết minh" },
-            en: { title: "Independence Palace", heroTitle: "Discover History", heroDesc: "Listen to the hidden stories behind every artifact and unique architectural space.", btnScan: "Scan QR Code", listTitle: "Places to Visit", loading: "Loading data...", btnListen: "Listen to Audio Guide" },
-            ja: { title: "独立宮殿", heroTitle: "歴史の発見", heroDesc: "すべての遺物とユニークな建築空間の背後に隠された物語を聞く。", btnScan: "QRをスキャン", listTitle: "見学エリア", loading: "データを読み込んでいます...", btnListen: "音声ガイドを聞く" },
-            ko: { title: "독립궁", heroTitle: "역사 탐험", heroDesc: "모든 유물과 독특한 건축 공간 뒤에 숨겨진 이야기를 들어보세요.", btnScan: "QR 코드 스캔", listTitle: "관람 구역 목록", loading: "데이터 로드 중...", btnListen: "오디오 가이드 듣기" },
-            zh: { title: "独立宫", heroTitle: "探索历史", heroDesc: "聆听每件文物和独特建筑空间背后隐藏的故事。", btnScan: "扫描二维码", listTitle: "参观区域列表", loading: "加载数据中...", btnListen: "收听语音导览" }
-        };
+        <!-- Modal Content -->
+        <div class="glass-dark w-full max-w-md mx-4 rounded-3xl shadow-2xl relative z-10 overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalContainer">
+            <!-- Close btn -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="p-8">
+                <!-- Image Placeholder -->
+                <div class="w-24 h-24 bg-gradient-to-br from-primary to-blue-400 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg border-2 border-white/20">
+                    <i class="fa-solid fa-headphones text-4xl text-white"></i>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-2" id="modalTitle">Phòng Khánh Tiết</h3>
+                    <p class="text-blue-200 text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-location-dot"></i> <span id="modalLocation">Tầng trệt</span>
+                    </p>
+                </div>
+                
+                <!-- Audio Controls -->
+                <div class="bg-white/10 rounded-2xl p-6 backdrop-blur-md border border-white/10">
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" id="progressContainer">
+                            <div class="h-full bg-secondary w-0 relative" id="progressBar">
+                                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-300 mt-2 font-medium">
+                            <span id="currentTime">00:00</span>
+                            <span id="durationTime">00:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="flex items-center justify-center gap-6">
+                        <button class="text-white hover:text-secondary transition text-xl"><i class="fa-solid fa-backward-step"></i></button>
+                        <button id="playBtn" class="w-14 h-14 bg-secondary hover:bg-yellow-400 text-dark rounded-full flex items-center justify-center text-2xl shadow-lg transition transform hover:scale-105" onclick="togglePlay()">
+                            <i class="fa-solid fa-play ml-1" id="playIcon"></i>
+                        </button>
+                        <button class="text-white hover:text-secondary transition text-xl"><i class="fa-solid fa-forward-step"></i></button>
+                    </div>
+                </div>
+                
+                <!-- QR Code Snippet inside modal -->
+                <div class="mt-6 border-t border-white/10 pt-4 text-center">
+                    <button class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2 mx-auto">
+                        <i class="fa-solid fa-qrcode"></i> Hiển thị mã QR chia sẻ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hidden Audio Element -->
+        <audio id="audioElement" src=""></audio>
+    </div>
 
-        const langSelect = document.getElementById('languageSelect');
-        const grid = document.getElementById('artifactsGrid');
-        const loading = document.getElementById('loading');
-        const errorDiv = document.getElementById('errorMessage');
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // MOCK DATA (Thay thế bằng API fetch từ MongoDB của bạn sau này)
+        const categories = [
+            { slug: 'all', name: 'Tất cả', icon: 'fa-globe' },
+            { slug: 'tang-tret', name: 'Tầng trệt', icon: 'fa-building' },
+            { slug: 'lau-1', name: 'Lầu 1', icon: 'fa-layer-group' },
+            { slug: 'lau-2', name: 'Lầu 2', icon: 'fa-layer-group' },
+            { slug: 'san-thuong', name: 'Tầng sân thượng', icon: 'fa-helicopter' },
+            { slug: 'ngoai-troi', name: 'Ngoài trời', icon: 'fa-tree' },
+            { slug: 'tang-ham', name: 'Tầng hầm', icon: 'fa-dungeon' }
+        ];
 
-        // Khởi tạo
-        langSelect.value = currentLang;
-        updateUIStaticText(currentLang);
-        fetchArtifacts(currentLang);
+        const artifacts = [
+            { code: 'DDL-01', name: 'Phòng Khánh Tiết', categorySlug: 'tang-tret', location: 'Tầng trệt - Dinh Độc Lập', description: 'Phòng Khánh Tiết là không gian lớn nhất tại Dinh Độc Lập...' },
+            { code: 'DDL-02', name: 'Phòng Trình Quốc Thư', categorySlug: 'lau-2', location: 'Lầu 2 - Dinh Độc Lập', description: 'Nơi Tổng thống nhận quốc thư của đại sứ các nước...' },
+            { code: 'DDL-03', name: 'Phòng Hợp Hội Đồng Bộ Trưởng', categorySlug: 'lau-2', location: 'Lầu 2 - Dinh Độc Lập', description: 'Nơi diễn ra các phiên họp kín của Nội các chính quyền...' },
+            { code: 'DDL-04', name: 'Bến Đáp Trực Thăng & F5E', categorySlug: 'san-thuong', location: 'Tầng sân thượng - Dinh Độc Lập', description: 'Nơi đỗ chiếc trực thăng UH-1...' },
+            { code: 'DDL-05', name: 'Xe Tăng 390 & Cổng Chính', categorySlug: 'ngoai-troi', location: 'Khuôn viên bãi cỏ phía trước', description: 'Chiếc xe tăng 390 huyền thoại đã húc văng cổng phụ...' },
+            { code: 'DDL-06', name: 'Khu Hầm Tác Chiến Lịch Sử', categorySlug: 'tang-ham', location: 'Tầng hầm - Dinh Độc Lập', description: 'Hệ thống hầm kiên cố chịu được bom đạn hạng nặng...' },
+            { code: 'DDL-07', name: 'Phòng Làm Việc Của Tổng Thống', categorySlug: 'lau-1', location: 'Lầu 1 - Dinh Độc Lập', description: 'Không gian làm việc chính thức của Tổng thống...' },
+            { code: 'DDL-16', name: 'Khu Vực Nhà Bếp', categorySlug: 'tang-ham', location: 'Tầng hầm - Dinh Độc Lập', description: 'Khu vực bếp rộng lớn được trang bị các thiết bị nấu nướng...' }
+        ];
 
-        // Sự kiện đổi ngôn ngữ
-        langSelect.addEventListener('change', (e) => {
-            currentLang = e.target.value;
-            localStorage.setItem('pref_lang', currentLang);
-            updateUIStaticText(currentLang);
-            fetchArtifacts(currentLang);
-        });
+        let currentCategory = 'all';
 
-        // Hàm cập nhật chữ trên giao diện theo ngôn ngữ
-        function updateUIStaticText(lang) {
-            const texts = uiTranslations[lang] || uiTranslations['vi'];
-            document.getElementById('ui-title').textContent = texts.title;
-            document.getElementById('ui-hero-title').textContent = texts.heroTitle;
-            document.getElementById('ui-hero-desc').textContent = texts.heroDesc;
-            document.getElementById('ui-btn-scan').textContent = texts.btnScan;
-            document.getElementById('ui-list-title').textContent = texts.listTitle;
-            document.getElementById('ui-loading').textContent = texts.loading;
+        // 1. Khởi tạo Giao diện
+        function initApp() {
+            renderSidebar();
+            renderMobileCategorySelect();
+            renderArtifacts(artifacts);
+            
+            // Search event
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const keyword = e.target.value.toLowerCase();
+                const filtered = artifacts.filter(a => 
+                    a.name.toLowerCase().includes(keyword) || 
+                    a.code.toLowerCase().includes(keyword)
+                );
+                renderArtifacts(filtered);
+            });
         }
 
-        // Tải danh sách công trình từ API
-        async function fetchArtifacts(lang) {
-            grid.classList.add('hidden');
-            loading.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-            grid.innerHTML = ''; // Làm sạch lưới trước khi load mới (an toàn vì tự sinh element phía dưới)
+        // 2. Render Sidebar
+        function renderSidebar() {
+            const sidebar = document.getElementById('categorySidebar');
+            sidebar.innerHTML = categories.map(cat => `
+                <button onclick="filterArtifacts('${cat.slug}')" 
+                        class="w-full text-left px-4 py-3 mb-1 rounded-xl text-sm font-medium transition flex items-center justify-between group
+                        ${currentCategory === cat.slug ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid ${cat.icon} ${currentCategory === cat.slug ? 'text-blue-200' : 'text-slate-400 group-hover:text-primary'} transition"></i>
+                        ${cat.name}
+                    </div>
+                    ${cat.slug !== 'all' ? `<span class="bg-white/20 text-[10px] px-2 py-0.5 rounded-full ${currentCategory === cat.slug ? 'text-white' : 'text-slate-400 bg-slate-200'}">
+                        ${artifacts.filter(a => a.categorySlug === cat.slug).length}
+                    </span>` : ''}
+                </button>
+            `).join('');
+        }
 
-            try {
-                const response = await fetch(`${API_URL}?lang=${lang}`);
-                const result = await response.json();
+        // 3. Render Mobile Dropdown
+        function renderMobileCategorySelect() {
+            const select = document.getElementById('mobileCategorySelect');
+            select.innerHTML = categories.map(cat => `
+                <option value="${cat.slug}">${cat.name}</option>
+            `).join('');
+            
+            select.addEventListener('change', (e) => {
+                filterArtifacts(e.target.value);
+            });
+        }
 
-                if (result.success && result.data.length > 0) {
-                    renderCards(result.data, lang);
-                } else {
-                    showError("Không có dữ liệu.");
-                }
-            } catch (error) {
-                console.error('Lỗi tải dữ liệu:', error);
-                showError("Đã xảy ra lỗi khi kết nối với máy chủ.");
-            } finally {
-                loading.classList.add('hidden');
+        // 4. Lọc Dữ Liệu
+        function filterArtifacts(slug) {
+            currentCategory = slug;
+            renderSidebar();
+            
+            // Update Title
+            const cat = categories.find(c => c.slug === slug);
+            document.getElementById('currentCategoryTitle').innerText = cat ? cat.name : 'Tất cả công trình';
+            document.getElementById('currentCategoryDesc').innerText = slug === 'all' ? 'Khám phá các di tích lịch sử bên trong Dinh Độc Lập' : `Danh sách các công trình thuộc khu vực ${cat.name.toLowerCase()}`;
+            
+            // Sync mobile select
+            document.getElementById('mobileCategorySelect').value = slug;
+            
+            const filtered = slug === 'all' ? artifacts : artifacts.filter(a => a.categorySlug === slug);
+            renderArtifacts(filtered);
+        }
+
+        // 5. Render Grid Data
+        function renderArtifacts(data) {
+            const grid = document.getElementById('artifactsGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+            
+            grid.innerHTML = data.map((item, index) => `
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group fade-in" style="animation-delay: ${index * 0.05}s">
+                    <!-- Image Placeholder (Color block) -->
+                    <div class="h-40 bg-slate-100 relative overflow-hidden flex items-center justify-center group-hover:bg-slate-200 transition">
+                        <i class="fa-solid fa-image text-slate-300 text-4xl"></i>
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold text-primary shadow-sm border border-slate-100">
+                            ${item.code}
+                        </div>
+                        
+                        <!-- Hover Overlay -->
+                        <div class="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                            <button onclick="openAudioModal('${item.code}')" class="w-10 h-10 bg-white text-primary rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg" title="Nghe Audio">
+                                <i class="fa-solid fa-play ml-0.5"></i>
+                            </button>
+                            <button class="w-10 h-10 bg-white text-slate-800 rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg" title="Mã QR">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-xs text-slate-500 font-medium">${item.location}</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800 mb-2 line-clamp-1 group-hover:text-primary transition">${item.name}</h3>
+                        <p class="text-slate-500 text-sm line-clamp-2 mb-4 h-10">${item.description}</p>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <div class="flex gap-1">
+                                <img src="https://flagcdn.com/w20/vn.png" class="w-4 h-4 rounded-full" title="Tiếng Việt">
+                                <img src="https://flagcdn.com/w20/gb.png" class="w-4 h-4 rounded-full" title="English">
+                                <img src="https://flagcdn.com/w20/jp.png" class="w-4 h-4 rounded-full" title="Japanese">
+                            </div>
+                            <button class="text-primary text-xs font-semibold hover:underline">Chi tiết <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================= AUDIO PLAYER LOGIC =================
+        const audioModal = document.getElementById('audioModal');
+        const modalContainer = document.getElementById('modalContainer');
+        const playIcon = document.getElementById('playIcon');
+        const progressBar = document.getElementById('progressBar');
+        const audioElement = document.getElementById('audioElement');
+        let isPlaying = false;
+
+        function openAudioModal(code) {
+            const artifact = artifacts.find(a => a.code === code);
+            if(!artifact) return;
+            
+            document.getElementById('modalTitle').innerText = artifact.name;
+            document.getElementById('modalLocation').innerText = artifact.location;
+            
+            // Show modal with animation
+            audioModal.classList.remove('hidden');
+            audioModal.classList.add('flex');
+            setTimeout(() => {
+                modalContainer.classList.remove('scale-95', 'opacity-0');
+                modalContainer.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Reset player state (Mocking audio load)
+            isPlaying = false;
+            playIcon.className = "fa-solid fa-play ml-1";
+            progressBar.style.width = '0%';
+        }
+
+        function closeModal() {
+            modalContainer.classList.remove('scale-100', 'opacity-100');
+            modalContainer.classList.add('scale-95', 'opacity-0');
+            
+            // Stop audio
+            isPlaying = false;
+            audioElement.pause();
+            
+            setTimeout(() => {
+                audioModal.classList.add('hidden');
+                audioModal.classList.remove('flex');
+            }, 300);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playIcon.className = "fa-solid fa-pause";
+                // Mocking progress bar movement for demo
+                progressBar.style.transition = 'width 10s linear';
+                progressBar.style.width = '100%';
+            } else {
+                playIcon.className = "fa-solid fa-play ml-1";
+                const currentWidth = window.getComputedStyle(progressBar).width;
+                progressBar.style.transition = 'none';
+                progressBar.style.width = currentWidth;
             }
         }
 
-        // Tạo giao diện thẻ công trình một cách bảo mật (không dùng innerHTML cho dữ liệu)
-        function renderCards(artifacts, lang) {
-            const texts = uiTranslations[lang] || uiTranslations['vi'];
-            const fragment = document.createDocumentFragment();
-
-            artifacts.forEach(item => {
-                // Thẻ Card chính
-                const card = document.createElement('a');
-                // Trỏ tới trang chi tiết kèm theo mã code và ngôn ngữ hiện tại
-                card.href = `/detail.html?code=${item.code}&lang=${lang}`; 
-                card.className = "group block bg-white rounded-2xl border border-stone-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden relative";
-
-                // Nhãn Ngôn ngữ Fallback (Nếu có)
-                if (item.fallback) {
-                    const badge = document.createElement('span');
-                    badge.className = "absolute top-3 left-3 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10";
-                    badge.textContent = "Chưa có bản dịch";
-                    card.appendChild(badge);
-                }
-
-                // Vùng ảnh giả lập (Vì CSDL chưa có ảnh, dùng pattern hoặc icon nền)
-                const imgArea = document.createElement('div');
-                imgArea.className = "h-40 bg-stone-100 flex items-center justify-center text-stone-300 group-hover:bg-brand-light transition-colors";
-                const icon = document.createElement('i');
-                icon.className = "fa-solid fa-archway text-4xl";
-                imgArea.appendChild(icon);
-                card.appendChild(imgArea);
-
-                // Phần Nội dung
-                const content = document.createElement('div');
-                content.className = "p-5";
-
-                const title = document.createElement('h4');
-                title.className = "font-serif font-bold text-lg text-brand-dark mb-1 line-clamp-1 group-hover:text-brand transition-colors";
-                title.textContent = item.name;
-                content.appendChild(title);
-
-                const locDiv = document.createElement('div');
-                locDiv.className = "flex items-center gap-1 text-xs text-stone-500 mb-3";
-                const locIcon = document.createElement('i');
-                locIcon.className = "fa-solid fa-location-dot";
-                const locText = document.createElement('span');
-                locText.textContent = item.location || "Dinh Độc Lập";
-                locDiv.appendChild(locIcon);
-                locDiv.appendChild(locText);
-                content.appendChild(locDiv);
-
-                const desc = document.createElement('p');
-                desc.className = "text-sm text-stone-600 line-clamp-2 mb-4 font-light";
-                desc.textContent = item.description;
-                content.appendChild(desc);
-
-                // Nút CTA (Nghe thuyết minh)
-                const btn = document.createElement('div');
-                btn.className = "text-brand font-medium text-sm flex items-center gap-2";
-                const btnIcon = document.createElement('i');
-                btnIcon.className = "fa-regular fa-circle-play";
-                const btnText = document.createElement('span');
-                btnText.textContent = texts.btnListen;
-                
-                btn.appendChild(btnIcon);
-                btn.appendChild(btnText);
-                content.appendChild(btn);
-
-                card.appendChild(content);
-                fragment.appendChild(card);
-            });
-
-            grid.appendChild(fragment);
-            grid.classList.remove('hidden');
-        }
-
-        function showError(msg) {
-            errorDiv.textContent = msg;
-            errorDiv.classList.remove('hidden');
-        }
-
-        // Hàm mô phỏng mở camera quét QR (Có thể trỏ tới một thư viện quét QR JS thật sau này)
-        function openScanner() {
-            // Tạm thời hiển thị alert. Ở đồ án thực tế, du khách dùng app camera của điện thoại quét mã thật để vào link.
-            alert("Vui lòng sử dụng ứng dụng Camera hoặc Zalo trên điện thoại của bạn để quét mã QR gắn tại hiện vật.");
-        }
+        // Khởi động app
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
