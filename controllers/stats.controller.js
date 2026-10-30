@@ -10,16 +10,14 @@ class StatsController {
             activeUsers.set(clientId, Date.now());
         }
 
-        try {
-            if (statsService && typeof statsService.heartbeat === 'function') {
-                statsService.heartbeat(req.body && req.body.deviceId);
-            }
-        } catch (error) {}
-
+        // Đã bỏ try...catch rỗng để lỗi 400 (khi sai mã) được đẩy ra ngoài cho hệ thống tự xử lý
+        if (statsService && typeof statsService.heartbeat === 'function') {
+            await statsService.heartbeat(req.body && req.body.deviceId);
+        }
+        
         res.status(204).send();
     }
 
-    // Hàm MỚI: Xóa ngay lập tức khi người dùng đóng web
     async disconnect(req, res) {
         const clientId = req.body && req.body.clientId;
         if (clientId) {

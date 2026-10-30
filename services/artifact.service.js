@@ -105,7 +105,7 @@ class ArtifactService {
         let targetBase = baseUrl;
         // Thêm đoạn điều kiện này vào: Nếu là localhost hoặc 127.0.0.1, tự ép sang IP Wi-Fi
         if (!targetBase || targetBase.includes('localhost') || targetBase.includes('127.0.0.1')) {
-            targetBase = 'http://192.168.31.108:5000';
+            targetBase = process.env.PUBLIC_BASE_URL || 'http://localhost:5000';
         }
 
         const base = normalizeBaseUrl(targetBase);
