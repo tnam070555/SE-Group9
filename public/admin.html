@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Dinh Độc Lập</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6', // Main Teal
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        sidebar: '#0f172a', // Slate 900
+                        sidebarHover: '#1e293b', // Slate 800
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Animations and Scrollbars -->
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        /* Toast Animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        /* Modal Animations */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-animate {
+            animation: modalFadeIn 0.2s ease-out forwards;
+        }
+
+        /* Table Hover Transitions */
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+        .table-row-hover:hover {
+            background-color: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden antialiased">
+
+    <!-- ========================================== -->
+    <!-- SIDEBAR NAVIGATION                         -->
+    <!-- ========================================== -->
+    <aside class="w-64 bg-sidebar text-slate-300 flex flex-col shadow-2xl z-20 flex-shrink-0 transition-all duration-300">
+        <!-- Logo Area -->
+        <div class="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/50">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30 mr-3">
+                <i class="fa-solid fa-landmark text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight tracking-wide">Dinh Độc Lập</h1>
+                <p class="text-xs text-brand-300/80 font-medium tracking-wider">AUDIO GUIDE</p>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">Menu Chính</p>
+            
+            <a href="#" onclick="app.switchView('dashboard')" id="nav-dashboard" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 bg-brand-500/10 text-brand-400">
+                <i class="fa-solid fa-chart-pie w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Tổng quan
+            </a>
+            
+            <a href="#" onclick="app.switchView('categories')" id="nav-categories" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-solid fa-layer-group w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Khu vực & Phân loại
+            </a>
+
+            <a href="#" onclick="app.switchView('artifacts')" id="nav-artifacts" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-solid fa-image w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Hiện vật & Công trình
+            </a>
+
+            <a href="#" onclick="app.switchView('languages')" id="nav-languages" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-solid fa-language w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Ngôn ngữ hỗ trợ
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8">Tương tác</p>
+            
+            <a href="#" onclick="app.switchView('feedbacks')" id="nav-feedbacks" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-regular fa-comments w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Đánh giá & Phản hồi
+                <span class="ml-auto bg-brand-500 text-white py-0.5 px-2 rounded-full text-xs font-bold shadow-sm">14</span>
+            </a>
+
+            <a href="#" onclick="app.switchView('events')" id="nav-events" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-regular fa-calendar-check w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
+                Sự kiện đặc biệt
+            </a>
+
+            <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-8">Hệ thống</p>
+            
+            <a href="#" onclick="app.switchView('settings')" id="nav-settings" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
+                <i class="fa-solid fa-gear w-6 text-center mr-2 text-lg transition-transform group-hover:rotate-90"></i>
+                Cài đặt chung
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer / Logout -->
+        <div class="p-4 border-t border-slate-800 bg-slate-900/30">
+            <button class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-rose-500/20 hover:text-rose-400 rounded-lg transition-colors">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Đăng xuất
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT AREA                          -->
+    <!-- ========================================== -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
+        
+        <!-- Top Header Bar -->
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 flex-shrink-0">
+            
+            <!-- Left: Page Title / Search -->
+            <div class="flex items-center">
+                <h2 id="header-title" class="text-xl font-bold text-slate-800 capitalize tracking-tight">Tổng quan hệ thống</h2>
+                <div class="ml-8 hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 border border-slate-200 focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <i class="fa-solid fa-search text-slate-400"></i>
+                    <input type="text" placeholder="Tìm kiếm nhanh..." class="bg-transparent border-none outline-none ml-2 text-sm text-slate-700 w-48 placeholder-slate-400">
+                </div>
+            </div>
+
+            <!-- Right: Notifications & Profile -->
+            <div class="flex items-center space-x-6">
+                <!-- Notifications -->
+                <button class="relative p-2 text-slate-400 hover:text-brand-500 transition-colors">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
+                </button>
+                
+                <!-- Separator -->
+                <div class="h-8 w-px bg-slate-200"></div>
+
+                <!-- User Profile -->
+                <div class="flex items-center cursor-pointer group">
+                    <div class="text-right mr-3 hidden md:block">
+                        <p class="text-sm font-bold text-slate-700 group-hover:text-brand-600 transition-colors">Quản trị viên</p>
+                        <p class="text-xs text-slate-500">admin@dinhdoclap.gov.vn</p>
+                    </div>
+                    <div class="relative">
+                        <img src="https://placehold.co/100x100/14b8a6/ffffff?text=AD" alt="Admin" class="w-10 h-10 rounded-full border-2 border-slate-100 shadow-sm object-cover">
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Body -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth" id="main-scroll-area">
+            
+            <!-- ========================================================================= -->
+            <!-- VIEW: DASHBOARD (Thống kê)                                                -->
+            <!-- ========================================================================= -->
+            <section id="view-dashboard" class="view-section active max-w-7xl mx-auto">
+                
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-brand-600 to-brand-400 rounded-2xl p-8 mb-8 text-white shadow-lg shadow-brand-500/20 flex justify-between items-center relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold mb-2">Xin chào, Admin! 👋</h2>
+                        <p class="text-brand-100 text-sm md:text-base max-w-xl">Hệ thống thuyết minh đa ngôn ngữ Dinh Độc Lập đang hoạt động ổn định. Dưới đây là báo cáo thống kê các chỉ số tương tác mới nhất trong ngày.</p>
+                    </div>
+                    <div class="hidden lg:block relative z-10">
+                        <div class="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30">
+                            <p class="text-xs uppercase tracking-wider text-brand-100 mb-1">Thời gian hiện tại</p>
+                            <p class="text-xl font-bold font-mono" id="real-time-clock">--:--:--</p>
+                            <p class="text-sm" id="real-time-date">--/--/----</p>
+                        </div>
+                    </div>
+                    <!-- Decorative background elements -->
+                    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
+                    <div class="absolute bottom-0 right-40 -mb-10 w-32 h-32 rounded-full bg-brand-900 opacity-20 blur-2xl"></div>
+                </div>
+
+                <!-- Stats Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Card 1 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center">
+                        <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-2xl mr-4 flex-shrink-0">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium mb-1">Đang truy cập</p>
+                            <h3 class="text-2xl font-bold text-slate-800" id="onlineUsers">0</h3>
+                            <p class="text-xs text-emerald-500 mt-1 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+12% hôm nay</p>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center">
+                        <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl mr-4 flex-shrink-0">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium mb-1">Lượt quét QR (Tháng)</p>
+                            <h3 class="text-2xl font-bold text-slate-800">12,458</h3>
+                            <p class="text-xs text-blue-500 mt-1 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>+5.2% so với tháng trước</p>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center">
+                        <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-2xl mr-4 flex-shrink-0">
+                            <i class="fa-solid fa-headphones"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium mb-1">Lượt nghe Audio</p>
+                            <h3 class="text-2xl font-bold text-slate-800">45,120</h3>
+                            <p class="text-xs text-purple-500 mt-1 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i>Trung bình 3.5 audio/khách</p>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center">
+                        <div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-2xl mr-4 flex-shrink-0">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium mb-1">Đánh giá trung bình</p>
+                            <h3 class="text-2xl font-bold text-slate-800">4.8 <span class="text-base font-normal text-slate-500">/ 5.0</span></h3>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Dựa trên 2,104 lượt đánh giá</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Main Chart (Line) -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 lg:col-span-2 relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 text-lg">Biểu đồ lượt truy cập 7 ngày qua</h3>
+                            <select class="text-sm border-slate-200 rounded-lg text-slate-600 py-1.5 pl-3 pr-8 focus:ring-brand-500 focus:border-brand-500 bg-slate-50">
+                                <option>7 ngày qua</option>
+                                <option>30 ngày qua</option>
+                                <option>Năm nay</option>
+                            </select>
+                        </div>
+                        <div class="w-full h-72">
+                            <canvas id="visitorsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Side Chart (Doughnut) -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 relative">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-lg">Tỉ lệ ngôn ngữ sử dụng</h3>
+                            <p class="text-xs text-slate-500">Top ngôn ngữ được du khách lựa chọn</p>
+                        </div>
+                        <div class="w-full h-64 flex justify-center items-center relative">
+                            <canvas id="languageChart"></canvas>
+                            <!-- Center text in doughnut -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                                <span class="text-2xl font-bold text-slate-700">Top 4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW: CATEGORIES (Quản lý Khu vực)                                        -->
+            <!-- ========================================================================= -->
+            <section id="view-categories" class="view-section max-w-6xl mx-auto">
+                
+                <!-- Action Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Quản lý Khu vực Tham quan</h2>
+                        <p class="text-slate-500 text-sm mt-1">Thêm, sửa, xóa các phân khu để nhóm các công trình hiện vật.</p>
+                    </div>
+                    <button onclick="categoryManager.toggleForm()" class="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm shadow-brand-500/30 transition-all flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Thêm khu vực mới
+                    </button>
+                </div>
+
+                <!-- Add/Edit Form Card (Initially hidden) -->
+                <div id="category-form-container" class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-8 hidden origin-top transition-all">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                        <h3 class="text-lg font-bold text-slate-800" id="category-form-title">Tạo khu vực mới</h3>
+                        <button onclick="categoryManager.toggleForm()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Form simulates POST / PUT to API -->
+                    <form id="category-form" onsubmit="categoryManager.handleFormSubmit(event)">
+                        <input type="hidden" id="cat-id" value="">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="cat-name" class="block text-sm font-semibold text-slate-700 mb-2">Tên khu vực <span class="text-rose-500">*</span></label>
+                                <input type="text" id="cat-name" required placeholder="Ví dụ: Tầng trệt, Tầng 2, Sân vườn..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700 placeholder-slate-400">
+                            </div>
+                            <div>
+                                <label for="cat-status" class="block text-sm font-semibold text-slate-700 mb-2">Trạng thái hiển thị</label>
+                                <select id="cat-status" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700">
+                                    <option value="active">Đang hoạt động (Hiển thị cho khách)</option>
+                                    <option value="inactive">Tạm ẩn (Đang bảo trì/cập nhật)</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="cat-desc" class="block text-sm font-semibold text-slate-700 mb-2">Mô tả ngắn</label>
+                                <textarea id="cat-desc" rows="3" placeholder="Nhập một đoạn mô tả ngắn về khu vực này..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700 resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                            <button type="button" onclick="categoryManager.toggleForm()" class="px-5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200">Hủy bỏ</button>
+                            <button type="submit" class="px-5 py-2.5 rounded-lg font-medium text-white bg-slate-800 hover:bg-slate-900 shadow-md transition-colors flex items-center">
+                                <i class="fa-solid fa-save mr-2"></i> Lưu dữ liệu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    
+                    <!-- Table Toolbar -->
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" id="cat-search" onkeyup="categoryManager.filterTable()" placeholder="Tìm tên khu vực..." class="pl-9 pr-4 py-2 rounded-md border border-slate-200 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none w-64">
+                        </div>
+                        <div class="text-sm text-slate-500 font-medium">
+                            Tổng cộng: <span id="cat-total-count" class="text-brand-600 font-bold">0</span> khu vực
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/50 text-slate-600 text-sm uppercase tracking-wider font-semibold border-b border-slate-200">
+                                    <th class="py-4 px-6 w-1/4">Tên Khu vực</th>
+                                    <th class="py-4 px-6 w-1/3">Mô tả</th>
+                                    <th class="py-4 px-6 text-center">Trạng thái</th>
+                                    <th class="py-4 px-6 text-center">Ngày tạo</th>
+                                    <th class="py-4 px-6 text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="category-tbody" class="text-sm text-slate-700 divide-y divide-slate-100">
+                                <!-- Data will be rendered here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State (Shown when no data) -->
+                    <div id="category-empty-state" class="hidden py-16 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4 text-3xl">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-slate-800 mb-1">Chưa có dữ liệu</h3>
+                        <p class="text-slate-500 mb-4">Hãy tạo khu vực đầu tiên để phân loại các công trình hiện vật.</p>
+                        <button onclick="categoryManager.toggleForm()" class="text-brand-600 font-medium hover:text-brand-700 hover:underline">
+                            + Tạo khu vực ngay
+                        </button>
+                    </div>
+
+                    <!-- Pagination (Mock) -->
+                    <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                        <span class="text-sm text-slate-500">Hiển thị <span class="font-medium text-slate-800">1</span> đến <span id="cat-show-count" class="font-medium text-slate-800">0</span> của <span id="cat-total-bottom" class="font-medium text-slate-800">0</span> kết quả</span>
+                        <div class="flex space-x-1">
+                            <button class="px-3 py-1.5 border border-slate-200 rounded text-slate-400 cursor-not-allowed bg-white" disabled><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                            <button class="px-3 py-1.5 border border-brand-500 bg-brand-50 text-brand-600 rounded font-medium">1</button>
+                            <button class="px-3 py-1.5 border border-slate-200 rounded text-slate-400 cursor-not-allowed bg-white" disabled><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- PLACEHOLDER VIEWS (Artifacts, Languages, Feedbacks, Events, Settings)     -->
+            <!-- ========================================================================= -->
+            
+            <section id="view-artifacts" class="view-section h-full flex items-center justify-center">
+                <div class="text-center max-w-md">
+                    <img src="https://placehold.co/200x200/f8fafc/cbd5e1?text=Artifacts" class="mx-auto rounded-full mb-6" alt="Placeholder">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Quản lý Công trình & Hiện vật</h2>
+                    <p class="text-slate-500 mb-6">Mô-đun quản lý danh sách công trình, upload file âm thanh thuyết minh và tạo mã QR tự động. Tính năng đang được hoàn thiện.</p>
+                    <button onclick="app.switchView('dashboard')" class="text-brand-600 font-medium hover:underline">Quay lại Tổng quan</button>
+                </div>
+            </section>
+
+            <section id="view-languages" class="view-section h-full flex items-center justify-center">
+                <div class="text-center max-w-md">
+                    <div class="text-6xl text-slate-300 mb-6"><i class="fa-solid fa-language"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Quản lý Ngôn ngữ</h2>
+                    <p class="text-slate-500 mb-6">Cấu hình các ngôn ngữ hỗ trợ trên hệ thống audio guide (Tiếng Việt, Tiếng Anh, Tiếng Pháp, v.v.).</p>
+                </div>
+            </section>
+
+            <section id="view-feedbacks" class="view-section h-full flex items-center justify-center">
+                <div class="text-center max-w-md">
+                    <div class="text-6xl text-amber-300 mb-6"><i class="fa-regular fa-star-half-stroke"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Phản hồi của Du khách</h2>
+                    <p class="text-slate-500 mb-6">Xem và quản lý các đánh giá, bình luận của du khách sau khi nghe thuyết minh tại các điểm.</p>
+                </div>
+            </section>
+
+            <section id="view-events" class="view-section h-full flex items-center justify-center">
+                <div class="text-center max-w-md">
+                    <div class="text-6xl text-rose-300 mb-6"><i class="fa-regular fa-calendar"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Sự kiện & Triển lãm</h2>
+                    <p class="text-slate-500">Quản lý thông báo các sự kiện đặc biệt, triển lãm chuyên đề đang diễn ra tại Dinh Độc Lập.</p>
+                </div>
+            </section>
+
+            <section id="view-settings" class="view-section h-full flex items-center justify-center">
+                <div class="text-center max-w-md">
+                    <div class="text-6xl text-slate-300 mb-6"><i class="fa-solid fa-cogs"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Cài đặt Hệ thống</h2>
+                    <p class="text-slate-500">Cấu hình thông tin API, tài khoản Admin, và các tham số kỹ thuật khác.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- GLOBAL UI COMPONENTS (Toasts & Modals)     -->
+    <!-- ========================================== -->
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <!-- Custom Confirmation Modal (Replaces browser default confirm()) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden modal-animate">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2" id="confirm-title">Xác nhận thao tác</h3>
+                <p class="text-slate-500 text-sm mb-6" id="confirm-message">Bạn có chắc chắn muốn thực hiện hành động này không? Dữ liệu bị xóa sẽ không thể khôi phục.</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="btn-confirm-cancel" class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors">Hủy bỏ</button>
+                    <button id="btn-confirm-ok" class="flex-1 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg shadow-md shadow-rose-500/30 transition-colors">Xác nhận Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC                           -->
+    <!-- ========================================== -->
+    <script>
+        /**
+         * ==========================================
+         * CORE APP LOGIC (Navigation & Utilities)
+         * ==========================================
+         */
+        const app = {
+            // Danh sách các view trong hệ thống
+            views: ['dashboard', 'categories', 'artifacts', 'languages', 'feedbacks', 'events', 'settings'],
+            
+            // Map tiêu đề trang theo View
+            titles: {
+                'dashboard': 'Tổng quan hệ thống',
+                'categories': 'Quản lý Khu vực / Phân loại',
+                'artifacts': 'Quản lý Công trình & Hiện vật',
+                'languages': 'Cấu hình Ngôn ngữ',
+                'feedbacks': 'Phản hồi từ Du khách',
+                'events': 'Sự kiện & Triển lãm',
+                'settings': 'Cài đặt hệ thống'
+            },
+
+            // Khởi tạo ứng dụng
+            init: function() {
+                this.updateClock();
+                setInterval(() => this.updateClock(), 1000);
+                
+                // GỌI API ĐẾM SỐ NGƯỜI ONLINE THẬT
+                this.fetchOnlineUsers();
+                setInterval(() => this.fetchOnlineUsers(), 5000); // Tự động cập nhật mỗi 5 giây
+                
+                // Khởi tạo đồ thị
+                chartsManager.init();
+                
+                // Khởi tạo dữ liệu bảng
+                categoryManager.init();
+            },
+
+            fetchOnlineUsers: async function() {
+                try {
+                    const response = await fetch('http://localhost:5000/api/admin/online-users');
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const onlineObj = document.getElementById('onlineUsers'); // Nhớ id này phải khớp với id thẻ HTML của bạn
+                        if (onlineObj) {
+                            onlineObj.innerText = result.count;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi lấy số người dùng online:', error);
+                }
+            },
+
+            // Chuyển đổi View
+            switchView: function(viewId) {
+                // Update Sidebar Classes
+                this.views.forEach(v => {
+                    const navEl = document.getElementById(`nav-${v}`);
+                    if(navEl) {
+                        navEl.classList.remove('bg-brand-500/10', 'text-brand-400');
+                        navEl.classList.add('hover:bg-sidebarHover', 'hover:text-white', 'text-slate-400');
+                    }
+                    
+                    const secEl = document.getElementById(`view-${v}`);
+                    if(secEl) secEl.classList.remove('active');
+                });
+
+                // Set Active state
+                const activeNav = document.getElementById(`nav-${viewId}`);
+                if(activeNav) {
+                    activeNav.classList.remove('hover:bg-sidebarHover', 'hover:text-white', 'text-slate-400');
+                    activeNav.classList.add('bg-brand-500/10', 'text-brand-400');
+                }
+                
+                const activeSec = document.getElementById(`view-${viewId}`);
+                if(activeSec) {
+                    activeSec.classList.add('active');
+                }
+
+                // Cập nhật Tiêu đề Header
+                document.getElementById('header-title').innerText = this.titles[viewId] || 'Quản lý Dinh Độc Lập';
+                
+                // Reset scroll
+                document.getElementById('main-scroll-area').scrollTop = 0;
+            },
+
+            // Hiển thị đồng hồ thời gian thực
+            updateClock: function() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const dateStr = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                const timeEl = document.getElementById('real-time-clock');
+                const dateEl = document.getElementById('real-time-date');
+                if(timeEl) timeEl.innerText = timeStr;
+                if(dateEl) dateEl.innerText = dateStr;
+            },
+
+            // Giả lập số người dùng online nhảy liên tục
+            simulateOnlineUsers: function() {
+                setInterval(() => {
+                    const el = document.getElementById('stat-online');
+                    if(el) {
+                        let current = parseInt(el.innerText);
+                        // Thay đổi từ -2 đến +3
+                        let diff = Math.floor(Math.random() * 6) - 2;
+                        let next = current + diff;
+                        if(next < 5) next = 5; // Luôn giữ tối thiểu 5
+                        if(next > 150) next = 150;
+                        el.innerText = next;
+                    }
+                }, 4000);
+            }
+        };
+
+        /**
+         * ==========================================
+         * CUSTOM UI COMPONENTS (Toast & Modal)
+         * ==========================================
+         * Thay thế hoàn toàn alert() và confirm()
+         */
+        const ui = {
+            // Hàm hiển thị thông báo góc trên bên phải
+            showToast: function(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                // Cấu hình icon và màu sắc theo loại (success/error/info)
+                let icon = 'fa-check-circle';
+                let colorClass = 'bg-emerald-500';
+                
+                if(type === 'error') {
+                    icon = 'fa-circle-xmark';
+                    colorClass = 'bg-rose-500';
+                } else if (type === 'info') {
+                    icon = 'fa-circle-info';
+                    colorClass = 'bg-blue-500';
+                }
+
+                toast.className = `flex items-center w-80 bg-white rounded-lg shadow-lg border border-slate-100 overflow-hidden toast-enter`;
+                
+                toast.innerHTML = `
+                    <div class="flex-shrink-0 w-12 h-14 ${colorClass} flex items-center justify-center text-white text-xl">
+                        <i class="fa-solid ${icon}"></i>
+                    </div>
+                    <div class="px-4 py-3 flex-1">
+                        <p class="text-sm font-semibold text-slate-800">${type === 'error' ? 'Lỗi' : 'Thành công'}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-snug">${message}</p>
+                    </div>
+                    <button class="px-3 text-slate-400 hover:text-slate-600" onclick="this.parentElement.remove()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+
+                // Tự động xóa sau 3.5s
+                setTimeout(() => {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => toast.remove(), 300); // Đợi animation xong
+                }, 3500);
+            },
+
+            // Hàm mở Modal Xác nhận tùy chỉnh
+            confirm: function(title, message, onConfirmCallback) {
+                const modal = document.getElementById('confirm-modal');
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-message').innerText = message;
+                
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+
+                // Dọn dẹp sự kiện cũ để tránh lặp (cloning node)
+                const newBtnOk = btnOk.cloneNode(true);
+                const newBtnCancel = btnCancel.cloneNode(true);
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+                // Gán sự kiện mới
+                newBtnCancel.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                });
+
+                newBtnOk.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    if (typeof onConfirmCallback === 'function') onConfirmCallback();
+                });
+            }
+        };
+
+        /**
+         * ==========================================
+         * CHART.JS MANAGER
+         * ==========================================
+         */
+        const chartsManager = {
+            init: function() {
+                this.renderLineChart();
+                this.renderDoughnutChart();
+            },
+            
+            renderLineChart: function() {
+                const ctx = document.getElementById('visitorsChart');
+                if(!ctx) return;
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
+                        datasets: [
+                            {
+                                label: 'Lượt tham quan',
+                                data: [450, 520, 480, 610, 590, 850, 920],
+                                borderColor: '#0ea5e9', // Sky 500
+                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: '#0ea5e9',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                fill: true,
+                                tension: 0.4 // Làm cong đường đồ thị
+                            },
+                            {
+                                label: 'Lượt quét QR Audio',
+                                data: [310, 390, 320, 450, 480, 710, 800],
+                                borderColor: '#14b8a6', // Teal 500
+                                backgroundColor: 'transparent',
+                                borderWidth: 3,
+                                borderDash: [5, 5],
+                                pointBackgroundColor: '#14b8a6',
+                                pointRadius: 3,
+                                fill: false,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, border: { display: false } },
+                            x: { grid: { display: false }, border: { display: false } }
+                        },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            },
+
+            renderDoughnutChart: function() {
+                const ctx = document.getElementById('languageChart');
+                if(!ctx) return;
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tiếng Việt', 'English', 'Français', 'Khác (Trung, Nhật...)'],
+                        datasets: [{
+                            data: [65, 20, 10, 5],
+                            backgroundColor: [
+                                '#14b8a6', // Teal
+                                '#3b82f6', // Blue
+                                '#8b5cf6', // Violet
+                                '#cbd5e1'  // Slate
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font: { size: 12 } } }
+                        }
+                    }
+                });
+            }
+        };
+
+        /**
+         * ==========================================
+         * CATEGORY MANAGER (CRUD Logic)
+         * ==========================================
+         * Giả lập dữ liệu và thao tác API cho bảng Category
+         */
+        const categoryManager = {
+            // Mock Data ban đầu
+            data: [
+                { _id: 'cat_1', name: 'Tầng Trệt', description: 'Khu vực trưng bày chính, phòng họp nội các.', status: 'active', createdAt: '2023-10-01' },
+                { _id: 'cat_2', name: 'Tầng Hai', description: 'Phòng làm việc của Tổng thống, khu vực tiếp khách.', status: 'active', createdAt: '2023-10-02' },
+                { _id: 'cat_3', name: 'Sân Thượng', description: 'Khu vực trực thăng UH-1 và cảnh quan xung quanh.', status: 'active', createdAt: '2023-10-03' },
+                { _id: 'cat_4', name: 'Tầng Hầm', description: 'Khu vực hầm ngầm cố thủ, tổng đài liên lạc.', status: 'active', createdAt: '2023-10-04' },
+                { _id: 'cat_5', name: 'Khu vực Ngoài trời', description: 'Khu trưng bày xe tăng 390 và 843, máy bay F5E.', status: 'inactive', createdAt: '2023-11-15' }
+            ],
+            
+            isFormOpen: false,
+            editingId: null,
+
+            init: function() {
+                this.renderTable(this.data);
+            },
+
+            // Đóng/mở form thêm mới/sửa
+            toggleForm: function(id = null) {
+                const formEl = document.getElementById('category-form-container');
+                const titleEl = document.getElementById('category-form-title');
+                const form = document.getElementById('category-form');
+
+                if (id) {
+                    // Chế độ Edit
+                    this.isFormOpen = true;
+                    this.editingId = id;
+                    titleEl.innerText = 'Cập nhật thông tin Khu vực';
+                    
+                    // Điền dữ liệu vào form
+                    const cat = this.data.find(c => c._id === id);
+                    if(cat) {
+                        document.getElementById('cat-id').value = cat._id;
+                        document.getElementById('cat-name').value = cat.name;
+                        document.getElementById('cat-desc').value = cat.description;
+                        document.getElementById('cat-status').value = cat.status;
+                    }
+                    formEl.classList.remove('hidden');
+                } else {
+                    // Chế độ Mở Toggle Thêm Mới hoặc Đóng
+                    this.isFormOpen = !this.isFormOpen;
+                    if (this.isFormOpen) {
+                        this.editingId = null;
+                        titleEl.innerText = 'Tạo khu vực mới';
+                        form.reset();
+                        document.getElementById('cat-id').value = '';
+                        formEl.classList.remove('hidden');
+                    } else {
+                        formEl.classList.add('hidden');
+                    }
+                }
+            },
+
+            // Xử lý Submit Form (Create / Update)
+            handleFormSubmit: function(e) {
+                e.preventDefault(); // Ngăn trình duyệt reload
+                
+                const id = document.getElementById('cat-id').value;
+                const name = document.getElementById('cat-name').value.trim();
+                const desc = document.getElementById('cat-desc').value.trim();
+                const status = document.getElementById('cat-status').value;
+
+                if (!name) {
+                    ui.showToast('Vui lòng nhập tên khu vực!', 'error');
+                    return;
+                }
+
+                if (id) {
+                    // Update (Giả lập gọi API PUT)
+                    const index = this.data.findIndex(c => c._id === id);
+                    if(index !== -1) {
+                        this.data[index] = { ...this.data[index], name, description: desc, status };
+                        ui.showToast('Đã cập nhật khu vực thành công!', 'success');
+                    }
+                } else {
+                    // Create (Giả lập gọi API POST)
+                    const newCat = {
+                        _id: 'cat_' + Date.now(),
+                        name: name,
+                        description: desc,
+                        status: status,
+                        createdAt: new Date().toISOString().split('T')[0]
+                    };
+                    // Thêm lên đầu mảng
+                    this.data.unshift(newCat);
+                    ui.showToast('Thêm khu vực mới thành công!', 'success');
+                }
+
+                this.toggleForm(); // Đóng form
+                this.renderTable(this.data); // Render lại bảng
+                
+                // Clear ô tìm kiếm nếu có
+                document.getElementById('cat-search').value = '';
+            },
+
+            // Xác nhận và xóa (Delete)
+            deleteItem: function(id) {
+                const cat = this.data.find(c => c._id === id);
+                if(!cat) return;
+
+                // Sử dụng custom modal thay vì confirm()
+                ui.confirm(
+                    'Xóa Khu Vực',
+                    `Bạn có chắc chắn muốn xóa khu vực "${cat.name}"? Tất cả công trình bên trong sẽ bị mất liên kết phân loại.`,
+                    () => {
+                        // Callback thực thi khi User bấm OK (Giả lập API DELETE)
+                        this.data = this.data.filter(c => c._id !== id);
+                        ui.showToast('Đã xóa khu vực tham quan!', 'info');
+                        this.renderTable(this.data);
+                    }
+                );
+            },
+
+            // Tính năng tìm kiếm nhanh tại Table
+            filterTable: function() {
+                const keyword = document.getElementById('cat-search').value.toLowerCase();
+                if(!keyword) {
+                    this.renderTable(this.data);
+                    return;
+                }
+                const filtered = this.data.filter(c => 
+                    c.name.toLowerCase().includes(keyword) || 
+                    c.description.toLowerCase().includes(keyword)
+                );
+                this.renderTable(filtered);
+            },
+
+            // Render dữ liệu ra HTML Bảng
+            renderTable: function(dataArray) {
+                const tbody = document.getElementById('category-tbody');
+                const emptyState = document.getElementById('category-empty-state');
+                
+                // Cập nhật bộ đếm
+                document.getElementById('cat-total-count').innerText = dataArray.length;
+                document.getElementById('cat-total-bottom').innerText = dataArray.length;
+                document.getElementById('cat-show-count').innerText = dataArray.length;
+
+                // Xóa dữ liệu cũ
+                tbody.innerHTML = '';
+
+                if (dataArray.length === 0) {
+                    tbody.parentElement.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                    return;
+                } else {
+                    tbody.parentElement.classList.remove('hidden');
+                    emptyState.classList.add('hidden');
+                }
+
+                // Render từng dòng
+                dataArray.forEach(cat => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'table-row-hover bg-white group';
+                    
+                    // Render Status Badge
+                    let statusBadge = '';
+                    if (cat.status === 'active') {
+                        statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"><span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full"></span>Hoạt động</span>`;
+                    } else {
+                        statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200"><span class="w-1.5 h-1.5 mr-1.5 bg-amber-500 rounded-full"></span>Tạm ẩn</span>`;
+                    }
+
+                    // Format Date
+                    const dateObj = new Date(cat.createdAt);
+                    const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                    tr.innerHTML = `
+                        <td class="py-4 px-6 font-semibold text-slate-800">${cat.name}</td>
+                        <td class="py-4 px-6 text-slate-500 text-sm max-w-xs truncate" title="${cat.description}">${cat.description || '<em class="text-slate-300">Không có mô tả</em>'}</td>
+                        <td class="py-4 px-6 text-center">${statusBadge}</td>
+                        <td class="py-4 px-6 text-center text-slate-500 text-sm">${dateStr}</td>
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="categoryManager.toggleForm('${cat._id}')" class="w-8 h-8 rounded bg-slate-100 hover:bg-brand-100 text-slate-500 hover:text-brand-600 transition-colors flex items-center justify-center shadow-sm" title="Chỉnh sửa">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="categoryManager.deleteItem('${cat._id}')" class="w-8 h-8 rounded bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 transition-colors flex items-center justify-center shadow-sm" title="Xóa">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        };
+
+        // Chạy khởi tạo ứng dụng khi DOM tải xong
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
