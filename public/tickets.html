@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt vé tham quan – Dinh Độc Lập</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['"Be Vietnam Pro"', 'sans-serif'] },
+      colors: { heritage: { red: '#8B1E24', redDeep: '#5E1216', gold: '#C9A227', goldSoft: '#E8D9A6', paper: '#F7F3EA', ink: '#2A2320', brown: '#6B5443' } }
+    } } };
+  </script>
+  <style>
+    body { background: #F7F3EA; background-image: radial-gradient(circle at 1px 1px, rgba(139,30,36,.06) 1px, transparent 0); background-size: 22px 22px; }
+    .gold-rule { background: linear-gradient(90deg, transparent, #C9A227, transparent); height: 2px; }
+    .step-done { background: #C9A227; color: #2A2320; }
+    .slot-on[aria-pressed="true"] { background: #8B1E24; color: #fff; border-color: #8B1E24; }
+    .slot-on[aria-pressed="true"] .seats { color: #E8D9A6; }
+    @media print { header, footer, .no-print { display: none !important; } body { background: #fff; } .ticket { break-inside: avoid; border: 1px solid #000 !important; } }
+  </style>
+</head>
+<body class="font-sans text-heritage-ink antialiased">
+
+  <header class="sticky top-0 z-40 bg-heritage-paper/95 backdrop-blur border-b border-heritage-gold/40 no-print">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full border-2 border-heritage-red text-heritage-red bg-white flex items-center justify-center shadow-sm"><i class="fa-solid fa-landmark"></i></div>
+        <div>
+          <p class="font-serif font-bold text-lg leading-tight text-heritage-red uppercase tracking-wide">Dinh Độc Lập</p>
+          <p class="text-xs text-heritage-brown" id="brandSub">Đặt vé tham quan</p>
+        </div>
+      </a>
+      <div class="flex items-center gap-2" id="langBar"></div>
+    </div>
+    <div class="gold-rule"></div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <h1 class="font-serif text-3xl sm:text-4xl font-bold text-heritage-red mb-2" id="pageTitle"></h1>
+    <p class="text-heritage-brown mb-8" id="pageDesc"></p>
+
+    <!-- Bước 1: ngày -->
+    <section class="bg-white rounded-2xl border border-heritage-gold/30 shadow-sm p-6 mb-6" id="step1">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-8 h-8 rounded-full bg-heritage-red text-white flex items-center justify-center font-bold text-sm" id="n1">1</span>
+        <h2 class="font-serif text-xl font-bold text-heritage-red" id="h1"></h2>
+      </div>
+      <input id="date" type="date" class="w-full sm:w-72 px-4 py-2.5 rounded-xl border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold">
+      <p class="text-sm text-heritage-brown mt-3" id="hours"></p>
+    </section>
+
+    <!-- Bước 2: khung giờ -->
+    <section class="bg-white rounded-2xl border border-heritage-gold/30 shadow-sm p-6 mb-6 hidden" id="step2">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-8 h-8 rounded-full bg-heritage-red text-white flex items-center justify-center font-bold text-sm" id="n2">2</span>
+        <h2 class="font-serif text-xl font-bold text-heritage-red" id="h2"></h2>
+      </div>
+      <p id="slotStatus" class="text-sm text-heritage-brown mb-3 hidden"></p>
+      <div id="slots" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+    </section>
+
+    <!-- Bước 3: số lượng -->
+    <section class="bg-white rounded-2xl border border-heritage-gold/30 shadow-sm p-6 mb-6 hidden" id="step3">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-8 h-8 rounded-full bg-heritage-red text-white flex items-center justify-center font-bold text-sm" id="n3">3</span>
+        <h2 class="font-serif text-xl font-bold text-heritage-red" id="h3"></h2>
+      </div>
+      <div id="types" class="divide-y divide-heritage-brown/10"></div>
+      <div class="flex flex-wrap items-center justify-between gap-4 mt-6 pt-5 border-t border-heritage-gold/40">
+        <div>
+          <p class="text-sm text-heritage-brown" id="totalQtyLabel"></p>
+          <p class="font-serif text-2xl font-bold text-heritage-red"><span id="total">0</span> đ</p>
+        </div>
+        <button id="submitBtn" type="button" class="bg-heritage-red hover:bg-heritage-redDeep disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-7 py-3 rounded-xl shadow transition"></button>
+      </div>
+      <p id="orderError" class="text-sm text-red-700 mt-3 hidden" role="alert"></p>
+    </section>
+
+    <!-- Kết quả: vé có mã QR -->
+    <section class="hidden" id="result">
+      <div class="bg-heritage-paper border border-heritage-gold/50 rounded-2xl p-6 mb-6 text-center">
+        <i class="fa-solid fa-circle-check text-3xl text-green-700 mb-2"></i>
+        <h2 class="font-serif text-2xl font-bold text-heritage-red" id="resultTitle"></h2>
+        <p class="text-sm text-heritage-brown mt-2" id="resultNote"></p>
+        <button id="printBtn" class="no-print mt-4 border border-heritage-brown/30 hover:border-heritage-red text-heritage-brown px-5 py-2 rounded-lg text-sm"><i class="fa-solid fa-print"></i> <span id="printText"></span></button>
+      </div>
+      <div id="tickets" class="grid sm:grid-cols-2 gap-6"></div>
+      <button id="newBtn" class="no-print mt-8 text-sm font-semibold text-heritage-red underline underline-offset-4"></button>
+    </section>
+
+    <!-- Tra cứu vé đã đặt -->
+    <section class="mt-12 no-print bg-white rounded-2xl border border-heritage-gold/30 p-6" id="lookup">
+      <h2 class="font-serif text-xl font-bold text-heritage-red mb-1" id="lookupTitle"></h2>
+      <p class="text-sm text-heritage-brown mb-4" id="lookupDesc"></p>
+      <form id="lookupForm" class="flex flex-wrap gap-3">
+        <input id="lookupCode" type="text" maxlength="40" class="flex-1 min-w-[12rem] px-4 py-2.5 rounded-xl border border-heritage-brown/25 font-mono uppercase focus:outline-none focus:border-heritage-gold">
+        <button class="bg-heritage-brown hover:bg-heritage-ink text-white font-semibold px-5 py-2.5 rounded-xl" id="lookupBtn" type="submit"></button>
+      </form>
+      <p id="lookupMsg" class="text-sm mt-3 hidden"></p>
+    </section>
+  </main>
+
+  <footer class="bg-heritage-redDeep text-heritage-paper/70 text-center text-xs py-6 mt-12 no-print" id="footer"></footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    // ---------- Chữ giao diện (vi, en; ngôn ngữ khác dùng tiếng Việt) ----------
+    const STR = {
+      vi: { brandSub: 'Đặt vé tham quan', title: 'Đặt vé tham quan', desc: 'Chọn ngày và khung giờ tham quan, sau đó nhận vé điện tử có mã QR. Vé chỉ hợp lệ trong đúng khung giờ đã chọn.',
+        h1: 'Chọn ngày tham quan', h2: 'Chọn khung giờ', h3: 'Chọn số lượng vé', hours: 'Mở cửa 07:00 – 18:00, cả 7 ngày trong tuần, kể cả Lễ, Tết.',
+        loadingSlots: 'Đang tải khung giờ...', noSlots: 'Không tải được khung giờ', seats: (n) => `còn ${n} chỗ`, full: 'Hết chỗ', past: 'Đã qua',
+        pickSlot: 'Hãy chọn một khung giờ trước.', seatsLeft: (n) => `Còn ${n} chỗ trong khung giờ này`, totalQty: (n) => `Tổng cộng ${n} vé`,
+        submit: 'Đặt vé', submitting: 'Đang đặt vé...', chooseAtLeast: 'Chọn ít nhất 1 vé', tooMany: (n) => `Tối đa ${n} vé mỗi lần đặt`,
+        ok: 'Đặt vé thành công', okNote: 'Xuất trình mã QR tại cổng. Mỗi vé chỉ dùng được một lần, đúng khung giờ đã chọn.', print: 'In vé', newOrder: 'Đặt thêm vé',
+        ticketTime: 'Khung giờ', ticketDate: 'Ngày', ticketType: 'Loại vé', code: 'Mã vé', status: 'Trạng thái', statusValid: 'Chưa sử dụng',
+        lookupTitle: 'Tra cứu vé đã đặt', lookupDesc: 'Nhập mã vé để xem lại thông tin và mã QR.', lookup: 'Tra cứu', notFound: 'Không tìm thấy vé với mã này.',
+        errDate: 'Hãy chọn ngày tham quan', errGeneric: 'Có lỗi xảy ra, vui lòng thử lại', free: 'Miễn phí', footer: '© Đồ án Thuyết minh tự động đa ngôn ngữ – ĐH Sài Gòn' },
+      en: { brandSub: 'Visitor tickets', title: 'Book your visit', desc: 'Choose a date and time slot, then receive e-tickets with QR codes. Tickets are valid only for the slot you choose.',
+        h1: 'Choose a date', h2: 'Choose a time slot', h3: 'Choose tickets', hours: 'Open 07:00 – 18:00, every day of the week, including public holidays.',
+        loadingSlots: 'Loading time slots...', noSlots: 'Could not load time slots', seats: (n) => `${n} seats left`, full: 'Sold out', past: 'Passed',
+        pickSlot: 'Please choose a time slot first.', seatsLeft: (n) => `${n} seats left in this slot`, totalQty: (n) => `${n} tickets in total`,
+        submit: 'Book tickets', submitting: 'Booking...', chooseAtLeast: 'Choose at least 1 ticket', tooMany: (n) => `Maximum ${n} tickets per booking`,
+        ok: 'Booking confirmed', okNote: 'Show the QR code at the gate. Each ticket can be used once, in the time slot you chose.', print: 'Print tickets', newOrder: 'Book more tickets',
+        ticketTime: 'Time slot', ticketDate: 'Date', ticketType: 'Ticket type', code: 'Ticket code', status: 'Status', statusValid: 'Not used',
+        lookupTitle: 'Find your booking', lookupDesc: 'Enter your ticket code to view it again with its QR code.', lookup: 'Find', notFound: 'No ticket found with this code.',
+        errDate: 'Please choose a date', errGeneric: 'Something went wrong, please try again', free: 'Free', footer: '© Multilingual audio guide – student project' },
+    };
+    const MAX_PER_ORDER = 10;
+    const L = () => STR[lang] || STR.vi;
+    const money = (n) => (n === 0 ? L().free : n.toLocaleString('vi-VN') + ' đ');
+
+    let lang = 'vi';
+    let languages = [{ code: 'vi', label: 'Tiếng Việt', speech: 'vi-VN' }];
+    let types = [];          // từ GET /api/tickets/types
+    let slots = [];          // từ GET /api/tickets/slots?date=
+    let date = '';
+    let chosen = null;       // khung giờ đã chọn
+    let quantities = {};     // { code: số lượng }
+    let submitting = false;
+
+    // ---------- Gọi API ----------
+    async function request(method, url, body) {
+      const res = await fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+      let data = null; try { data = await res.json(); } catch (e) { /* không phải JSON */ }
+      if (!res.ok) { const err = new Error((data && data.message) || L().errGeneric); err.status = res.status; throw err; }
+      return data;
+    }
+
+    // ---------- Vẽ giao diện tĩnh ----------
+    function applyStatic() {
+      const s = L();
+      document.documentElement.lang = lang;
+      const set = (id, t) => { document.getElementById(id).textContent = t; };
+      set('brandSub', s.brandSub); set('pageTitle', s.title); set('pageDesc', s.desc);
+      set('h1', s.h1); set('h2', s.h2); set('h3', s.h3); set('hours', s.hours);
+      set('submitBtn', s.submit); set('printText', s.print); set('newBtn', s.newOrder);
+      set('lookupTitle', s.lookupTitle); set('lookupDesc', s.lookupDesc); set('lookupBtn', s.lookup); set('footer', s.footer);
+      set('resultTitle', s.ok); set('resultNote', s.okNote);
+      document.getElementById('date').min = todayISO();
+      document.getElementById('date').max = addDaysISO(60);
+    }
+
+    function todayISO() { const d = new Date(); return d.toISOString().slice(0, 10); }
+    function addDaysISO(n) { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+
+    // ---------- Bước 1: ngày ----------
+    async function onDateChange() {
+      const value = document.getElementById('date').value;
+      if (!value) return;
+      date = value;
+      chosen = null; quantities = {};
+      document.getElementById('result').classList.add('hidden');
+      showStep('step2'); showStep('step3', false);
+      await loadSlots();
+    }
+
+    // ---------- Bước 2: khung giờ ----------
+    async function loadSlots() {
+      const status = document.getElementById('slotStatus');
+      const box = document.getElementById('slots');
+      box.replaceChildren();
+      status.textContent = L().loadingSlots; status.classList.remove('hidden');
+      try {
+        const body = await request('GET', `/api/tickets/slots?date=${encodeURIComponent(date)}`);
+        slots = body.data || [];
+        status.classList.add('hidden');
+        renderSlots();
+      } catch (err) {
+        status.textContent = L().noSlots + ': ' + err.message; status.classList.remove('hidden');
+      }
+    }
+
+    function renderSlots() {
+      const box = document.getElementById('slots');
+      box.replaceChildren();
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const isToday = date === todayISO();
+      slots.forEach((s) => {
+        const [h, m] = s.from.split(':').map(Number);
+        const passed = isToday && h * 60 + m <= nowMin;
+        const left = Math.max(0, s.capacity - s.booked);
+        const full = left <= 0;
+        const disabled = full || passed;
+        const b = el('button', 'slot-on text-left border border-heritage-brown/25 bg-white rounded-xl px-4 py-3 transition hover:border-heritage-red disabled:opacity-40 disabled:cursor-not-allowed');
+        b.type = 'button';
+        b.disabled = disabled;
+        b.setAttribute('aria-pressed', String(Boolean(chosen && chosen.from === s.from)));
+        b.append(el('p', 'font-semibold', `${s.from} – ${s.to}`),
+          el('p', 'seats text-xs text-heritage-brown mt-1', disabled ? (passed ? L().past : L().full) : L().seats(left)));
+        b.addEventListener('click', () => chooseSlot(s));
+        box.append(b);
+      });
+    }
+
+    function chooseSlot(s) {
+      clearOrderError();
+      chosen = s;
+      quantities = {};
+      renderSlots();
+      showStep('step3');
+      renderTypes();
+      updateTotals();
+    }
+
+    // ---------- Bước 3: số lượng ----------
+    function seatsLeft() { return chosen ? Math.max(0, chosen.capacity - chosen.booked) : 0; }
+    function totalQty() { return Object.values(quantities).reduce((a, b) => a + b, 0); }
+    function totalPrice() { return types.reduce((sum, t) => sum + t.price * (quantities[t.code] || 0), 0); }
+    function maxAllowed() { return Math.min(MAX_PER_ORDER, seatsLeft()); }
+
+    function renderTypes() {
+      const box = document.getElementById('types');
+      box.replaceChildren();
+      types.forEach((t) => {
+        const row = el('div', 'flex items-center justify-between gap-4 py-4');
+        const info = el('div');
+        info.append(el('p', 'font-semibold text-heritage-ink', t.name),
+          el('p', 'text-xs text-heritage-brown', t.description || ''),
+          el('p', 'text-sm text-heritage-red font-semibold mt-1', money(t.price)));
+        const ctrl = el('div', 'flex items-center gap-3');
+        const minus = el('button', 'w-9 h-9 rounded-full border border-heritage-brown/30 text-lg hover:border-heritage-red disabled:opacity-30', '−');
+        const count = el('span', 'w-8 text-center font-semibold', String(quantities[t.code] || 0));
+        const plus = el('button', 'w-9 h-9 rounded-full border border-heritage-brown/30 text-lg hover:border-heritage-red disabled:opacity-30', '+');
+        minus.type = plus.type = 'button';
+        minus.setAttribute('aria-label', '−'); plus.setAttribute('aria-label', '+');
+        minus.disabled = !(quantities[t.code] > 0);
+        plus.disabled = totalQty() >= maxAllowed();
+        minus.addEventListener('click', () => { clearOrderError(); quantities[t.code] = Math.max(0, (quantities[t.code] || 0) - 1); renderTypes(); updateTotals(); });
+        plus.addEventListener('click', () => { clearOrderError(); if (totalQty() < maxAllowed()) { quantities[t.code] = (quantities[t.code] || 0) + 1; renderTypes(); updateTotals(); } });
+        ctrl.append(minus, count, plus);
+        row.append(info, ctrl);
+        box.append(row);
+      });
+    }
+
+    function updateTotals() {
+      const qty = totalQty();
+      document.getElementById('total').textContent = totalPrice().toLocaleString('vi-VN');
+      const left = seatsLeft();
+      document.getElementById('totalQtyLabel').textContent = chosen
+        ? `${L().totalQty(qty)} · ${L().seatsLeft(left)}`
+        : L().pickSlot;
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = submitting || qty === 0 || !chosen;
+      btn.textContent = submitting ? L().submitting : L().submit;
+    }
+
+    function clearOrderError() {
+      document.getElementById('orderError').classList.add('hidden');
+    }
+
+    function showOrderError(message) {
+      const err = document.getElementById('orderError');
+      err.textContent = message; err.classList.remove('hidden');
+    }
+
+    async function submitOrder() {
+      if (submitting) return;
+      clearOrderError();
+      if (!chosen) return showOrderError(L().pickSlot);
+      const items = types.filter((t) => (quantities[t.code] || 0) > 0).map((t) => ({ type: t.code, quantity: quantities[t.code] }));
+      if (items.length === 0) return showOrderError(L().chooseAtLeast);
+      submitting = true; updateTotals();
+      try {
+        const body = await request('POST', '/api/tickets/orders', {
+          date, slot: { from: chosen.from, to: chosen.to }, items,
+        });
+        showResult(body.tickets || []);
+      } catch (err) {
+        if (err.status === 409) {
+          await loadSlots();              // khung giờ có thể vừa hết chỗ: làm mới số chỗ
+          quantities = {};
+          renderTypes();
+        }
+        showOrderError(err.message);
+      } finally {
+        submitting = false; updateTotals();
+      }
+    }
+
+    // ---------- Kết quả: vé có QR ----------
+    function showResult(tickets) {
+      const box = document.getElementById('tickets');
+      box.replaceChildren();
+      tickets.forEach((t) => {
+        const card = el('article', 'ticket bg-white rounded-2xl border-2 border-dashed border-heritage-gold p-5 flex gap-5 items-center');
+        const img = document.createElement('img');
+        img.src = t.qrUrl; img.alt = 'QR ' + t.code; img.className = 'w-32 h-32 object-contain shrink-0';
+        const info = el('div', 'text-sm space-y-1');
+        info.append(
+          el('p', 'font-serif text-lg font-bold text-heritage-red', typeName(t.type)),
+          el('p', '', `${L().ticketDate}: ${t.date || date}`),
+          el('p', '', `${L().ticketTime}: ${t.slot ? t.slot.from + ' – ' + t.slot.to : ''}`),
+          el('p', 'font-mono text-xs', `${L().code}: ${t.code}`),
+          el('p', 'text-green-800 font-semibold', `${L().status}: ${L().statusValid}`));
+        card.append(img, info);
+        box.append(card);
+      });
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('step3').classList.add('hidden');
+      const r = document.getElementById('result');
+      if (r.scrollIntoView) r.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function typeName(code) {
+      const t = types.find((x) => x.code === code);
+      return t ? t.name : code;
+    }
+
+    function showStep(id, visible = true) {
+      document.getElementById(id).classList.toggle('hidden', !visible);
+    }
+
+    function newOrder() {
+      chosen = null; quantities = {};
+      document.getElementById('result').classList.add('hidden');
+      document.getElementById('date').value = '';
+      showStep('step2', false); showStep('step3', false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ---------- Tra cứu vé ----------
+    async function lookup(e) {
+      e.preventDefault();
+      const code = document.getElementById('lookupCode').value.trim().toUpperCase();
+      const msg = document.getElementById('lookupMsg');
+      if (!code) return;
+      try {
+        const body = await request('GET', `/api/tickets/${encodeURIComponent(code)}`);
+        msg.className = 'text-sm mt-3 text-green-800';
+        msg.textContent = `${typeName(body.ticket.type)} · ${body.ticket.date} · ${body.ticket.slot.from} – ${body.ticket.slot.to} · ${body.ticket.status === 'used' ? 'Đã sử dụng' : L().statusValid}`;
+        showResult([body.ticket]);
+      } catch (err) {
+        msg.className = 'text-sm mt-3 text-red-700';
+        msg.textContent = err.status === 404 ? L().notFound : err.message;
+      }
+      msg.classList.remove('hidden');
+    }
+
+    // ---------- Khởi động ----------
+    async function loadTypes() {
+      try { types = (await request('GET', '/api/tickets/types')).data || []; } catch (e) { types = []; }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try { languages = (await fetchJson('/api/languages')).data; } catch (e) { /* mặc định */ }
+      lang = detectLanguage(languages.map((l) => l.code).filter((c) => STR[c]));
+      if (!STR[lang]) lang = 'vi';
+      renderLanguageButtons(document.getElementById('langBar'), languages.filter((l) => STR[l.code]), lang, (code) => {
+        lang = code; storeLang(code); applyStatic(); renderTypes(); if (slots.length) renderSlots(); updateTotals();
+      }, 'text-xs');
+      applyStatic();
+      await loadTypes();
+      document.getElementById('date').addEventListener('change', onDateChange);
+      document.getElementById('submitBtn').addEventListener('click', submitOrder);
+      document.getElementById('printBtn').addEventListener('click', () => window.print());
+      document.getElementById('newBtn').addEventListener('click', newOrder);
+      document.getElementById('lookupForm').addEventListener('submit', lookup);
+      updateTotals();
+    });
+  </script>
+</body>
+</html>
