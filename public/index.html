@@ -96,36 +96,34 @@
   </section>
 
   <!-- ===== GIÁ VÉ & GIỜ MỞ CỬA ===== -->
-  <section style="background:#1B4332" id="ticketSection">
+  <section class="bg-heritage-redDeep" id="ticketSection">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
       <div class="grid md:grid-cols-2 gap-10 md:gap-16">
 
         <!-- Cột trái: Giá vé -->
         <div>
-          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-wide mb-3" style="color:#C9A227" id="ticketPriceTitle"></h2>
-          <div style="height:1px;background:rgba(201,162,39,.35)" class="mb-5"></div>
-          <p class="text-sm mb-6 leading-relaxed" style="color:#d4e8dc" id="ticketPriceDesc">
+          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-widest text-heritage-gold mb-3" id="ticketPriceTitle"></h2>
+          <div class="gold-rule mb-5"></div>
+          <p class="text-sm mb-6 leading-relaxed text-heritage-goldSoft/80" id="ticketPriceDesc">
             <span id="ticketDescText"></span>
-            <a href="tickets.html" class="font-bold underline underline-offset-2" style="color:#C9A227" id="ticketSectionLink"></a><span id="ticketDescSuffix"></span>
+            <a href="tickets.html" class="font-bold underline underline-offset-2 text-heritage-gold" id="ticketSectionLink"></a><span id="ticketDescSuffix"></span>
           </p>
-          <div class="space-y-3" id="ticketPriceRows">
-            <!-- rows filled by JS or static fallback -->
-          </div>
+          <div id="ticketPriceRows" class="space-y-3"></div>
         </div>
 
         <!-- Cột phải: Giờ mở cửa -->
         <div>
-          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-wide mb-3" style="color:#C9A227" id="ticketHoursTitle"></h2>
-          <div style="height:1px;background:rgba(201,162,39,.35)" class="mb-5"></div>
-          <p class="text-sm mb-6 leading-relaxed" style="color:#d4e8dc" id="ticketHoursDesc"></p>
+          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-widest text-heritage-gold mb-3" id="ticketHoursTitle"></h2>
+          <div class="gold-rule mb-5"></div>
+          <p class="text-sm mb-6 leading-relaxed text-heritage-goldSoft/80" id="ticketHoursDesc"></p>
           <div class="space-y-3">
-            <div class="flex justify-between text-sm" style="color:#e8f5ee">
-              <span class="font-bold" id="ticketDayLabel"></span>
+            <div class="flex justify-between text-sm text-heritage-paper/90">
+              <span class="font-semibold" id="ticketDayLabel"></span>
               <span id="ticketDayValue"></span>
             </div>
-            <div style="height:1px;background:rgba(255,255,255,.1)"></div>
-            <div class="flex justify-between text-sm" style="color:#e8f5ee">
-              <span class="font-bold" id="ticketTimeLabel"></span>
+            <div class="gold-rule opacity-30"></div>
+            <div class="flex justify-between text-sm text-heritage-paper/90">
+              <span class="font-semibold" id="ticketTimeLabel"></span>
               <span>07:00 – 18:00</span>
             </div>
           </div>
@@ -678,6 +676,20 @@
         const g = document.getElementById('ticketTypesGrid');
         if (g) g.replaceChildren();   // hide skeleton on error
       }
+    }
+
+    // ---------- Bảng giá vé ----------
+    function renderTicketPriceRows() {
+      const box = document.getElementById('ticketPriceRows');
+      if (!box) return;
+      const rows = (S().ticketRows || []);
+      box.replaceChildren();
+      rows.forEach(([label, price], i) => {
+        const row = el('div', 'flex justify-between items-center text-sm text-heritage-paper/90'
+          + (i > 0 ? ' pt-3 border-t border-white/10' : ''));
+        row.append(el('span', 'font-semibold', label), el('span', '', price));
+        box.append(row);
+      });
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
