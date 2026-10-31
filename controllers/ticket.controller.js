@@ -1,4 +1,5 @@
 const ticketService = require('../services/ticket.service');
+const ticketOrderRepository = require('../repositories/ticketOrder.repository');
 
 /**
  * Controller module Tickets.
@@ -25,6 +26,14 @@ const ticketController = {
     createOrder: async (req, res) => {
         const result = await ticketService.createOrder(req.body);
         res.status(201).json({ success: true, data: result });
+    },
+
+    /** GET /api/tickets/orders – admin only, xem danh sách đơn đặt */
+    getOrders: async (req, res) => {
+        const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
+        const skip   = parseInt(req.query.skip) || 0;
+        const orders = await ticketOrderRepository.findAll({}, limit, skip);
+        res.json({ success: true, data: orders });
     },
 
     /** GET /api/tickets/:code */
