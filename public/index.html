@@ -95,38 +95,42 @@
     </div>
   </section>
 
-  <!-- ===== BANNER ĐẶT VÉ ===== -->
-  <section class="bg-white border-y border-heritage-gold/40" id="ticketSection">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <i class="fa-solid fa-ticket text-heritage-gold"></i>
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown" id="ticketLabel"></p>
-          </div>
-          <h2 class="font-serif text-2xl font-bold text-heritage-red" id="ticketSectionTitle"></h2>
-          <p class="text-heritage-brown mt-1 text-sm" id="ticketSectionDesc">
-            <!-- text set by JS -->
-            <span id="ticketDescText"></span>
-            <a href="tickets.html" class="text-heritage-red underline underline-offset-2 font-medium" id="ticketSectionLink"></a>
-          </p>
-        </div>
-        <a href="tickets.html" class="flex-shrink-0 inline-flex items-center gap-2 bg-heritage-red hover:bg-heritage-redDeep text-white font-semibold px-6 py-3 rounded-xl shadow transition" id="ticketSectionBtn">
-          <i class="fa-solid fa-ticket"></i>
-          <span id="ticketSectionBtnText"></span>
-        </a>
-      </div>
+  <!-- ===== GIÁ VÉ & GIỜ MỞ CỬA ===== -->
+  <section style="background:#1B4332" id="ticketSection">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <div class="grid md:grid-cols-2 gap-10 md:gap-16">
 
-      <!-- Bảng giá vé nhanh — load từ API -->
-      <div class="mt-6" id="ticketTypesBox">
-        <p class="text-xs font-bold uppercase tracking-[0.15em] text-heritage-brown mb-3" id="ticketTypesTitle"></p>
-        <div id="ticketTypesGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <!-- skeleton -->
-          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
-          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
-          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
-          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
+        <!-- Cột trái: Giá vé -->
+        <div>
+          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-wide mb-3" style="color:#C9A227" id="ticketPriceTitle"></h2>
+          <div style="height:1px;background:rgba(201,162,39,.35)" class="mb-5"></div>
+          <p class="text-sm mb-6 leading-relaxed" style="color:#d4e8dc" id="ticketPriceDesc">
+            <span id="ticketDescText"></span>
+            <a href="tickets.html" class="font-bold underline underline-offset-2" style="color:#C9A227" id="ticketSectionLink"></a><span id="ticketDescSuffix"></span>
+          </p>
+          <div class="space-y-3" id="ticketPriceRows">
+            <!-- rows filled by JS or static fallback -->
+          </div>
         </div>
+
+        <!-- Cột phải: Giờ mở cửa -->
+        <div>
+          <h2 class="font-serif text-xl sm:text-2xl font-bold tracking-wide mb-3" style="color:#C9A227" id="ticketHoursTitle"></h2>
+          <div style="height:1px;background:rgba(201,162,39,.35)" class="mb-5"></div>
+          <p class="text-sm mb-6 leading-relaxed" style="color:#d4e8dc" id="ticketHoursDesc"></p>
+          <div class="space-y-3">
+            <div class="flex justify-between text-sm" style="color:#e8f5ee">
+              <span class="font-bold" id="ticketDayLabel"></span>
+              <span id="ticketDayValue"></span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+            <div class="flex justify-between text-sm" style="color:#e8f5ee">
+              <span class="font-bold" id="ticketTimeLabel"></span>
+              <span>07:00 – 18:00</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -266,9 +270,16 @@
         ticketBannerDesc: 'Mua vé trực tuyến, nhận vé điện tử có mã QR. Không cần xếp hàng.',
         ticketBannerBtn: 'Đặt vé ngay',
         ticketSectionTitle: 'Đặt vé tham quan trực tuyến',
-        ticketSectionDesc: 'Chọn ngày, khung giờ và loại vé ngay dưới đây — hoặc mở',
-        ticketSectionLink: 'trang đặt vé đầy đủ',
-        ticketTypes: 'Loại vé & giá vé',
+        ticketSectionDesc: 'Quý khách có thể đặt vé trực tuyến ',
+        ticketSectionLink: 'TẠI ĐÂY',
+        ticketSectionSuffix: ', để tiết kiệm thời gian.',
+        ticketPriceTitle: 'GIÁ VÉ THAM QUAN',
+        ticketHoursTitle: 'GIỜ MỞ CỬA',
+        ticketHoursDesc: 'Dinh Độc Lập mở cửa phục vụ khách tham quan tất cả các ngày trong tuần, kể cả Lễ, Tết (trừ các trường hợp đặc biệt có thông báo riêng).',
+        ticketDayLabel: 'Ngày mở cửa',
+        ticketDayValue: 'Thứ 2 – Chủ nhật',
+        ticketTimeLabel: 'Thời gian',
+        ticketRows: [['Người lớn','80.000 đ'],['Sinh viên / Người cao tuổi','40.000 đ'],['Trẻ em (6 – dưới 16 tuổi)','20.000 đ']],
       },
       en: { areaTitle: 'Areas', other: 'Other', siteQrError: 'The QR code could not be loaded. Check that the server is updated (has /api/site/qr) and running.', siteQrTitle: 'Scan to open this guide', siteQrDesc: 'Visitors can scan this code with their phone to open the audio guide on their own device.', siteBaseLabel: 'Server address (so your phone can reach it)', siteWarn: 'Using localhost, phones cannot scan this. Enter the IP address of the server computer.', siteDownload: 'Download QR image', brandSub: 'Multilingual audio guide', kicker: 'National historic site', heroTitle: 'A journey through the historic rooms',
         heroDesc: 'Every exhibit in Independence Palace has its own story. Scan the QR code at each exhibit to listen to the guide in your language.',
@@ -283,9 +294,16 @@
         ticketBannerDesc: 'Buy tickets online and receive e-tickets with QR codes. Skip the queue.',
         ticketBannerBtn: 'Book tickets',
         ticketSectionTitle: 'Book tickets online',
-        ticketSectionDesc: 'Choose a date, time slot and ticket type below — or open the',
-        ticketSectionLink: 'full booking page',
-        ticketTypes: 'Ticket types & prices',
+        ticketSectionDesc: 'You can book tickets online ',
+        ticketSectionLink: 'HERE',
+        ticketSectionSuffix: ' to save time.',
+        ticketPriceTitle: 'ADMISSION PRICES',
+        ticketHoursTitle: 'OPENING HOURS',
+        ticketHoursDesc: 'Independence Palace is open every day of the week, including public holidays (except special closures announced separately).',
+        ticketDayLabel: 'Open',
+        ticketDayValue: 'Mon – Sun',
+        ticketTimeLabel: 'Hours',
+        ticketRows: [['Adults','80,000 đ'],['Students / Seniors','40,000 đ'],['Children (6–15)','20,000 đ']],
       },
       ja: { areaTitle: 'エリア', other: 'その他', siteQrError: 'QRコードを読み込めませんでした。サーバーが更新済み（/api/site/qr）で起動しているか確認してください。', siteQrTitle: 'QRコードを読み取ってこのガイドを開く', siteQrDesc: 'スマートフォンで読み取ると、ご自身の端末で音声ガイドを開けます。', siteBaseLabel: 'サーバーのアドレス（スマートフォンからアクセス用）', siteWarn: 'localhostを使用しているため、スマートフォンでは読み取れません。サーバーのIPアドレスを入力してください。', siteDownload: 'QRコードの画像をダウンロード', brandSub: '多言語音声ガイド', kicker: '国の史跡', heroTitle: '歴史ある部屋をめぐる旅',
         heroDesc: '独立宮殿の一つひとつの展示には、それぞれの物語があります。展示のQRコードを読み取り、お好きな言語で解説をお聞きください。',
@@ -300,9 +318,16 @@
         ticketBannerDesc: 'オンラインで購入し、QRコード付きの電子チケットを受け取れます。',
         ticketBannerBtn: '今すぐ予約',
         ticketSectionTitle: 'オンラインチケット予約',
-        ticketSectionDesc: '日付・時間帯・種類を選択してください。または',
-        ticketSectionLink: '予約ページへ',
-        ticketTypes: '種類と料金',
+        ticketSectionDesc: 'オンラインでご購入できます ',
+        ticketSectionLink: 'こちら',
+        ticketSectionSuffix: '（時間短縮）。',
+        ticketPriceTitle: '入場料金',
+        ticketHoursTitle: '開館時間',
+        ticketHoursDesc: '独立宮殿は週7日、祝日・旧正月を含み開館しています（特別な閉館は別途告知）。',
+        ticketDayLabel: '開館日',
+        ticketDayValue: '月曜日〜日曜日',
+        ticketTimeLabel: '時間',
+        ticketRows: [['大人','80,000 đ'],['学生 / シニア','40,000 đ'],['子ども（6〜15歳）','20,000 đ']],
       },
       ko: { areaTitle: '구역', other: '기타', siteQrError: 'QR 코드를 불러올 수 없습니다. 서버가 업데이트되었는지(/api/site/qr) 및 실행 중인지 확인하세요。', siteQrTitle: '이 안내를 열려면 스캔하세요', siteQrDesc: '휴대폰으로 스캔하면 자신의 기기에서 음성 안내 페이지를 열 수 있습니다.', siteBaseLabel: '서버 주소 (휴대폰에서 접속용)', siteWarn: 'localhost를 사용 중이라 휴대폰에서 스캔할 수 없습니다. 서버 컴퓨터의 IP 주소를 입력하세요.', siteDownload: 'QR 코드 이미지 다운로드', brandSub: '다국어 음성 안내', kicker: '국가 사적지', heroTitle: '역사의 방들을 따라 떠나는 여정',
         heroDesc: '독립궁의 모든 전시물에는 저마다의 이야기가 있습니다. 전시물의 QR 코드를 스캔하고 원하는 언어로 안내를 들어 보세요.',
@@ -317,9 +342,16 @@
         ticketBannerDesc: '온라인으로 구매하고 QR 코드가 포함된 전자 티켓을 받으세요.',
         ticketBannerBtn: '지금 예약',
         ticketSectionTitle: '온라인 티켓 예약',
-        ticketSectionDesc: '날짜, 시간대, 티켓 종류를 선택하세요. 또는',
-        ticketSectionLink: '전체 예약 페이지',
-        ticketTypes: '티켓 종류 및 가격',
+        ticketSectionDesc: '온라인으로 티켓을 구매할 수 있습니다 ',
+        ticketSectionLink: '여기',
+        ticketSectionSuffix: '.',
+        ticketPriceTitle: '입장 요금',
+        ticketHoursTitle: '운영 시간',
+        ticketHoursDesc: '독립궁은 공휴일 및 설날을 포함해 매일 운영합니다 (특별 휴관 제외).',
+        ticketDayLabel: '운영일',
+        ticketDayValue: '월요일 – 일요일',
+        ticketTimeLabel: '시간',
+        ticketRows: [['성인','80,000 đ'],['학생 / 경로','40,000 đ'],['어린이 (6–15세)','20,000 đ']],
       },
       zh: { areaTitle: '区域', other: '其他', siteQrError: '无法加载二维码。请检查服务器是否已更新（有 /api/site/qr 接口）并正在运行。', siteQrTitle: '扫码打开本导览', siteQrDesc: '游客可用手机扫描此码，在自己的设备上打开语音讲解页面。', siteBaseLabel: '服务器地址（供手机访问）', siteWarn: '当前使用 localhost，手机无法扫描。请输入运行服务器的电脑 IP 地址。', siteDownload: '下载二维码图片', brandSub: '多语种语音讲解', kicker: '国家历史遗迹', heroTitle: '穿越历史厅室的旅程',
         heroDesc: '独立宫的每一件展品都有自己的故事。扫描展品上的二维码，即可用您的语言聆听讲解。',
@@ -334,9 +366,16 @@
         ticketBannerDesc: '在线购票，获取带二维码的电子票。无需排队。',
         ticketBannerBtn: '立即预订',
         ticketSectionTitle: '在线预订参观票',
-        ticketSectionDesc: '在下方选择日期、场次和票种，或打开',
-        ticketSectionLink: '完整预订页面',
-        ticketTypes: '票种与价格',
+        ticketSectionDesc: '您可在线购票 ',
+        ticketSectionLink: '点此购票',
+        ticketSectionSuffix: '，节省排队时间。',
+        ticketPriceTitle: '参观票价',
+        ticketHoursTitle: '开放时间',
+        ticketHoursDesc: '独立宫每天开放，包括节假日和春节（特殊关闭情况另行通知）。',
+        ticketDayLabel: '开放日',
+        ticketDayValue: '周一至周日',
+        ticketTimeLabel: '时间',
+        ticketRows: [['成人','80,000 đ'],['学生 / 老年人','40,000 đ'],['儿童（6–15岁）','20,000 đ']],
       },
     };
 
@@ -379,13 +418,17 @@
       set('siteQrTitle', s.siteQrTitle); set('siteQrDesc', s.siteQrDesc); set('siteBaseLabel', s.siteBaseLabel);
       set('siteWarn', s.siteWarn); set('siteDownload', s.siteDownload);
       // Ticket section
-      if (document.getElementById('ticketLabel'))     set('ticketLabel', s.ticketBannerTitle);
-      if (document.getElementById('ticketSectionTitle')) set('ticketSectionTitle', s.ticketSectionTitle);
-      if (document.getElementById('ticketDescText'))  set('ticketDescText', s.ticketSectionDesc);
+      if (document.getElementById('ticketPriceTitle'))  set('ticketPriceTitle',  s.ticketPriceTitle);
+      if (document.getElementById('ticketHoursTitle'))  set('ticketHoursTitle',  s.ticketHoursTitle);
+      if (document.getElementById('ticketHoursDesc'))   set('ticketHoursDesc',   s.ticketHoursDesc);
+      if (document.getElementById('ticketDescText'))    set('ticketDescText',    s.ticketSectionDesc);
+      if (document.getElementById('ticketDescSuffix'))  set('ticketDescSuffix',  s.ticketSectionSuffix || '');
       if (document.getElementById('ticketSectionLink')) set('ticketSectionLink', s.ticketSectionLink);
-      if (document.getElementById('ticketSectionBtnText')) set('ticketSectionBtnText', s.ticketBannerBtn);
-      if (document.getElementById('ticketTypesTitle')) set('ticketTypesTitle', s.ticketTypes);
+      if (document.getElementById('ticketDayLabel'))    set('ticketDayLabel',    s.ticketDayLabel);
+      if (document.getElementById('ticketDayValue'))    set('ticketDayValue',    s.ticketDayValue);
+      if (document.getElementById('ticketTimeLabel'))   set('ticketTimeLabel',   s.ticketTimeLabel);
       if (document.getElementById('heroBannerBtnText')) set('heroBannerBtnText', s.ticketBannerBtn);
+      renderTicketPriceRows();
       updateSiteQr();
     }
 
@@ -659,7 +702,7 @@
       document.getElementById('qrBase').value = window.location.origin;
       document.getElementById('siteBase').value = window.location.origin;
       loadArtifacts();
-      loadTicketTypes();
+      renderTicketPriceRows();
     });
   </script>
 </body>
