@@ -4,19 +4,25 @@ const artifactRepository = require('../repositories/artifact.repository');
 const seedService = require('../services/seed.service');
 const buildings = require('../data/buildings.seed');
 
+// Test đọc số lượng từ chính file dữ liệu, nên thêm/bớt công trình không làm test bị lỗi giả.
 test.afterEach(() => {
     test.mock.restoreAll();
     delete process.env.SEED_SAMPLE_DATA;
 });
 
-test('dữ liệu mẫu: 6 công trình hợp lệ, mỗi công trình có đủ bản dịch en, ja, ko, zh', () => {
-    assert.strictEqual(buildings.length, 6);
-    assert.strictEqual(new Set(buildings.map((b) => b.code)).size, 6);
+test('dữ liệu mẫu: có công trình, mã không trùng và hợp lệ', () => {
+    assert.ok(buildings.length > 0, 'file dữ liệu không có công trình nào');
+    assert.strictEqual(new Set(buildings.map((b) => b.code)).size, buildings.length, 'có mã trùng');
     for (const b of buildings) {
         assert.match(b.code, /^[A-Z0-9_-]+$/);
-        assert.ok(b.name && b.description && b.location);
+        assert.ok(b.name && b.description && b.location, `${b.code} thiếu name/description/location`);
+    }
+});
+
+test('dữ liệu mẫu: mỗi công trình có đủ bản dịch en, ja, ko, zh', () => {
+    for (const b of buildings) {
         for (const lang of ['en', 'ja', 'ko', 'zh']) {
-            const t = b.translations[lang];
+            const t = b.translations && b.translations[lang];
             assert.ok(t && t.name && t.description && t.location, `${b.code} thiếu bản dịch ${lang}`);
         }
     }
@@ -33,19 +39,19 @@ test('bản dịch tiếng Nhật/Hàn/Trung dùng đúng bộ chữ (không l�
     }
 });
 
-test('database trống: nạp cả 6 công trình kèm bản dịch', async () => {
+test('database trống: nạp toàn bộ công trình kèm bản dịch', async () => {
     let inserted;
     test.mock.method(artifactRepository, 'count', async () => 0);
     test.mock.method(artifactRepository, 'insertMany', async (items) => { inserted = items; });
-    assert.deepStrictEqual(await seedService.syncSampleData(), { created: 6, updated: 0 });
-    assert.strictEqual(inserted.length, 6);
+    assert.deepStrictEqual(await seedService.syncSampleData(), { created: buildings.length, updated: 0 });
+    assert.strictEqual(inserted.length, buildings.length);
     assert.ok(inserted[0].translations.ja);
 });
 
 test('đã có dữ liệu: bổ sung bản dịch còn thiếu, không tạo lại công trình', async () => {
     const updates = [];
     const insert = test.mock.method(artifactRepository, 'insertMany', async () => {});
-    test.mock.method(artifactRepository, 'count', async () => 6);
+    test.mock.method(artifactRepository, 'count', async () => buildings.length);
     // công trình cũ chưa có bản dịch (đã nạp ở phiên bản trước)
     test.mock.method(artifactRepository, 'findByCode', async (code) => {
         const seed = buildings.find((b) => b.code === code);
@@ -53,7 +59,7 @@ test('đã có dữ liệu: bổ sung bản dịch còn thiếu, không tạo l�
     });
     test.mock.method(artifactRepository, 'updateById', async (id, data) => { updates.push([id, data]); });
 
-    assert.deepStrictEqual(await seedService.syncSampleData(), { created: 0, updated: 6 });
+    assert.deepStrictEqual(await seedService.syncSampleData(), { created: 0, updated: buildings.length });
     assert.strictEqual(insert.mock.callCount(), 0);
     assert.strictEqual(Object.keys(updates[0][1].$set).length, 12); // 4 ngôn ngữ x 3 trường
 });

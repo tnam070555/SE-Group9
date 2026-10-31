@@ -22,7 +22,8 @@ const artifactSchema = new mongoose.Schema({
     description: { type: String },                                      // Nội dung thuyết minh gốc (tiếng Việt)
     location: { type: String },                                         // Vị trí trong Dinh (tầng, khu vực)
     audioUrl: { type: String },                                         // Đường dẫn audio đã lưu (chưa dùng)
-    translations: translationsShape,                                    // Bản dịch theo ngôn ngữ
+    translations: translationsShape,       
+    categorySlug: { type: String, index: true },                             // Bản dịch theo ngôn ngữ
 }, { timestamps: true });
 
 module.exports = mongoose.model('Artifact', artifactSchema);

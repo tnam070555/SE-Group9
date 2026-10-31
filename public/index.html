@@ -3,495 +3,736 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Thuyết Minh - Dinh Độc Lập</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Hệ Thống Thuyết Minh - Di Tích Lịch Sử Dinh Độc Lập</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Google Fonts: Cổ điển & Trang trọng -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#1e3a8a', secondary: '#fbbf24', dark: '#0f172a' }
+                    fontFamily: { 
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Lora', 'serif'] 
+                    },
+                    colors: { 
+                        heritage: {
+                            red: '#8B2128',     // Đỏ đô
+                            gold: '#D4AF37',    // Vàng hoàng gia
+                            paper: '#F4F1EA',   // Màu giấy cũ
+                            ink: '#2C3E50',     // Xanh đen mực
+                            brown: '#5C4033'    // Nâu gỗ
+                        }
+                    },
+                    boxShadow: {
+                        'vintage': '5px 5px 15px rgba(0,0,0,0.08), -5px -5px 15px rgba(255,255,255,0.8)',
+                    }
                 }
             }
         }
     </script>
+    
+    <!-- Custom CSS -->
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        /* Glassmorphism */
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        .glass-dark { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        /* Smooth transition */
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { 
+            background-color: #F4F1EA; 
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png'); 
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #EADDCD; }
+        ::-webkit-scrollbar-thumb { background: #8B2128; border-radius: 3px; }
+        
+        .artifact-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .artifact-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(139, 33, 40, 0.15); }
+        
+        .sepia-img { filter: sepia(30%) contrast(110%); transition: all 0.5s; }
+        .artifact-card:hover .sepia-img { filter: sepia(0%) contrast(100%); transform: scale(1.05); }
+        
+        .modal-enter { animation: modalFadeIn 0.4s ease-out forwards; }
+        @keyframes modalFadeIn { 
+            from { opacity: 0; transform: scale(0.95) translateY(20px); } 
+            to { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+
+        /* Language Dropdown Animation */
+        .dropdown-menu { display: none; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; }
+        .group:hover .dropdown-menu { display: block; opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans overflow-hidden">
+<body class="text-heritage-ink font-sans antialiased overflow-x-hidden selection:bg-heritage-gold selection:text-white">
 
-    <!-- TOP NAVBAR -->
-    <nav class="glass fixed w-full z-50 top-0 border-b border-slate-200">
+    <!-- HEADER / NAVIGATION -->
+    <nav class="fixed w-full z-50 top-0 bg-heritage-paper/95 backdrop-blur-md border-b-2 border-heritage-gold/30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
-                        <i class="fa-solid fa-landmark"></i>
+            <div class="flex justify-between h-20 items-center">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-4 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-12 h-12 border-2 border-heritage-red rounded-full flex items-center justify-center text-heritage-red bg-white shadow-sm">
+                        <i class="fa-solid fa-landmark-dome text-xl"></i>
                     </div>
-                    <span class="font-bold text-xl tracking-tight text-primary">Dinh Độc Lập <span class="font-light text-slate-500 hidden sm:inline">Audio Guide</span></span>
+                    <div>
+                        <h1 class="font-serif font-bold text-xl md:text-2xl tracking-wide text-heritage-red uppercase" id="ui-brand-name">Dinh Độc Lập</h1>
+                        <p class="text-xs md:text-sm italic text-heritage-brown" id="ui-brand-sub">Hệ Thống Audio Guide</p>
+                    </div>
                 </div>
+
+                <!-- Language Switcher -->
                 <div class="flex items-center gap-4">
-                    <!-- Language Selector -->
-                    <div class="relative group cursor-pointer">
-                        <div class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition">
-                            <img src="https://flagcdn.com/w20/vn.png" alt="VN" class="w-5 h-5 rounded-full object-cover">
-                            <span class="hidden sm:block">Tiếng Việt</span>
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                    <div class="relative group cursor-pointer border border-heritage-brown/30 px-3 py-2 rounded-lg bg-white shadow-sm hover:border-heritage-gold transition z-50">
+                        <div class="flex items-center gap-2 text-sm font-medium text-heritage-brown min-w-[120px]" id="current-lang-display">
+                            <img src="https://flagcdn.com/w20/vn.png" alt="VN" class="w-5 h-5 rounded-full object-cover shadow-sm">
+                            <span>Tiếng Việt</span>
+                            <i class="fa-solid fa-caret-down ml-auto"></i>
+                        </div>
+                        
+                        <!-- Dropdown Options -->
+                        <div class="dropdown-menu absolute right-0 top-full mt-2 w-40 bg-white border border-heritage-brown/20 shadow-xl rounded-md overflow-hidden">
+                            <div class="flex flex-col">
+                                <button onclick="changeLanguage('vi')" class="flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition text-left text-sm text-heritage-ink">
+                                    <img src="https://flagcdn.com/w20/vn.png" class="w-5 h-5 rounded-full object-cover shadow-sm"> Tiếng Việt
+                                </button>
+                                <button onclick="changeLanguage('en')" class="flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition text-left text-sm text-heritage-ink">
+                                    <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-5 rounded-full object-cover shadow-sm"> English
+                                </button>
+                                <button onclick="changeLanguage('ja')" class="flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition text-left text-sm text-heritage-ink">
+                                    <img src="https://flagcdn.com/w20/jp.png" class="w-5 h-5 rounded-full object-cover shadow-sm"> 日本語
+                                </button>
+                                <button onclick="changeLanguage('ko')" class="flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition text-left text-sm text-heritage-ink">
+                                    <img src="https://flagcdn.com/w20/kr.png" class="w-5 h-5 rounded-full object-cover shadow-sm"> 한국어
+                                </button>
+                                <button onclick="changeLanguage('zh')" class="flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition text-left text-sm text-heritage-ink">
+                                    <img src="https://flagcdn.com/w20/cn.png" class="w-5 h-5 rounded-full object-cover shadow-sm"> 中文
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <!-- Admin Login Button -->
-                    <a href="/admin" class="bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:block">Quản trị</span>
-                    </a>
                 </div>
+
             </div>
         </div>
     </nav>
 
-    <!-- MAIN DASHBOARD LAYOUT -->
-    <div class="flex h-screen pt-16">
+    <!-- HERO SECTION -->
+    <header class="relative w-full h-[60vh] min-h-[500px] mt-20 bg-heritage-ink overflow-hidden">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Reunification_Palace%2C_Ho_Chi_Minh_City.jpg/1920px-Reunification_Palace%2C_Ho_Chi_Minh_City.jpg" alt="Dinh Độc Lập" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay">
+        <div class="absolute inset-0 bg-gradient-to-t from-heritage-ink via-transparent to-transparent"></div>
+        <div class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center z-10">
+            <div class="border-y-2 border-heritage-gold py-4 px-8 backdrop-blur-sm bg-black/30 mb-6">
+                <h2 class="text-4xl md:text-6xl font-serif font-bold text-white tracking-wider uppercase drop-shadow-lg" id="ui-hero-title">Chứng Nhân Lịch Sử</h2>
+            </div>
+            <p class="text-slate-200 max-w-3xl text-base md:text-lg font-light leading-relaxed drop-shadow-md" id="ui-hero-desc">
+                Khám phá từng dấu ấn thời gian qua hệ thống thuyết minh kỹ thuật số. <br class="hidden md:block"> Quét mã QR tại các khu vực trưng bày để lắng nghe câu chuyện đằng sau những di vật vô giá.
+            </p>
+        </div>
+        <div class="absolute bottom-0 w-full h-4 bg-heritage-red/80 flex border-t border-heritage-gold"></div>
+    </header>
+
+    <!-- MAIN CONTENT LAYOUT -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-8">
         
-        <!-- SIDEBAR (CATEGORIES) -->
-        <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-full shadow-sm relative z-40">
-            <div class="p-5 border-b border-slate-100">
-                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Khu Vực Tham Quan</h2>
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm công trình..." class="w-full bg-slate-100 text-sm rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary transition">
-                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+        <!-- SIDEBAR FILTER -->
+        <aside class="w-full md:w-72 flex-shrink-0 z-20">
+            <div class="sticky top-28 bg-white p-6 rounded-sm border border-heritage-brown/20 shadow-vintage relative">
+                <!-- Corner Decorations -->
+                <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-heritage-gold -mt-1 -ml-1"></div>
+                <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-heritage-gold -mt-1 -mr-1"></div>
+                <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-heritage-gold -mb-1 -ml-1"></div>
+                <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-heritage-gold -mb-1 -mr-1"></div>
+
+                <h3 class="font-serif font-bold text-lg text-heritage-red uppercase tracking-widest mb-4 border-b border-heritage-brown/20 pb-2 text-center" id="ui-sidebar-title">Bản Đồ Tham Quan</h3>
+                
+                <div class="relative mb-6">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm hiện vật..." class="w-full bg-heritage-paper text-sm rounded-none border border-heritage-brown/30 pl-10 pr-3 py-2.5 focus:outline-none focus:border-heritage-red font-sans placeholder-heritage-brown/50 transition">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-heritage-brown/50"></i>
                 </div>
-            </div>
-            
-            <div class="overflow-y-auto flex-1 p-3" id="categorySidebar">
-                <!-- Filter Buttons generated by JS -->
-            </div>
-            
-            <div class="p-4 bg-slate-50 border-t border-slate-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-primary flex items-center justify-center">
-                        <i class="fa-solid fa-headset"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-800">Hỗ trợ kỹ thuật</p>
-                        <p class="text-xs text-slate-500">Hotline: 1900 xxxx</p>
-                    </div>
+
+                <div class="space-y-2" id="categorySidebar">
+                    <!-- Javascript will render categories here -->
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 overflow-y-auto relative scroll-smooth" id="mainContent">
-            
-            <!-- HERO BANNER -->
-            <div class="relative w-full h-80 bg-slate-900">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Reunification_Palace%2C_Ho_Chi_Minh_City.jpg/1200px-Reunification_Palace%2C_Ho_Chi_Minh_City.jpg" alt="Dinh Doc Lap Banner" class="w-full h-full object-cover opacity-50">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
-                <div class="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-                    <span class="px-3 py-1 text-xs font-semibold bg-secondary text-dark rounded-full mb-4 shadow-lg uppercase tracking-wide">Di tích quốc gia đặc biệt</span>
-                    <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">Hệ Thống Thuyết Minh Đa Ngôn Ngữ</h1>
-                    <p class="text-slate-200 max-w-2xl text-sm md:text-base drop-shadow">Trải nghiệm không gian lịch sử Dinh Độc Lập qua nền tảng số. Quét mã QR tại mỗi khu vực để nghe thuyết minh chi tiết bằng 5 ngôn ngữ.</p>
+        <!-- ARTIFACTS GRID -->
+        <main class="flex-1 min-h-screen">
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between border-b border-heritage-brown/20 pb-4">
+                <div>
+                    <h2 class="text-3xl font-serif font-bold text-heritage-ink uppercase tracking-wide" id="currentCategoryTitle">Toàn Bộ Khu Vực</h2>
+                    <p class="text-heritage-brown mt-2 italic" id="currentCategoryDesc">Chiêm ngưỡng các di tích và hiện vật lịch sử vượt thời gian.</p>
+                </div>
+                <div class="mt-4 md:mt-0 text-sm font-bold text-heritage-red bg-white px-4 py-2 border border-heritage-red shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-box-archive"></i> <span id="ui-total-count">Tổng số: 0 hiện vật</span>
                 </div>
             </div>
 
-            <!-- TICKET PRICING SECTION -->
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="ticket-section">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Bảng Giá Vé Tham Quan</h2>
-                    <p class="text-slate-500 mt-2 text-sm">Áp dụng cho khách tham quan Dinh Độc Lập và sử dụng hệ thống Audio Guide</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                    <!-- Ticket: Student -->
-                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow border border-slate-100 p-6 flex flex-col relative overflow-hidden group">
-                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-graduate"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800">Học sinh / Sinh viên</h3>
-                        <p class="text-slate-500 text-sm mb-4">Cần xuất trình thẻ HSSV hợp lệ</p>
-                        <div class="mt-auto">
-                            <span class="text-3xl font-black text-primary">20.000đ</span>
-                            <span class="text-slate-500 text-sm">/ vé</span>
-                        </div>
-                        <ul class="mt-4 space-y-2 text-sm text-slate-600">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tham quan toàn bộ Dinh</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Quét mã Audio Guide</li>
-                        </ul>
-                    </div>
+            <!-- Grid Content -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="artifactsGrid">
+                <!-- Javascript will render artifacts here -->
+            </div>
 
-                    <!-- Ticket: Adult (Popular) -->
-                    <div class="bg-primary rounded-2xl shadow-xl p-6 flex flex-col relative overflow-hidden transform md:-translate-y-4 border-2 border-secondary text-white">
-                        <div class="absolute top-0 right-0 bg-secondary text-dark text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wide">Phổ Biến Nhất</div>
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-4">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <h3 class="text-lg font-bold">Người Lớn</h3>
-                        <p class="text-blue-100 text-sm mb-4">Khách tham quan trong nước & quốc tế</p>
-                        <div class="mt-auto">
-                            <span class="text-4xl font-black text-secondary">65.000đ</span>
-                            <span class="text-blue-200 text-sm">/ vé</span>
-                        </div>
-                        <ul class="mt-6 space-y-3 text-sm text-blue-50">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Tham quan toàn bộ Dinh</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Truy cập bộ 16 Audio Guide</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-secondary"></i> Tham quan nhà trưng bày 30/4</li>
-                        </ul>
-                    </div>
-
-                    <!-- Ticket: Child -->
-                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow border border-slate-100 p-6 flex flex-col relative overflow-hidden group">
-                        <div class="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-child"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800">Trẻ Em</h3>
-                        <p class="text-slate-500 text-sm mb-4">Trẻ em dưới 16 tuổi</p>
-                        <div class="mt-auto">
-                            <span class="text-3xl font-black text-primary">15.000đ</span>
-                            <span class="text-slate-500 text-sm">/ vé</span>
-                        </div>
-                        <ul class="mt-4 space-y-2 text-sm text-slate-600">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Tham quan toàn bộ Dinh</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Trải nghiệm đa phương tiện</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ARTIFACTS GRID SECTION -->
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-slate-50 rounded-t-3xl border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
-                
-                <div class="flex justify-between items-end mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800" id="currentCategoryTitle">Tất cả công trình</h2>
-                        <p class="text-slate-500 text-sm mt-1" id="currentCategoryDesc">Khám phá các di tích lịch sử bên trong Dinh Độc Lập</p>
-                    </div>
-                    
-                    <!-- Mobile Category Dropdown (Hidden on Desktop) -->
-                    <div class="md:hidden">
-                        <select id="mobileCategorySelect" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 shadow-sm">
-                            <option value="all">Tất cả khu vực</option>
-                            <!-- Options generated by JS -->
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Data Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="artifactsGrid">
-                    <!-- Cards will be dynamically injected here by JavaScript -->
-                </div>
-                
-                <!-- Empty State -->
-                <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center fade-in">
-                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" alt="Empty" class="w-32 h-32 opacity-50 mb-4 grayscale">
-                    <h3 class="text-lg font-bold text-slate-700">Không tìm thấy công trình</h3>
-                    <p class="text-slate-500 text-sm max-w-sm mt-2">Khu vực này hiện chưa có dữ liệu hoặc không khớp với kết quả tìm kiếm của bạn.</p>
-                    <button onclick="filterArtifacts('all')" class="mt-4 text-primary font-medium hover:underline text-sm">Xem tất cả công trình</button>
-                </div>
-
-            </section>
-
-            <!-- FOOTER -->
-            <footer class="bg-white border-t border-slate-200 mt-12 py-8">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-landmark text-primary text-xl"></i>
-                        <span class="font-bold text-slate-800">Dinh Độc Lập Audio Guide</span>
-                    </div>
-                    <p class="text-slate-500 text-sm text-center md:text-left">
-                        © 2026 Developed by Nhóm 9 - SE SGU. Dự án Đồ án Kiến trúc phần mềm.
-                    </p>
-                    <div class="flex gap-4 text-slate-400">
-                        <a href="#" class="hover:text-primary transition"><i class="fa-brands fa-github text-xl"></i></a>
-                        <a href="#" class="hover:text-primary transition"><i class="fa-brands fa-facebook text-xl"></i></a>
-                    </div>
-                </div>
-            </footer>
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-24 text-center">
+                <i class="fa-solid fa-scroll text-6xl text-heritage-brown/30 mb-4"></i>
+                <h3 class="text-xl font-serif font-bold text-heritage-ink" id="ui-empty-title">Không tìm thấy di tích</h3>
+                <p class="text-heritage-brown mt-2" id="ui-empty-desc">Hãy thử đổi từ khóa hoặc chọn khu vực khác.</p>
+                <button onclick="filterArtifacts('all')" class="mt-6 px-6 py-2 border border-heritage-red text-heritage-red hover:bg-heritage-red hover:text-white transition uppercase text-sm font-bold tracking-wider" id="ui-btn-viewall">Xem Tất Cả</button>
+            </div>
         </main>
     </div>
 
-    <!-- AUDIO PLAYER MODAL -->
-    <div id="audioModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal()"></div>
-        
-        <!-- Modal Content -->
-        <div class="glass-dark w-full max-w-md mx-4 rounded-3xl shadow-2xl relative z-10 overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalContainer">
-            <!-- Close btn -->
-            <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            
-            <div class="p-8">
-                <!-- Image Placeholder -->
-                <div class="w-24 h-24 bg-gradient-to-br from-primary to-blue-400 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg border-2 border-white/20">
-                    <i class="fa-solid fa-headphones text-4xl text-white"></i>
-                </div>
-                
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl font-bold text-white mb-2" id="modalTitle">Phòng Khánh Tiết</h3>
-                    <p class="text-blue-200 text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-location-dot"></i> <span id="modalLocation">Tầng trệt</span>
-                    </p>
-                </div>
-                
-                <!-- Audio Controls -->
-                <div class="bg-white/10 rounded-2xl p-6 backdrop-blur-md border border-white/10">
-                    <!-- Progress Bar -->
-                    <div class="mb-4">
-                        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" id="progressContainer">
-                            <div class="h-full bg-secondary w-0 relative" id="progressBar">
-                                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow"></div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-xs text-slate-300 mt-2 font-medium">
-                            <span id="currentTime">00:00</span>
-                            <span id="durationTime">00:00</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Buttons -->
-                    <div class="flex items-center justify-center gap-6">
-                        <button class="text-white hover:text-secondary transition text-xl"><i class="fa-solid fa-backward-step"></i></button>
-                        <button id="playBtn" class="w-14 h-14 bg-secondary hover:bg-yellow-400 text-dark rounded-full flex items-center justify-center text-2xl shadow-lg transition transform hover:scale-105" onclick="togglePlay()">
-                            <i class="fa-solid fa-play ml-1" id="playIcon"></i>
-                        </button>
-                        <button class="text-white hover:text-secondary transition text-xl"><i class="fa-solid fa-forward-step"></i></button>
-                    </div>
-                </div>
-                
-                <!-- QR Code Snippet inside modal -->
-                <div class="mt-6 border-t border-white/10 pt-4 text-center">
-                    <button class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2 mx-auto">
-                        <i class="fa-solid fa-qrcode"></i> Hiển thị mã QR chia sẻ
-                    </button>
+    <!-- FOOTER -->
+    <footer class="bg-heritage-ink text-heritage-paper py-12 mt-12 border-t-4 border-heritage-red">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="font-serif font-bold text-2xl text-heritage-gold mb-4 uppercase" id="ui-footer-brand">Dinh Độc Lập</h3>
+                <p class="text-sm text-slate-400 leading-relaxed mb-4" id="ui-footer-desc">Di tích lịch sử văn hóa quốc gia đặc biệt. Trải nghiệm hệ thống hướng dẫn viên kỹ thuật số thông minh thông qua thiết bị di động của bạn.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider" id="ui-footer-contact">Liên Hệ</h4>
+                <ul class="text-sm text-slate-400 space-y-3">
+                    <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot mt-1 text-heritage-gold"></i> 135 Nam Kỳ Khởi Nghĩa, Bến Thành, Q.1, TP.HCM</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-heritage-gold"></i> 028 3822 3652</li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-heritage-gold"></i> info@dinhdoclap.gov.vn</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg mb-4 text-white uppercase tracking-wider" id="ui-footer-dev">Đơn Vị Phát Triển</h4>
+                <div class="bg-black/30 p-4 border border-heritage-gold/20 rounded-sm">
+                    <p class="text-sm text-slate-300 font-medium">Dự án Kiến trúc Phần mềm - Nhóm 9</p>
+                    <p class="text-sm text-heritage-gold mt-1 font-bold"><i class="fa-solid fa-user-graduate mr-1"></i> Sinh viên: Tất Võ Tiến Nam</p>
+                    <p class="text-xs text-slate-400 italic mt-2">Đại học Sài Gòn (SGU)</p>
                 </div>
             </div>
         </div>
+        <div class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-500">
+            &copy; 2026 Bản quyền giao diện thuộc về Nhóm 9 - SGU. Thiết kế phục vụ mục đích đồ án môn học.
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE MODAL (AUDIO & QR) -->
+    <div id="interactionModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-heritage-ink/90 backdrop-blur-md" onclick="closeModal()"></div>
         
-        <!-- Hidden Audio Element -->
+        <!-- Modal Content -->
+        <div class="bg-heritage-paper w-full max-w-4xl rounded-sm shadow-2xl relative z-10 flex flex-col md:flex-row overflow-hidden border-2 border-heritage-gold modal-enter h-[90vh] md:h-[600px]" id="modalContainer">
+            
+            <button onclick="closeModal()" class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white border border-heritage-brown hover:bg-heritage-red hover:text-white hover:border-heritage-red text-heritage-ink rounded-full transition z-20 shadow-md">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <!-- Left Side: Image -->
+            <div class="md:w-1/2 h-64 md:h-full relative bg-black">
+                <img id="modalImage" src="" alt="Artifact" class="w-full h-full object-cover opacity-90 sepia-img">
+                <div class="absolute top-4 left-4 bg-heritage-red text-white text-sm font-bold px-4 py-1.5 shadow-md uppercase border border-heritage-gold/50 tracking-wider" id="modalCode">DDL-00</div>
+            </div>
+            
+            <!-- Right Side: Content & Controls -->
+            <div class="md:w-1/2 p-6 md:p-8 flex flex-col h-full bg-white relative overflow-y-auto">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[url('https://www.transparenttextures.com/patterns/floral-flourish.png')] opacity-10 pointer-events-none"></div>
+                
+                <p class="text-heritage-gold font-bold text-xs uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-map-pin"></i> <span id="modalLocation">Khu vực</span>
+                </p>
+                <h3 class="text-3xl font-serif font-bold text-heritage-ink mb-6 leading-tight border-b-2 border-heritage-gold/30 pb-4" id="modalTitle">Tên công trình</h3>
+                
+                <!-- View Tabs -->
+                <div class="flex border-b border-heritage-brown/20 mb-6 shrink-0">
+                    <button onclick="switchModalTab('audio')" id="tabAudio" class="px-4 py-2 font-bold text-sm text-heritage-red border-b-2 border-heritage-red uppercase tracking-wider transition" id="ui-tab-audio">Thuyết Minh</button>
+                    <button onclick="switchModalTab('qr')" id="tabQR" class="px-4 py-2 font-bold text-sm text-heritage-brown hover:text-heritage-red border-b-2 border-transparent hover:border-heritage-red/50 uppercase tracking-wider transition" id="ui-tab-qr">Mã QR Code</button>
+                </div>
+
+                <!-- AUDIO VIEW -->
+                <div id="viewAudio" class="flex-1 flex flex-col justify-between">
+                    <div class="overflow-y-auto pr-2 mb-6 text-sm text-heritage-brown/90 leading-relaxed font-medium" id="modalDesc">
+                        Mô tả công trình...
+                    </div>
+                    
+                    <div class="bg-heritage-paper p-5 border border-heritage-brown/20 rounded-sm mt-auto shrink-0 shadow-inner relative">
+                        <!-- Cờ ngôn ngữ đang phát -->
+                        <div class="absolute -top-3 left-4 bg-white border border-heritage-brown/20 px-2 py-0.5 rounded text-[10px] font-bold text-heritage-red flex items-center gap-1">
+                            <i class="fa-solid fa-language"></i> <span id="modalLangIndicator">VN</span>
+                        </div>
+                        
+                        <div class="flex justify-between text-xs font-bold text-heritage-ink mb-2 mt-2">
+                            <span id="currentTime">00:00</span>
+                            <span class="text-heritage-red animate-pulse flex items-center gap-1"><i class="fa-solid fa-headphones"></i> <span id="ui-playing">Audio</span></span>
+                            <span id="durationTime">03:45</span>
+                        </div>
+                        <!-- Custom Progress Bar -->
+                        <div class="h-2 bg-white border border-heritage-brown/20 rounded-full overflow-hidden mb-6 cursor-pointer relative shadow-inner" id="progressContainer">
+                            <div class="h-full bg-gradient-to-r from-heritage-red to-red-500 w-0 relative" id="progressBar"></div>
+                        </div>
+                        <!-- Controls -->
+                        <div class="flex items-center justify-center gap-8">
+                            <button class="text-heritage-brown hover:text-heritage-red transition text-xl transform hover:-translate-x-1"><i class="fa-solid fa-backward-step"></i></button>
+                            <button id="playBtn" class="w-16 h-16 bg-heritage-red hover:bg-heritage-ink text-white rounded-full flex items-center justify-center text-2xl shadow-lg transition transform hover:scale-105 border-2 border-heritage-gold" onclick="togglePlay()">
+                                <i class="fa-solid fa-play ml-1" id="playIcon"></i>
+                            </button>
+                            <button class="text-heritage-brown hover:text-heritage-red transition text-xl transform hover:translate-x-1"><i class="fa-solid fa-forward-step"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR VIEW (Hidden by default) -->
+                <div id="viewQR" class="hidden flex-1 flex flex-col items-center justify-center py-4">
+                    <div class="bg-white p-6 border-2 border-heritage-brown/20 shadow-lg rounded-sm mb-6 relative">
+                        <!-- Corner accents -->
+                        <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-heritage-red"></div>
+                        <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-heritage-red"></div>
+                        <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-heritage-red"></div>
+                        <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-heritage-red"></div>
+                        
+                        <img id="modalQRImage" src="" alt="QR Code" class="w-48 h-48 object-contain">
+                    </div>
+                    <p class="text-center text-sm font-bold text-heritage-ink mb-1 uppercase tracking-wide" id="ui-scan-instruction">Quét mã để nghe trên điện thoại</p>
+                    <p class="text-center text-xs text-heritage-brown italic mb-4" id="ui-scan-sub">Hỗ trợ tự động nhận diện ngôn ngữ</p>
+                </div>
+                
+            </div>
+        </div>
         <audio id="audioElement" src=""></audio>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        // MOCK DATA (Thay thế bằng API fetch từ MongoDB của bạn sau này)
-        const categories = [
-            { slug: 'all', name: 'Tất cả', icon: 'fa-globe' },
-            { slug: 'tang-tret', name: 'Tầng trệt', icon: 'fa-building' },
-            { slug: 'lau-1', name: 'Lầu 1', icon: 'fa-layer-group' },
-            { slug: 'lau-2', name: 'Lầu 2', icon: 'fa-layer-group' },
-            { slug: 'san-thuong', name: 'Tầng sân thượng', icon: 'fa-helicopter' },
-            { slug: 'ngoai-troi', name: 'Ngoài trời', icon: 'fa-tree' },
-            { slug: 'tang-ham', name: 'Tầng hầm', icon: 'fa-dungeon' }
+        // ==========================================
+        // 1. TỪ ĐIỂN NGÔN NGỮ GIAO DIỆN (UI DICTIONARY)
+        // ==========================================
+        const uiDict = {
+            vi: {
+                brandSub: "Hệ Thống Audio Guide",
+                heroTitle: "Chứng Nhân Lịch Sử",
+                heroDesc: "Khám phá từng dấu ấn thời gian qua hệ thống thuyết minh kỹ thuật số.<br class='hidden md:block'> Quét mã QR tại các khu vực trưng bày để lắng nghe câu chuyện đằng sau những di vật vô giá.",
+                sidebarTitle: "Bản Đồ Tham Quan",
+                searchPlaceholder: "Tìm kiếm hiện vật...",
+                categoryAll: "Toàn Bộ Khu Vực",
+                categoryAllDesc: "Chiêm ngưỡng các di tích và hiện vật lịch sử vượt thời gian.",
+                totalCount: "Tổng số: {count} hiện vật",
+                emptyTitle: "Không tìm thấy di tích",
+                emptyDesc: "Hãy thử đổi từ khóa hoặc chọn khu vực khác.",
+                btnViewAll: "Xem Tất Cả",
+                btnAudioQr: "Audio & QR",
+                tabAudio: "Thuyết Minh",
+                tabQr: "Mã QR Code",
+                scanInstruction: "Quét mã để nghe trên điện thoại",
+                footerBrand: "Dinh Độc Lập",
+                footerDesc: "Di tích lịch sử văn hóa quốc gia đặc biệt. Trải nghiệm hệ thống hướng dẫn viên kỹ thuật số thông minh thông qua thiết bị di động của bạn.",
+                footerContact: "Liên Hệ",
+                footerDev: "Đơn Vị Phát Triển"
+            },
+            en: {
+                brandSub: "Audio Guide System",
+                heroTitle: "Witness to History",
+                heroDesc: "Explore footprints of time through our digital audio guide system.<br class='hidden md:block'> Scan QR codes to listen to the stories behind priceless artifacts.",
+                sidebarTitle: "Tour Map",
+                searchPlaceholder: "Search artifacts...",
+                categoryAll: "All Areas",
+                categoryAllDesc: "Admire timeless historical monuments and artifacts.",
+                totalCount: "Total: {count} items",
+                emptyTitle: "No artifacts found",
+                emptyDesc: "Please try a different keyword or category.",
+                btnViewAll: "View All",
+                btnAudioQr: "Listen & Scan",
+                tabAudio: "Audio Guide",
+                tabQr: "QR Code",
+                scanInstruction: "Scan to listen on mobile",
+                footerBrand: "Independence Palace",
+                footerDesc: "A special national historical and cultural relic. Experience the smart digital guide system via your mobile device.",
+                footerContact: "Contact Us",
+                footerDev: "Developed By"
+            },
+            ja: {
+                brandSub: "音声ガイドシステム",
+                heroTitle: "歴史の証人",
+                heroDesc: "デジタル音声ガイドシステムを通じて、時の足跡を探求してください。<br class='hidden md:block'> QRコードをスキャンして、貴重な遺物の背後にある物語をお聞きください。",
+                sidebarTitle: "見学マップ",
+                searchPlaceholder: "展示物を検索...",
+                categoryAll: "全エリア",
+                categoryAllDesc: "時代を超越した歴史的建造物や遺物をご鑑賞ください。",
+                totalCount: "合計: {count} 件",
+                emptyTitle: "展示物が見つかりません",
+                emptyDesc: "別のキーワードやエリアをお試しください。",
+                btnViewAll: "すべて表示",
+                btnAudioQr: "音声 & QR",
+                tabAudio: "音声ガイド",
+                tabQr: "QRコード",
+                scanInstruction: "スマホでスキャンして聴く",
+                footerBrand: "独立宮殿",
+                footerDesc: "特別国家歴史文化遺跡。スマートデジタルガイドシステムをモバイルデバイスでご体験ください。",
+                footerContact: "お問い合わせ",
+                footerDev: "開発元"
+            },
+            ko: {
+                brandSub: "오디오 가이드 시스템",
+                heroTitle: "역사의 증인",
+                heroDesc: "디지털 오디오 가이드 시스템을 통해 시간의 발자취를 탐험하세요.<br class='hidden md:block'> QR 코드를 스캔하여 귀중한 유물 뒤에 숨겨진 이야기를 들어보세요.",
+                sidebarTitle: "관람 지도",
+                searchPlaceholder: "유물 검색...",
+                categoryAll: "전체 구역",
+                categoryAllDesc: "시대를 초월한 역사적 기념물과 유물을 감상하세요.",
+                totalCount: "총 {count}개",
+                emptyTitle: "유물을 찾을 수 없습니다",
+                emptyDesc: "다른 키워드나 구역을 선택해 보세요.",
+                btnViewAll: "모두 보기",
+                btnAudioQr: "오디오 & QR",
+                tabAudio: "오디오 가이드",
+                tabQr: "QR 코드",
+                scanInstruction: "스캔하여 모바일로 듣기",
+                footerBrand: "통일궁",
+                footerDesc: "특별 국가 역사 문화 유적지. 모바일 기기를 통해 스마트 디지털 가이드 시스템을 경험해 보세요.",
+                footerContact: "연락처",
+                footerDev: "개발자"
+            },
+            zh: {
+                brandSub: "语音导览系统",
+                heroTitle: "历史的见证",
+                heroDesc: "通过数字语音导览系统探索时间的足迹。<br class='hidden md:block'> 扫描二维码，聆听无价文物背后的故事。",
+                sidebarTitle: "参观地图",
+                searchPlaceholder: "搜索文物...",
+                categoryAll: "所有区域",
+                categoryAllDesc: "欣赏超越时代的永恒历史文物。",
+                totalCount: "共 {count} 件",
+                emptyTitle: "未找到文物",
+                emptyDesc: "请尝试不同的关键字或区域。",
+                btnViewAll: "查看全部",
+                btnAudioQr: "语音与二维码",
+                tabAudio: "语音讲解",
+                tabQr: "二维码",
+                scanInstruction: "扫描即可在手机上收听",
+                footerBrand: "独立宫",
+                footerDesc: "国家级特别历史文化遗迹。通过移动设备体验智能数字导览系统。",
+                footerContact: "联系方式",
+                footerDev: "开发团队"
+            }
+        };
+
+        // ==========================================
+        // 2. DỮ LIỆU CÔNG TRÌNH (ĐA NGÔN NGỮ)
+        // ==========================================
+        let currentLang = 'vi'; // Default language
+
+        // Danh mục khu vực (Mảng object hỗ trợ dịch thuật)
+        const categoriesData = [
+            { slug: 'tang-tret', vi: 'Tầng trệt', en: 'Ground Floor', ja: '1階', ko: '1층', zh: '一楼' },
+            { slug: 'lau-1', vi: 'Lầu 1', en: '1st Floor', ja: '2階', ko: '2층', zh: '二楼' },
+            { slug: 'lau-2', vi: 'Lầu 2', en: '2nd Floor', ja: '3階', ko: '3층', zh: '三楼' },
+            { slug: 'san-thuong', vi: 'Tầng sân thượng', en: 'Rooftop', ja: '屋上', ko: '옥상', zh: '屋顶' },
+            { slug: 'tang-ham', vi: 'Tầng hầm', en: 'Basement', ja: '地下', ko: '지하', zh: '地下室' },
+            { slug: 'ngoai-troi', vi: 'Khuôn viên ngoài trời', en: 'Outdoor Area', ja: '屋外エリア', ko: '야외 구역', zh: '室外区域' }
         ];
 
-        const artifacts = [
-            { code: 'DDL-01', name: 'Phòng Khánh Tiết', categorySlug: 'tang-tret', location: 'Tầng trệt - Dinh Độc Lập', description: 'Phòng Khánh Tiết là không gian lớn nhất tại Dinh Độc Lập...' },
-            { code: 'DDL-02', name: 'Phòng Trình Quốc Thư', categorySlug: 'lau-2', location: 'Lầu 2 - Dinh Độc Lập', description: 'Nơi Tổng thống nhận quốc thư của đại sứ các nước...' },
-            { code: 'DDL-03', name: 'Phòng Hợp Hội Đồng Bộ Trưởng', categorySlug: 'lau-2', location: 'Lầu 2 - Dinh Độc Lập', description: 'Nơi diễn ra các phiên họp kín của Nội các chính quyền...' },
-            { code: 'DDL-04', name: 'Bến Đáp Trực Thăng & F5E', categorySlug: 'san-thuong', location: 'Tầng sân thượng - Dinh Độc Lập', description: 'Nơi đỗ chiếc trực thăng UH-1...' },
-            { code: 'DDL-05', name: 'Xe Tăng 390 & Cổng Chính', categorySlug: 'ngoai-troi', location: 'Khuôn viên bãi cỏ phía trước', description: 'Chiếc xe tăng 390 huyền thoại đã húc văng cổng phụ...' },
-            { code: 'DDL-06', name: 'Khu Hầm Tác Chiến Lịch Sử', categorySlug: 'tang-ham', location: 'Tầng hầm - Dinh Độc Lập', description: 'Hệ thống hầm kiên cố chịu được bom đạn hạng nặng...' },
-            { code: 'DDL-07', name: 'Phòng Làm Việc Của Tổng Thống', categorySlug: 'lau-1', location: 'Lầu 1 - Dinh Độc Lập', description: 'Không gian làm việc chính thức của Tổng thống...' },
-            { code: 'DDL-16', name: 'Khu Vực Nhà Bếp', categorySlug: 'tang-ham', location: 'Tầng hầm - Dinh Độc Lập', description: 'Khu vực bếp rộng lớn được trang bị các thiết bị nấu nướng...' }
+        // 16 Công trình có đủ bản dịch 
+        const artifactsBase = [
+            { 
+                code: 'DDL-01', categorySlug: 'tang-tret', 
+                imageUrl: 'https://images.unsplash.com/photo-1574762957187-573ec78e473a?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-01',
+                translations: {
+                    vi: { name: 'Phòng Khánh Tiết', location: 'Tầng trệt', description: 'Phòng Khánh Tiết là không gian lớn nhất tại Dinh Độc Lập với sức chứa lên đến 500 người. Đây là nơi diễn ra các lễ ra mắt nội các, hội nghị quốc tế.' },
+                    en: { name: 'Grand Reception Hall', location: 'Ground floor', description: 'The largest space in Independence Palace with a capacity of up to 500 people. It is where cabinet inaugurations and international conferences took place.' },
+                    ja: { name: '式典の間', location: '1階', description: '独立宮殿で最も広い空間で、最大500人を収容できます。内閣の就任式や国際会議が行われました。' },
+                    ko: { name: '대연회장', location: '1층', description: '독립궁에서 가장 넓은 공간으로 최대 500명을 수용할 수 있습니다. 내각 출범식과 국제회의가 열린 곳입니다.' },
+                    zh: { name: '庆典厅', location: '一楼', description: '独立宫内最大的空间，可容纳多达500人。这里曾举行内阁就职仪式和国际会议。' }
+                }
+            },
+            { 
+                code: 'DDL-02', categorySlug: 'lau-2', 
+                imageUrl: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-02',
+                translations: {
+                    vi: { name: 'Phòng Trình Quốc Thư', location: 'Lầu 2', description: 'Nơi Tổng thống nhận quốc thư của đại sứ các nước. Nổi bật với bức tranh sơn mài Bình Ngô Đại Cáo mang đậm nét nghệ thuật.' },
+                    en: { name: 'Credentials Presentation Room', location: '2nd floor', description: 'Where the President received letters of credence of foreign ambassadors. Featuring the exquisite lacquer painting "Binh Ngo Dai Cao".' },
+                    ja: { name: '信任状奉呈の間', location: '2階', description: '大統領が各国大使から信任状を受け取る場所です。伝統的な漆絵「平呉大誥」が飾られています。' },
+                    ko: { name: '신임장 제정실', location: '2층', description: '대통령이 각국 대사로부터 신임장을 받던 곳입니다. 벽을 장식한 옻칠화가 돋보입니다.' },
+                    zh: { name: '呈递国书厅', location: '二楼', description: '总统接受各国大使国书的地方。墙上装饰着充满传统艺术气息的漆画。' }
+                }
+            },
+            { 
+                code: 'DDL-03', categorySlug: 'lau-2', 
+                imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-03',
+                translations: {
+                    vi: { name: 'Phòng Hợp Hội Đồng Bộ Trưởng', location: 'Lầu 2', description: 'Nơi diễn ra các phiên họp kín của Nội các chính quyền Sài Gòn cũ với hệ thống tai nghe phiên dịch hiện đại.' },
+                    en: { name: 'Council of Ministers Room', location: '2nd floor', description: 'Venue of the closed-door sessions of the former Saigon government Cabinet, equipped with multilingual headsets.' },
+                    ja: { name: '閣僚会議室', location: '2階', description: '旧サイゴン政権の内閣が非公開の会議を開いた場所で、最新の通訳用ヘッドホン設備を備えていました。' },
+                    ko: { name: '각료 회의실', location: '2층', description: '옛 사이공 정권 내각의 비공개 회의가 열리던 곳으로 다국어 통역 이어폰 시스템을 갖추고 있었습니다.' },
+                    zh: { name: '部长会议厅', location: '二楼', description: '旧西贡政权内阁举行秘密会议的地方，配备了当时先进的多语种翻译耳机系统。' }
+                }
+            },
+            { 
+                code: 'DDL-04', categorySlug: 'san-thuong', 
+                imageUrl: 'https://images.unsplash.com/photo-1506161427181-79b88f343890?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-04',
+                translations: {
+                    vi: { name: 'Bến Đáp Trực Thăng & F5E', location: 'Tầng sân thượng', description: 'Nơi đỗ chiếc trực thăng UH-1. Ghi dấu sự kiện phi công Nguyễn Thành Trung lái máy bay F5E ném bom.' },
+                    en: { name: 'Helipad & F-5E', location: 'Rooftop', description: 'Parking spot for a UH-1 helicopter. Commemorates the bombing by pilot Nguyen Thanh Trung in an F-5E on April 8, 1975.' },
+                    ja: { name: 'ヘリポートとF-5E', location: '屋上', description: 'UH-1ヘリコプターが駐機していた場所。1975年4月8日にF-5E戦闘機で行われた爆撃事件を記念しています。' },
+                    ko: { name: '헬기장 & F-5E', location: '옥상', description: 'UH-1 헬리콥터 주기장. 1975년 4월 8일 조종사 응우옌 타인 쭝의 F-5E 폭격 사건을 기념하는 장소입니다.' },
+                    zh: { name: '直升机停机坪与F-5E', location: '屋顶', description: 'UH-1直升机停放处，记录了飞行员阮成忠于1975年4月8日驾驶F-5E战机轰炸的事件。' }
+                }
+            },
+            { 
+                code: 'DDL-05', categorySlug: 'ngoai-troi', 
+                imageUrl: 'https://images.unsplash.com/photo-1585885233158-b67645cfdb65?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-05',
+                translations: {
+                    vi: { name: 'Xe Tăng 390 & Cổng Chính', location: 'Ngoài trời', description: 'Chiếc xe tăng 390 huyền thoại đã húc văng cổng phụ Dinh Độc Lập vào lúc 10 giờ 45 phút ngày 30/4/1975.' },
+                    en: { name: 'Tank 390 & Main Gate', location: 'Outdoor Area', description: 'The legendary Tank 390 smashed through the side gate of Independence Palace at 10:45 on April 30, 1975.' },
+                    ja: { name: '390号戦車と正門', location: '屋外', description: '伝説の390号戦車は、1975年4月30日午前10時45分に独立宮殿の門を突き破りました。' },
+                    ko: { name: '390호 전차와 정문', location: '야외', description: '전설적인 390호 전차는 1975년 4월 30일 10시 45분에 독립궁의 문을 들이받아 열었습니다.' },
+                    zh: { name: '390号坦克与正门', location: '室外', description: '传奇的390号坦克于1975年4月30日上午10时45分撞开独立宫大门。' }
+                }
+            },
+            { 
+                code: 'DDL-06', categorySlug: 'tang-ham', 
+                imageUrl: 'https://images.unsplash.com/photo-1605335626244-67dce81e3a1f?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-06',
+                translations: {
+                    vi: { name: 'Khu Hầm Tác Chiến Lịch Sử', location: 'Tầng hầm', description: 'Hệ thống hầm kiên cố chịu được bom đạn hạng nặng, chứa đài vô tuyến, bản đồ tác chiến và phòng làm việc.' },
+                    en: { name: 'Historic War Command Bunker', location: 'Basement', description: 'A fortified bunker system able to withstand heavy bombs, housing radio equipment and battle maps.' },
+                    ja: { name: '作戦指令地下壕', location: '地下', description: '重爆撃にも耐える堅固な地下壕で、無線設備や作戦地図が置かれています。' },
+                    ko: { name: '지하 작전 벙커', location: '지하', description: '중폭탄도 견디는 견고한 벙커로 무선 장비와 작전 지도를 보관하고 있습니다.' },
+                    zh: { name: '作战指挥地下室', location: '地下室', description: '坚固的地下掩体，可抵御重型炸弹，内设无线电台和作战地图。' }
+                }
+            },
+            // ... (Để mã gọn hơn mà vẫn đủ chức năng, tôi sẽ thêm 10 mục nữa với cấu trúc tương tự)
+            { code: 'DDL-07', categorySlug: 'lau-1', imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-07', translations: { vi: { name: 'Phòng Làm Việc Tổng Thống', location: 'Lầu 1', description: 'Nơi làm việc chính thức của Tổng thống.' }, en: { name: 'Presidential Office', location: '1st Floor', description: 'The official workspace of the President.' }, ja: { name: '大統領執務室', location: '2階', description: '大統領の公式な執務空間です。' }, ko: { name: '대통령 집무실', location: '2층', description: '대통령의 공식 집무실입니다.' }, zh: { name: '总统办公室', location: '二楼', description: '总统的官方办公场所。' } } },
+            { code: 'DDL-08', categorySlug: 'ngoai-troi', imageUrl: 'https://images.unsplash.com/photo-1599577180579-2f57b686e0c6?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-08', translations: { vi: { name: 'Xe Tăng 843', location: 'Ngoài trời', description: 'Cùng húc tung cổng chính ngày 30/4/1975.' }, en: { name: 'Tank 843', location: 'Outdoor', description: 'Also crashed the gates on April 30, 1975.' }, ja: { name: '843号戦車', location: '屋外', description: '1975年4月30日に正門を突き破った戦車。' }, ko: { name: '843호 전차', location: '야외', description: '1975년 정문을 부수고 들어온 전차입니다.' }, zh: { name: '843号坦克', location: '室外', description: '于1975年撞开正门的坦克。' } } },
+            { code: 'DDL-09', categorySlug: 'tang-tret', imageUrl: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-09', translations: { vi: { name: 'Phòng Đại Yến', location: 'Tầng trệt', description: 'Nơi tổ chức tiệc chiêu đãi quốc gia.' }, en: { name: 'State Banquet Hall', location: 'Ground Floor', description: 'Venue for state banquets.' }, ja: { name: '大宴会場', location: '1階', description: '国家晩餐会の会場。' }, ko: { name: '국가 연회장', location: '1층', description: '국가 연회장입니다.' }, zh: { name: '国宴厅', location: '一楼', description: '国宴举办地。' } } },
+            { code: 'DDL-10', categorySlug: 'lau-1', imageUrl: 'https://images.unsplash.com/photo-1595511890410-3b8cb40026e6?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-10', translations: { vi: { name: 'Phòng Khách Phó TT', location: 'Lầu 1', description: 'Phòng tiếp khách riêng của Phó Tổng thống.' }, en: { name: 'Vice Pres. Reception', location: '1st Floor', description: 'Vice President reception area.' }, ja: { name: '副大統領応接室', location: '2階', description: '副大統領の応接空間。' }, ko: { name: '부통령 접견실', location: '2층', description: '부통령 접견실.' }, zh: { name: '副总统接待室', location: '二楼', description: '副总统接待室。' } } },
+            { code: 'DDL-11', categorySlug: 'lau-2', imageUrl: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-11', translations: { vi: { name: 'Khu Sinh Hoạt Gia Đình', location: 'Lầu 2', description: 'Khu vực sinh sống của gia đình Tổng thống.' }, en: { name: 'Family Quarters', location: '2nd Floor', description: 'Living area of the President family.' }, ja: { name: '家族居住区', location: '3階', description: '大統領家族の居住区。' }, ko: { name: '가족 거주 구역', location: '3층', description: '대통령 가족 거주 구역.' }, zh: { name: '家族生活区', location: '三楼', description: '总统家族生活区。' } } },
+            { code: 'DDL-12', categorySlug: 'san-thuong', imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-12', translations: { vi: { name: 'Phòng Giải Trí', location: 'Sân thượng', description: 'Có máy chiếu phim và quầy bar.' }, en: { name: 'Entertainment Room', location: 'Rooftop', description: 'Equipped with film projector and bar.' }, ja: { name: '娯楽室', location: '屋上', description: '映画プロジェクターとバーを備えた娯楽室。' }, ko: { name: '영화 및 오락실', location: '옥상', 주: '오락용 방입니다.' }, zh: { name: '电影娱乐室', location: '屋顶', description: '娱乐室。' } } },
+            { code: 'DDL-13', categorySlug: 'tang-ham', imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-13', translations: { vi: { name: 'Đài Phát Thanh', location: 'Tầng hầm', description: 'Máy phát sóng dự phòng.' }, en: { name: 'Backup Radio Station', location: 'Basement', description: 'Backup broadcasting system.' }, ja: { name: '予備放送局', location: '地下', description: '予備の無線設備。' }, ko: { name: '예비 라디오 방송국', location: '지하', description: '예비 방송 시스템.' }, zh: { name: '备用广播电台', location: '地下室', description: '备用广播系统。' } } },
+            { code: 'DDL-14', categorySlug: 'lau-1', imageUrl: 'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-14', translations: { vi: { name: 'Phòng Khách Phu Nhân', location: 'Lầu 1', description: 'Nơi Phu nhân tiếp đón khách quý.' }, en: { name: 'First Lady Reception', location: '1st Floor', description: 'Where First Lady received guests.' }, ja: { name: '大統領夫人応接室', location: '2階', description: '夫人応接室。' }, ko: { name: '영부인 접견실', location: '2층', description: '영부인 접견실.' }, zh: { name: '夫人接待室', location: '二楼', description: '第一夫人接待室。' } } },
+            { code: 'DDL-15', categorySlug: 'lau-2', imageUrl: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-15', translations: { vi: { name: 'Thư Viện', location: 'Lầu 2', description: 'Lưu trữ sách và tài liệu lịch sử.' }, en: { name: 'Library', location: '2nd Floor', description: 'Storing books and documents.' }, ja: { name: '図書室', location: '3階', description: '図書室。' }, ko: { name: '도서실', location: '3층', description: '대통령 도서실.' }, zh: { name: '阅览室', location: '三楼', description: '阅览室。' } } },
+            { code: 'DDL-16', categorySlug: 'tang-ham', imageUrl: 'https://images.unsplash.com/photo-1556910103-1c02745a8e7d?auto=format&fit=crop&w=600', qrCode: 'http://192.168.31.108:5000/scan/DDL-16', translations: { vi: { name: 'Nhà Bếp', location: 'Tầng hầm', description: 'Khu vực bếp phục vụ dạ tiệc.' }, en: { name: 'Palace Kitchen', location: 'Basement', description: 'Kitchen area for banquets.' }, ja: { name: '厨房', location: '地下', description: '厨房。' }, ko: { name: '주방', location: '지하', description: '주방.' }, zh: { name: '厨房', location: '地下室', description: '厨房。' } } }
         ];
 
-        let currentCategory = 'all';
+        let currentCategorySlug = 'all';
 
-        // 1. Khởi tạo Giao diện
-        function initApp() {
-            renderSidebar();
-            renderMobileCategorySelect();
-            renderArtifacts(artifacts);
+        // ==========================================
+        // 3. LOGIC XỬ LÝ ĐA NGÔN NGỮ (I18N)
+        // ==========================================
+        function changeLanguage(langCode) {
+            currentLang = langCode;
             
-            // Search event
+            // 3.1 Cập nhật Icon cờ trên Navbar
+            const flagMap = { vi: 'vn', en: 'gb', ja: 'jp', ko: 'kr', zh: 'cn' };
+            const nameMap = { vi: 'Tiếng Việt', en: 'English', ja: '日本語', ko: '한국어', zh: '中文' };
+            document.getElementById('current-lang-display').innerHTML = `
+                <img src="https://flagcdn.com/w20/${flagMap[langCode]}.png" class="w-5 h-5 rounded-full shadow-sm">
+                <span>${nameMap[langCode]}</span>
+                <i class="fa-solid fa-caret-down ml-auto"></i>
+            `;
+            document.getElementById('modalLangIndicator').innerText = langCode.toUpperCase();
+
+            // 3.2 Cập nhật tĩnh UI Text từ UI Dictionary
+            const dict = uiDict[langCode];
+            document.getElementById('ui-brand-sub').innerText = dict.brandSub;
+            document.getElementById('ui-hero-title').innerText = dict.heroTitle;
+            document.getElementById('ui-hero-desc').innerHTML = dict.heroDesc;
+            document.getElementById('ui-sidebar-title').innerText = dict.sidebarTitle;
+            document.getElementById('searchInput').placeholder = dict.searchPlaceholder;
+            document.getElementById('ui-empty-title').innerText = dict.emptyTitle;
+            document.getElementById('ui-empty-desc').innerText = dict.emptyDesc;
+            document.getElementById('ui-btn-viewall').innerText = dict.btnViewAll;
+            document.getElementById('ui-tab-audio').innerText = dict.tabAudio;
+            document.getElementById('ui-tab-qr').innerText = dict.tabQr;
+            document.getElementById('ui-scan-instruction').innerText = dict.scanInstruction;
+            document.getElementById('ui-footer-brand').innerText = dict.footerBrand;
+            document.getElementById('ui-footer-desc').innerText = dict.footerDesc;
+            document.getElementById('ui-footer-contact').innerText = dict.footerContact;
+            document.getElementById('ui-footer-dev').innerText = dict.footerDev;
+
+            // 3.3 Re-render lại Sidebar và Dữ liệu Grid với ngôn ngữ mới
+            renderSidebar();
+            filterArtifacts(currentCategorySlug);
+        }
+
+        // ==========================================
+        // 4. LOGIC HIỂN THỊ (RENDER UI)
+        // ==========================================
+        function initApp() {
+            changeLanguage('vi'); // Khởi động bằng tiếng việt
+            
+            // Xử lý tìm kiếm
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const keyword = e.target.value.toLowerCase();
-                const filtered = artifacts.filter(a => 
-                    a.name.toLowerCase().includes(keyword) || 
-                    a.code.toLowerCase().includes(keyword)
-                );
+                // Lọc trên bản dịch hiện tại
+                const filtered = artifactsBase.filter(a => {
+                    const translatedItem = a.translations[currentLang] || a.translations['vi'];
+                    return translatedItem.name.toLowerCase().includes(keyword) || 
+                           a.code.toLowerCase().includes(keyword);
+                });
                 renderArtifacts(filtered);
             });
         }
 
-        // 2. Render Sidebar
         function renderSidebar() {
             const sidebar = document.getElementById('categorySidebar');
-            sidebar.innerHTML = categories.map(cat => `
-                <button onclick="filterArtifacts('${cat.slug}')" 
-                        class="w-full text-left px-4 py-3 mb-1 rounded-xl text-sm font-medium transition flex items-center justify-between group
-                        ${currentCategory === cat.slug ? 'bg-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid ${cat.icon} ${currentCategory === cat.slug ? 'text-blue-200' : 'text-slate-400 group-hover:text-primary'} transition"></i>
-                        ${cat.name}
-                    </div>
-                    ${cat.slug !== 'all' ? `<span class="bg-white/20 text-[10px] px-2 py-0.5 rounded-full ${currentCategory === cat.slug ? 'text-white' : 'text-slate-400 bg-slate-200'}">
-                        ${artifacts.filter(a => a.categorySlug === cat.slug).length}
-                    </span>` : ''}
+            const dict = uiDict[currentLang];
+            
+            let html = `
+                <button onclick="filterArtifacts('all')" class="w-full text-left px-4 py-3 border-l-4 transition-all uppercase text-xs font-bold tracking-wide flex justify-between items-center ${currentCategorySlug === 'all' ? 'border-heritage-red bg-heritage-red/5 text-heritage-red' : 'border-transparent text-heritage-ink hover:bg-slate-50 hover:border-heritage-gold'}">
+                    ${dict.categoryAll}
                 </button>
-            `).join('');
-        }
+            `;
 
-        // 3. Render Mobile Dropdown
-        function renderMobileCategorySelect() {
-            const select = document.getElementById('mobileCategorySelect');
-            select.innerHTML = categories.map(cat => `
-                <option value="${cat.slug}">${cat.name}</option>
-            `).join('');
-            
-            select.addEventListener('change', (e) => {
-                filterArtifacts(e.target.value);
+            categoriesData.forEach(cat => {
+                const translatedCatName = cat[currentLang] || cat['vi'];
+                const count = artifactsBase.filter(a => a.categorySlug === cat.slug).length;
+                html += `
+                    <button onclick="filterArtifacts('${cat.slug}')" class="w-full text-left px-4 py-3 border-l-4 transition-all uppercase text-xs font-bold tracking-wide flex justify-between items-center ${currentCategorySlug === cat.slug ? 'border-heritage-red bg-heritage-red/5 text-heritage-red' : 'border-transparent text-heritage-ink hover:bg-slate-50 hover:border-heritage-gold'}">
+                        ${translatedCatName}
+                        <span class="bg-white border border-heritage-brown/20 text-[10px] px-2 py-0.5 rounded-full text-heritage-brown">${count}</span>
+                    </button>
+                `;
             });
+            sidebar.innerHTML = html;
         }
 
-        // 4. Lọc Dữ Liệu
         function filterArtifacts(slug) {
-            currentCategory = slug;
-            renderSidebar();
+            currentCategorySlug = slug;
+            renderSidebar(); // Update active states in sidebar
             
-            // Update Title
-            const cat = categories.find(c => c.slug === slug);
-            document.getElementById('currentCategoryTitle').innerText = cat ? cat.name : 'Tất cả công trình';
-            document.getElementById('currentCategoryDesc').innerText = slug === 'all' ? 'Khám phá các di tích lịch sử bên trong Dinh Độc Lập' : `Danh sách các công trình thuộc khu vực ${cat.name.toLowerCase()}`;
+            const dict = uiDict[currentLang];
+            const titleEl = document.getElementById('currentCategoryTitle');
+            const descEl = document.getElementById('currentCategoryDesc');
             
-            // Sync mobile select
-            document.getElementById('mobileCategorySelect').value = slug;
-            
-            const filtered = slug === 'all' ? artifacts : artifacts.filter(a => a.categorySlug === slug);
-            renderArtifacts(filtered);
+            if(slug === 'all') {
+                titleEl.innerText = dict.categoryAll;
+                descEl.innerText = dict.categoryAllDesc;
+                renderArtifacts(artifactsBase);
+            } else {
+                const catObj = categoriesData.find(c => c.slug === slug);
+                titleEl.innerText = catObj[currentLang] || catObj['vi'];
+                descEl.innerText = "";
+                renderArtifacts(artifactsBase.filter(a => a.categorySlug === slug));
+            }
         }
 
-        // 5. Render Grid Data
-        function renderArtifacts(data) {
+        function renderArtifacts(dataList) {
             const grid = document.getElementById('artifactsGrid');
             const emptyState = document.getElementById('emptyState');
             
-            if (data.length === 0) {
+            // Update total text using regex replacement based on language
+            const totalTextTemplate = uiDict[currentLang].totalCount;
+            document.getElementById('ui-total-count').innerText = totalTextTemplate.replace('{count}', dataList.length);
+            
+            if (dataList.length === 0) {
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
                 return;
             }
-            
             emptyState.classList.add('hidden');
             emptyState.classList.remove('flex');
             
-            grid.innerHTML = data.map((item, index) => `
-                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group fade-in" style="animation-delay: ${index * 0.05}s">
-                    <!-- Image Placeholder (Color block) -->
-                    <div class="h-40 bg-slate-100 relative overflow-hidden flex items-center justify-center group-hover:bg-slate-200 transition">
-                        <i class="fa-solid fa-image text-slate-300 text-4xl"></i>
-                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold text-primary shadow-sm border border-slate-100">
-                            ${item.code}
-                        </div>
-                        
-                        <!-- Hover Overlay -->
-                        <div class="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                            <button onclick="openAudioModal('${item.code}')" class="w-10 h-10 bg-white text-primary rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg" title="Nghe Audio">
-                                <i class="fa-solid fa-play ml-0.5"></i>
-                            </button>
-                            <button class="w-10 h-10 bg-white text-slate-800 rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg" title="Mã QR">
-                                <i class="fa-solid fa-qrcode"></i>
-                            </button>
+            const btnAudioQrText = uiDict[currentLang].btnAudioQr;
+
+            grid.innerHTML = dataList.map(baseItem => {
+                // Lấy bản dịch của item
+                const item = baseItem.translations[currentLang] || baseItem.translations['vi'];
+                
+                return `
+                <div class="artifact-card bg-white border border-heritage-brown/20 shadow-sm relative overflow-hidden flex flex-col h-full group">
+                    <div class="h-48 overflow-hidden relative bg-black">
+                        <img src="${baseItem.imageUrl}" alt="${item.name}" class="w-full h-full object-cover sepia-img">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 text-white">
+                            <span class="bg-heritage-red px-2 py-1 text-[10px] font-bold uppercase tracking-wider mb-1 inline-block border border-heritage-gold/50 shadow">${baseItem.code}</span>
+                            <p class="text-xs font-serif text-heritage-gold flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.location}</p>
                         </div>
                     </div>
-                    
-                    <div class="p-5">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                            <span class="text-xs text-slate-500 font-medium">${item.location}</span>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2 line-clamp-1 group-hover:text-primary transition">${item.name}</h3>
-                        <p class="text-slate-500 text-sm line-clamp-2 mb-4 h-10">${item.description}</p>
-                        
-                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
-                            <div class="flex gap-1">
-                                <img src="https://flagcdn.com/w20/vn.png" class="w-4 h-4 rounded-full" title="Tiếng Việt">
-                                <img src="https://flagcdn.com/w20/gb.png" class="w-4 h-4 rounded-full" title="English">
-                                <img src="https://flagcdn.com/w20/jp.png" class="w-4 h-4 rounded-full" title="Japanese">
-                            </div>
-                            <button class="text-primary text-xs font-semibold hover:underline">Chi tiết <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></button>
-                        </div>
+                    <div class="p-5 flex flex-col flex-1 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]">
+                        <h3 class="font-serif font-bold text-xl text-heritage-ink mb-2 line-clamp-1 group-hover:text-heritage-red transition">${item.name}</h3>
+                        <p class="text-heritage-brown text-sm line-clamp-3 mb-6 flex-1 leading-relaxed">${item.description || ''}</p>
+                        <button onclick="openModal('${baseItem.code}')" class="w-full py-2.5 border border-heritage-ink text-heritage-ink font-bold text-xs uppercase tracking-widest hover:bg-heritage-ink hover:text-white transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-headphones"></i> ${btnAudioQrText}
+                        </button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // ================= AUDIO PLAYER LOGIC =================
-        const audioModal = document.getElementById('audioModal');
-        const modalContainer = document.getElementById('modalContainer');
-        const playIcon = document.getElementById('playIcon');
-        const progressBar = document.getElementById('progressBar');
-        const audioElement = document.getElementById('audioElement');
+        // ==========================================
+        // 5. MODAL (AUDIO & QR CODE)
+        // ==========================================
         let isPlaying = false;
-
-        function openAudioModal(code) {
-            const artifact = artifacts.find(a => a.code === code);
-            if(!artifact) return;
+        
+        function openModal(code) {
+            const baseItem = artifactsBase.find(a => a.code === code);
+            if(!baseItem) return;
             
-            document.getElementById('modalTitle').innerText = artifact.name;
-            document.getElementById('modalLocation').innerText = artifact.location;
+            const translatedItem = baseItem.translations[currentLang] || baseItem.translations['vi'];
             
-            // Show modal with animation
-            audioModal.classList.remove('hidden');
-            audioModal.classList.add('flex');
-            setTimeout(() => {
-                modalContainer.classList.remove('scale-95', 'opacity-0');
-                modalContainer.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            document.getElementById('modalTitle').innerText = translatedItem.name;
+            document.getElementById('modalCode').innerText = baseItem.code;
+            document.getElementById('modalLocation').innerText = translatedItem.location;
+            document.getElementById('modalDesc').innerText = translatedItem.description;
+            document.getElementById('modalImage').src = baseItem.imageUrl;
             
-            // Reset player state (Mocking audio load)
+            // API tạo QR Code
+            document.getElementById('modalQRImage').src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(baseItem.qrCode)}&choe=UTF-8`;
+            
+            switchModalTab('audio'); // Mở sẵn tab audio
+            
+            const modal = document.getElementById('interactionModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Stop playing if reopening
             isPlaying = false;
-            playIcon.className = "fa-solid fa-play ml-1";
-            progressBar.style.width = '0%';
+            document.getElementById('playIcon').className = "fa-solid fa-play ml-1";
+            document.getElementById('progressBar').style.width = '0%';
         }
 
         function closeModal() {
-            modalContainer.classList.remove('scale-100', 'opacity-100');
-            modalContainer.classList.add('scale-95', 'opacity-0');
-            
-            // Stop audio
+            document.getElementById('interactionModal').classList.add('hidden');
+            document.getElementById('interactionModal').classList.remove('flex');
             isPlaying = false;
-            audioElement.pause();
-            
-            setTimeout(() => {
-                audioModal.classList.add('hidden');
-                audioModal.classList.remove('flex');
-            }, 300);
+        }
+
+        function switchModalTab(tab) {
+            const btnAudio = document.getElementById('tabAudio');
+            const btnQR = document.getElementById('tabQR');
+            const viewAudio = document.getElementById('viewAudio');
+            const viewQR = document.getElementById('viewQR');
+
+            if (tab === 'audio') {
+                btnAudio.className = "px-4 py-2 font-bold text-sm text-heritage-red border-b-2 border-heritage-red uppercase tracking-wider transition";
+                btnQR.className = "px-4 py-2 font-bold text-sm text-heritage-brown hover:text-heritage-red border-b-2 border-transparent hover:border-heritage-red/50 uppercase tracking-wider transition";
+                viewAudio.classList.remove('hidden'); viewAudio.classList.add('flex');
+                viewQR.classList.add('hidden'); viewQR.classList.remove('flex');
+            } else {
+                btnQR.className = "px-4 py-2 font-bold text-sm text-heritage-red border-b-2 border-heritage-red uppercase tracking-wider transition";
+                btnAudio.className = "px-4 py-2 font-bold text-sm text-heritage-brown hover:text-heritage-red border-b-2 border-transparent hover:border-heritage-red/50 uppercase tracking-wider transition";
+                viewQR.classList.remove('hidden'); viewQR.classList.add('flex');
+                viewAudio.classList.add('hidden'); viewAudio.classList.remove('flex');
+            }
         }
 
         function togglePlay() {
             isPlaying = !isPlaying;
+            const playIcon = document.getElementById('playIcon');
+            const progress = document.getElementById('progressBar');
             if (isPlaying) {
                 playIcon.className = "fa-solid fa-pause";
-                // Mocking progress bar movement for demo
-                progressBar.style.transition = 'width 10s linear';
-                progressBar.style.width = '100%';
+                progress.style.transition = 'width 10s linear';
+                progress.style.width = '100%';
             } else {
                 playIcon.className = "fa-solid fa-play ml-1";
-                const currentWidth = window.getComputedStyle(progressBar).width;
-                progressBar.style.transition = 'none';
-                progressBar.style.width = currentWidth;
+                const w = window.getComputedStyle(progress).width;
+                progress.style.transition = 'none';
+                progress.style.width = w;
             }
         }
 
-        // Khởi động app
+        // Initialize when ready
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
