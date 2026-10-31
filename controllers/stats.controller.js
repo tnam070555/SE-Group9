@@ -1,28 +1,17 @@
 const statsService = require('../services/stats.service');
 
-const activeUsers = new Map();
-const TIMEOUT = 60 * 1000;
-
+// Lớp 1: chỉ lo HTTP. Express 5 tự chuyển lỗi bất đồng bộ sang errorHandler.
+// Nguồn đếm online duy nhất: presenceService (qua statsService.heartbeat / statsService.getStats)
 class StatsController {
     async heartbeat(req, res) {
-        const clientId = (req.body && req.body.clientId) || req.ip;
-        if (clientId) {
-            activeUsers.set(clientId, Date.now());
-        }
-
-        // Đã bỏ try...catch rỗng để lỗi 400 (khi sai mã) được đẩy ra ngoài cho hệ thống tự xử lý
-        if (statsService && typeof statsService.heartbeat === 'function') {
-            await statsService.heartbeat(req.body && req.body.deviceId);
-        }
-        
+        // deviceId dùng cho presence (đếm online); clientId không còn dùng riêng nữa
+        await statsService.heartbeat(req.body && req.body.deviceId);
         res.status(204).send();
     }
 
     async disconnect(req, res) {
-        const clientId = req.body && req.body.clientId;
-        if (clientId) {
-            activeUsers.delete(clientId);
-        }
+        // Tín hiệu ngắt kết nối tự nhiên — presence.service tự dọn khi TTL hết,
+        // nên không cần xử lý thêm ở đây. Giữ endpoint để frontend không bị lỗi.
         res.status(204).send();
     }
 
@@ -36,17 +25,8 @@ class StatsController {
     }
 
     async getOnlineCount(req, res) {
-        const now = Date.now();
-        let count = 0;
-
-        for (let [id, lastSeen] of activeUsers.entries()) {
-            if (now - lastSeen > TIMEOUT) {
-                activeUsers.delete(id);
-            } else {
-                count++;
-            }
-        }
-        res.status(200).json({ count: count });
+        // Dùng cùng nguồn với getStats để số liệu nhất quán
+        res.status(200).json({ count: statsService.getOnlineCount() });
     }
 }
 

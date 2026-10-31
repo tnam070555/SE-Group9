@@ -39,6 +39,10 @@ class StatsService {
     }
 
     // Số liệu cho admin
+    getOnlineCount() {
+        return presenceService.countOnline();
+    }
+
     async getStats() {
         const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const [byCode, byLanguage, artifacts, viewsLast24Hours] = await Promise.all([

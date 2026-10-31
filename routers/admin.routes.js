@@ -8,5 +8,5 @@ const statsController = require('../controllers/stats.controller');
 router.post('/login', adminController.login);
 
 router.get('/stats', verifyToken, requireAdmin, statsController.getStats);
-router.get('/stats', verifyToken, requireAdmin, statsController.getStats);
+
 module.exports = router;

@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/category.controller');
+const { verifyToken, requireAdmin } = require('../middlewares/auth.middleware');
 
-// Lưu ý: Trong dự án thực tế, bạn cần thêm middleware kiểm tra JWT (admin) vào các route này để bảo mật
+// Công khai: du khách xem danh sách khu vực
 router.get('/', categoryController.getAllCategories);
-router.post('/', categoryController.createCategory);
-router.put('/:id', categoryController.updateCategory);
-router.delete('/:id', categoryController.deleteCategory);
+
+// Chỉ admin đã đăng nhập
+router.post('/', verifyToken, requireAdmin, categoryController.createCategory);
+router.put('/:id', verifyToken, requireAdmin, categoryController.updateCategory);
+router.delete('/:id', verifyToken, requireAdmin, categoryController.deleteCategory);
 
 module.exports = router;
