@@ -58,6 +58,7 @@ function localize(doc, lang) {
     return {
         _id: a._id,
         code: a.code,
+        categorySlug: a.categorySlug,
         name: t.name || a.name,
         description: t.description || a.description,
         location: t.location || a.location,
@@ -111,6 +112,12 @@ class ArtifactService {
         const base = normalizeBaseUrl(targetBase);
         const link = `${base}/detail.html?code=${encodeURIComponent(artifact.code)}`;
         return QRCode.toBuffer(link, { type: 'png', width: 320, margin: 2 });
+    }
+
+    // Mã QR dẫn tới trang du khách. Không lưu database, sinh theo yêu cầu.
+    async getSiteQrPng(baseUrl) {
+        const base = normalizeBaseUrl(baseUrl);
+        return QRCode.toBuffer(`${base}/`, { type: 'png', width: 400, margin: 2 });
     }
 
     async update(id, data) {

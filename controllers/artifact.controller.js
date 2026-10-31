@@ -35,6 +35,17 @@ class ArtifactController {
         res.send(png);
     }
 
+    // Mã QR trang web. ?base= hoặc PUBLIC_BASE_URL hoặc địa chỉ đang truy cập
+    async getSiteQr(req, res) {
+        const base = (typeof req.query.base === 'string' && req.query.base)
+            || process.env.PUBLIC_BASE_URL
+            || `${req.protocol}://${req.get('host')}`;
+        const png = await artifactService.getSiteQrPng(base);
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'no-store');
+        res.send(png);
+    }
+
     async updateArtifact(req, res) {
         const result = await artifactService.update(req.params.id, req.body);
         res.status(200).json({ success: true, data: result });

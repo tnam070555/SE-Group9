@@ -20,7 +20,8 @@ const artifactSchema = new mongoose.Schema({
         match: [/^[A-Z0-9_-]+$/, 'Mã (code) chỉ gồm chữ, số, dấu - và _'],
     },
     description: { type: String },                                      // Nội dung thuyết minh gốc (tiếng Việt)
-    location: { type: String },                                         // Vị trí trong Dinh (tầng, khu vực)
+    location: { type: String },
+    categorySlug: { type: String, index: true },                                         // Vị trí trong Dinh (tầng, khu vực)
     audioUrl: { type: String },                                         // Đường dẫn audio đã lưu (chưa dùng)
     translations: translationsShape,       
     categorySlug: { type: String, index: true },                             // Bản dịch theo ngôn ngữ
