@@ -82,9 +82,51 @@
       <p class="uppercase tracking-[0.3em] text-xs text-heritage-goldSoft mb-4" id="heroKicker"></p>
       <h2 class="font-serif text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 leading-tight" id="heroTitle"></h2>
       <p class="max-w-2xl mx-auto text-heritage-paper/85 leading-relaxed" id="heroDesc"></p>
-      <div class="mt-8 inline-flex items-center gap-2 bg-black/20 border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
-        <i class="fa-solid fa-qrcode text-heritage-gold"></i>
-        <span id="heroHint"></span>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div class="inline-flex items-center gap-2 bg-black/20 border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
+          <i class="fa-solid fa-qrcode text-heritage-gold"></i>
+          <span id="heroHint"></span>
+        </div>
+        <a href="tickets.html" class="inline-flex items-center gap-2 bg-heritage-gold hover:bg-amber-400 text-heritage-ink font-semibold rounded-full px-5 py-2 text-sm transition shadow" id="heroBannerBtn">
+          <i class="fa-solid fa-ticket"></i>
+          <span id="heroBannerBtnText"></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BANNER ĐẶT VÉ ===== -->
+  <section class="bg-white border-y border-heritage-gold/40" id="ticketSection">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fa-solid fa-ticket text-heritage-gold"></i>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown" id="ticketLabel"></p>
+          </div>
+          <h2 class="font-serif text-2xl font-bold text-heritage-red" id="ticketSectionTitle"></h2>
+          <p class="text-heritage-brown mt-1 text-sm" id="ticketSectionDesc">
+            <!-- text set by JS -->
+            <span id="ticketDescText"></span>
+            <a href="tickets.html" class="text-heritage-red underline underline-offset-2 font-medium" id="ticketSectionLink"></a>
+          </p>
+        </div>
+        <a href="tickets.html" class="flex-shrink-0 inline-flex items-center gap-2 bg-heritage-red hover:bg-heritage-redDeep text-white font-semibold px-6 py-3 rounded-xl shadow transition" id="ticketSectionBtn">
+          <i class="fa-solid fa-ticket"></i>
+          <span id="ticketSectionBtnText"></span>
+        </a>
+      </div>
+
+      <!-- Bảng giá vé nhanh — load từ API -->
+      <div class="mt-6" id="ticketTypesBox">
+        <p class="text-xs font-bold uppercase tracking-[0.15em] text-heritage-brown mb-3" id="ticketTypesTitle"></p>
+        <div id="ticketTypesGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <!-- skeleton -->
+          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
+          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
+          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
+          <div class="h-16 rounded-xl bg-heritage-paper border border-heritage-gold/20 animate-pulse"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -219,7 +261,15 @@
         qrHint: 'Quét mã bằng điện thoại để mở trang thuyết minh của công trình.', qrBase: 'Địa chỉ server (để điện thoại truy cập)',
         qrWarn: 'Đang dùng localhost, điện thoại không quét được. Hãy nhập IP của máy chạy server.', fallback: 'Công trình này chưa có bản dịch, đang hiển thị tiếng Việt.',
         noSpeech: 'Thiết bị này không hỗ trợ đọc thuyết minh.', footHowTitle: 'Cách sử dụng', footHow: 'Quét mã QR gắn tại công trình, chọn ngôn ngữ và nhấn nghe.',
-        footProjTitle: 'Đồ án môn Công Nghệ Phần Mềm', footProj: 'Đại học Sài Gòn – Khoa Công nghệ thông tin', copy: '© Đồ án Thuyết minh tự động đa ngôn ngữ' },
+        footProjTitle: 'Đồ án môn Công Nghệ Phần Mềm', footProj: 'Đại học Sài Gòn – Khoa Công nghệ thông tin', copy: '© Đồ án Thuyết minh tự động đa ngôn ngữ',
+        ticketBannerTitle: 'Đặt vé tham quan',
+        ticketBannerDesc: 'Mua vé trực tuyến, nhận vé điện tử có mã QR. Không cần xếp hàng.',
+        ticketBannerBtn: 'Đặt vé ngay',
+        ticketSectionTitle: 'Đặt vé tham quan trực tuyến',
+        ticketSectionDesc: 'Chọn ngày, khung giờ và loại vé ngay dưới đây — hoặc mở',
+        ticketSectionLink: 'trang đặt vé đầy đủ',
+        ticketTypes: 'Loại vé & giá vé',
+      },
       en: { areaTitle: 'Areas', other: 'Other', siteQrError: 'The QR code could not be loaded. Check that the server is updated (has /api/site/qr) and running.', siteQrTitle: 'Scan to open this guide', siteQrDesc: 'Visitors can scan this code with their phone to open the audio guide on their own device.', siteBaseLabel: 'Server address (so your phone can reach it)', siteWarn: 'Using localhost, phones cannot scan this. Enter the IP address of the server computer.', siteDownload: 'Download QR image', brandSub: 'Multilingual audio guide', kicker: 'National historic site', heroTitle: 'A journey through the historic rooms',
         heroDesc: 'Every exhibit in Independence Palace has its own story. Scan the QR code at each exhibit to listen to the guide in your language.',
         heroHint: 'Scan the QR code at each exhibit to listen', listTitle: 'Exhibits', search: 'Search exhibits...', all: 'All areas',
@@ -228,7 +278,15 @@
         qrHint: 'Scan with your phone to open the guide for this exhibit.', qrBase: 'Server address (so your phone can reach it)',
         qrWarn: 'Using localhost, phones cannot scan this. Enter the IP address of the server computer.', fallback: 'This exhibit has no translation yet; showing Vietnamese.',
         noSpeech: 'This device does not support speech.', footHowTitle: 'How to use', footHow: 'Scan the QR code at an exhibit, choose a language and press listen.',
-        footProjTitle: 'Software Engineering project', footProj: 'Saigon University – Faculty of Information Technology', copy: '© Multilingual audio guide – student project' },
+        footProjTitle: 'Software Engineering project', footProj: 'Saigon University – Faculty of Information Technology', copy: '© Multilingual audio guide – student project',
+        ticketBannerTitle: 'Book your visit',
+        ticketBannerDesc: 'Buy tickets online and receive e-tickets with QR codes. Skip the queue.',
+        ticketBannerBtn: 'Book tickets',
+        ticketSectionTitle: 'Book tickets online',
+        ticketSectionDesc: 'Choose a date, time slot and ticket type below — or open the',
+        ticketSectionLink: 'full booking page',
+        ticketTypes: 'Ticket types & prices',
+      },
       ja: { areaTitle: 'エリア', other: 'その他', siteQrError: 'QRコードを読み込めませんでした。サーバーが更新済み（/api/site/qr）で起動しているか確認してください。', siteQrTitle: 'QRコードを読み取ってこのガイドを開く', siteQrDesc: 'スマートフォンで読み取ると、ご自身の端末で音声ガイドを開けます。', siteBaseLabel: 'サーバーのアドレス（スマートフォンからアクセス用）', siteWarn: 'localhostを使用しているため、スマートフォンでは読み取れません。サーバーのIPアドレスを入力してください。', siteDownload: 'QRコードの画像をダウンロード', brandSub: '多言語音声ガイド', kicker: '国の史跡', heroTitle: '歴史ある部屋をめぐる旅',
         heroDesc: '独立宮殿の一つひとつの展示には、それぞれの物語があります。展示のQRコードを読み取り、お好きな言語で解説をお聞きください。',
         heroHint: '各展示のQRコードを読み取って解説を聞く', listTitle: '展示一覧', search: '展示を検索...', all: 'すべてのエリア',
@@ -237,7 +295,15 @@
         qrHint: 'スマートフォンで読み取ると、この展示の解説ページが開きます。', qrBase: 'サーバーのアドレス（スマートフォンからアクセス用）',
         qrWarn: 'localhostを使用しているため、スマートフォンでは読み取れません。サーバーのIPアドレスを入力してください。', fallback: 'この展示にはまだ翻訳がないため、ベトナム語で表示しています。',
         noSpeech: 'この端末は音声読み上げに対応していません。', footHowTitle: '使い方', footHow: '展示のQRコードを読み取り、言語を選んで再生を押してください。',
-        footProjTitle: 'ソフトウェア工学の課題', footProj: 'サイゴン大学 情報技術学部', copy: '© 多言語音声ガイド – 学生プロジェクト' },
+        footProjTitle: 'ソフトウェア工学の課題', footProj: 'サイゴン大学 情報技術学部', copy: '© 多言語音声ガイド – 学生プロジェクト',
+        ticketBannerTitle: 'チケット予約',
+        ticketBannerDesc: 'オンラインで購入し、QRコード付きの電子チケットを受け取れます。',
+        ticketBannerBtn: '今すぐ予約',
+        ticketSectionTitle: 'オンラインチケット予約',
+        ticketSectionDesc: '日付・時間帯・種類を選択してください。または',
+        ticketSectionLink: '予約ページへ',
+        ticketTypes: '種類と料金',
+      },
       ko: { areaTitle: '구역', other: '기타', siteQrError: 'QR 코드를 불러올 수 없습니다. 서버가 업데이트되었는지(/api/site/qr) 및 실행 중인지 확인하세요。', siteQrTitle: '이 안내를 열려면 스캔하세요', siteQrDesc: '휴대폰으로 스캔하면 자신의 기기에서 음성 안내 페이지를 열 수 있습니다.', siteBaseLabel: '서버 주소 (휴대폰에서 접속용)', siteWarn: 'localhost를 사용 중이라 휴대폰에서 스캔할 수 없습니다. 서버 컴퓨터의 IP 주소를 입력하세요.', siteDownload: 'QR 코드 이미지 다운로드', brandSub: '다국어 음성 안내', kicker: '국가 사적지', heroTitle: '역사의 방들을 따라 떠나는 여정',
         heroDesc: '독립궁의 모든 전시물에는 저마다의 이야기가 있습니다. 전시물의 QR 코드를 스캔하고 원하는 언어로 안내를 들어 보세요.',
         heroHint: '각 전시물의 QR 코드를 스캔해 안내 듣기', listTitle: '전시물 목록', search: '전시물 검색...', all: '모든 구역',
@@ -246,7 +312,15 @@
         qrHint: '휴대폰으로 스캔하면 이 전시물의 안내 페이지가 열립니다.', qrBase: '서버 주소 (휴대폰에서 접속용)',
         qrWarn: 'localhost를 사용 중이라 휴대폰에서 스캔할 수 없습니다. 서버 컴퓨터의 IP 주소를 입력하세요.', fallback: '이 전시물은 아직 번역이 없어 베트남어로 표시합니다.',
         noSpeech: '이 기기는 음성 읽기를 지원하지 않습니다.', footHowTitle: '이용 방법', footHow: '전시물의 QR 코드를 스캔하고 언어를 고른 뒤 재생을 누르세요.',
-        footProjTitle: '소프트웨어 공학 프로젝트', footProj: '사이공 대학교 정보기술학부', copy: '© 다국어 음성 안내 – 학생 프로젝트' },
+        footProjTitle: '소프트웨어 공학 프로젝트', footProj: '사이공 대학교 정보기술학부', copy: '© 다국어 음성 안내 – 학생 프로젝트',
+        ticketBannerTitle: '입장권 예약',
+        ticketBannerDesc: '온라인으로 구매하고 QR 코드가 포함된 전자 티켓을 받으세요.',
+        ticketBannerBtn: '지금 예약',
+        ticketSectionTitle: '온라인 티켓 예약',
+        ticketSectionDesc: '날짜, 시간대, 티켓 종류를 선택하세요. 또는',
+        ticketSectionLink: '전체 예약 페이지',
+        ticketTypes: '티켓 종류 및 가격',
+      },
       zh: { areaTitle: '区域', other: '其他', siteQrError: '无法加载二维码。请检查服务器是否已更新（有 /api/site/qr 接口）并正在运行。', siteQrTitle: '扫码打开本导览', siteQrDesc: '游客可用手机扫描此码，在自己的设备上打开语音讲解页面。', siteBaseLabel: '服务器地址（供手机访问）', siteWarn: '当前使用 localhost，手机无法扫描。请输入运行服务器的电脑 IP 地址。', siteDownload: '下载二维码图片', brandSub: '多语种语音讲解', kicker: '国家历史遗迹', heroTitle: '穿越历史厅室的旅程',
         heroDesc: '独立宫的每一件展品都有自己的故事。扫描展品上的二维码，即可用您的语言聆听讲解。',
         heroHint: '扫描每件展品的二维码聆听讲解', listTitle: '展品列表', search: '搜索展品...', all: '全部区域',
@@ -255,7 +329,15 @@
         qrHint: '用手机扫描，即可打开该展品的讲解页面。', qrBase: '服务器地址（供手机访问）',
         qrWarn: '当前使用 localhost，手机无法扫描。请输入运行服务器的电脑 IP 地址。', fallback: '该展品暂无翻译，正在显示越南语。',
         noSpeech: '此设备不支持语音朗读。', footHowTitle: '使用方法', footHow: '扫描展品上的二维码，选择语言后点击播放。',
-        footProjTitle: '软件工程课程项目', footProj: '西贡大学 信息技术学院', copy: '© 多语种语音讲解 – 学生项目' },
+        footProjTitle: '软件工程课程项目', footProj: '西贡大学 信息技术学院', copy: '© 多语种语音讲解 – 学生项目',
+        ticketBannerTitle: '预订参观票',
+        ticketBannerDesc: '在线购票，获取带二维码的电子票。无需排队。',
+        ticketBannerBtn: '立即预订',
+        ticketSectionTitle: '在线预订参观票',
+        ticketSectionDesc: '在下方选择日期、场次和票种，或打开',
+        ticketSectionLink: '完整预订页面',
+        ticketTypes: '票种与价格',
+      },
     };
 
     // Khu vực: slug khớp với categorySlug trong dữ liệu và 6 mục categories trong MongoDB
@@ -296,6 +378,14 @@
       document.getElementById('qrBase').placeholder = 'http://192.168.1.10:5000';
       set('siteQrTitle', s.siteQrTitle); set('siteQrDesc', s.siteQrDesc); set('siteBaseLabel', s.siteBaseLabel);
       set('siteWarn', s.siteWarn); set('siteDownload', s.siteDownload);
+      // Ticket section
+      if (document.getElementById('ticketLabel'))     set('ticketLabel', s.ticketBannerTitle);
+      if (document.getElementById('ticketSectionTitle')) set('ticketSectionTitle', s.ticketSectionTitle);
+      if (document.getElementById('ticketDescText'))  set('ticketDescText', s.ticketSectionDesc);
+      if (document.getElementById('ticketSectionLink')) set('ticketSectionLink', s.ticketSectionLink);
+      if (document.getElementById('ticketSectionBtnText')) set('ticketSectionBtnText', s.ticketBannerBtn);
+      if (document.getElementById('ticketTypesTitle')) set('ticketTypesTitle', s.ticketTypes);
+      if (document.getElementById('heroBannerBtnText')) set('heroBannerBtnText', s.ticketBannerBtn);
       updateSiteQr();
     }
 
@@ -522,6 +612,31 @@
     }
 
     // ---------- Khởi động ----------
+    // ---------- Bảng giá vé nhanh ----------
+    async function loadTicketTypes() {
+      try {
+        const body = await fetchJson('/api/tickets/types');
+        const types = body.data || [];
+        const grid = document.getElementById('ticketTypesGrid');
+        if (!grid || types.length === 0) return;
+        grid.replaceChildren();
+        const money = (n) => n === 0 ? (lang === 'vi' ? 'Miễn phí' : lang === 'en' ? 'Free' : lang === 'ja' ? '無料' : lang === 'ko' ? '무료' : '免费') : n.toLocaleString('vi-VN') + ' đ';
+        types.forEach((t) => {
+          const card = el('div', 'flex flex-col justify-between px-4 py-3 rounded-xl border border-heritage-gold/30 bg-heritage-paper hover:border-heritage-gold transition cursor-default');
+          card.append(
+            el('p', 'text-xs text-heritage-brown truncate', t.description || t.name),
+            el('div', 'flex items-end justify-between gap-2 mt-2',
+              ...[el('p', 'font-semibold text-heritage-ink text-sm', t.name),
+                  el('p', 'font-bold text-heritage-red text-sm whitespace-nowrap', money(t.price))])
+          );
+          grid.append(card);
+        });
+      } catch (e) {
+        const g = document.getElementById('ticketTypesGrid');
+        if (g) g.replaceChildren();   // hide skeleton on error
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('modalClose').addEventListener('click', closeModal);
       document.getElementById('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
@@ -544,6 +659,7 @@
       document.getElementById('qrBase').value = window.location.origin;
       document.getElementById('siteBase').value = window.location.origin;
       loadArtifacts();
+      loadTicketTypes();
     });
   </script>
 </body>

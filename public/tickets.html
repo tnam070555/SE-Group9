@@ -351,9 +351,10 @@
       if (!code) return;
       try {
         const body = await request('GET', `/api/tickets/${encodeURIComponent(code)}`);
+        const ticket = body.data || body.ticket;
         msg.className = 'text-sm mt-3 text-green-800';
-        msg.textContent = `${typeName(body.ticket.type)} · ${body.ticket.date} · ${body.ticket.slot.from} – ${body.ticket.slot.to} · ${body.ticket.status === 'used' ? 'Đã sử dụng' : L().statusValid}`;
-        showResult([body.ticket]);
+        msg.textContent = `${typeName(ticket.type)} · ${ticket.date} · ${ticket.slot.from} – ${ticket.slot.to} · ${ticket.status === 'used' ? 'Đã sử dụng' : L().statusValid}`;
+        showResult([{ ...ticket, date: ticket.date, slot: ticket.slot }]);
       } catch (err) {
         msg.className = 'text-sm mt-3 text-red-700';
         msg.textContent = err.status === 404 ? L().notFound : err.message;
