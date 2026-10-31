@@ -29,19 +29,19 @@
                     },
                     colors: {
                         brand: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6', // Main Teal
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
+                            50:  '#fdf3f4',
+                            100: '#fbe8e9',
+                            200: '#f5c6c8',
+                            300: '#ec9295',
+                            400: '#de5558',
+                            500: '#C9A227', // Gold accent
+                            600: '#8B1E24', // Heritage red (primary actions)
+                            700: '#6d1a1f',
+                            800: '#5E1216', // Deep red
+                            900: '#3a0b0e',
                         },
-                        sidebar: '#0f172a', // Slate 900
-                        sidebarHover: '#1e293b', // Slate 800
+                        sidebar: '#2A2320',      // Dark ink brown
+                        sidebarHover: '#3d2f2b', // Slightly lighter
                     }
                 }
             }
@@ -59,11 +59,11 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #C9A227;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #8B1E24;
         }
 
         /* Animations */
@@ -109,21 +109,32 @@
             transition: all 0.2s ease;
         }
         .table-row-hover:hover {
-            background-color: #f8fafc;
+            background-color: #fdf3f4;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(139,30,36,0.06);
         }
+        /* Mobile sidebar overlay */
+        #sidebar-overlay { display: none; }
+        @media (max-width: 768px) {
+            #main-sidebar { transform: translateX(-100%); transition: transform .3s ease; }
+            #main-sidebar.open { transform: translateX(0); }
+            #sidebar-overlay.open { display: block; }
+        }
+        .gold-rule-h { background: linear-gradient(90deg, transparent, #C9A227, transparent); height: 1px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden antialiased">
+<body class="bg-stone-50 text-slate-800 h-screen flex overflow-hidden antialiased">
 
     <!-- ========================================== -->
     <!-- SIDEBAR NAVIGATION                         -->
     <!-- ========================================== -->
-    <aside class="w-64 bg-sidebar text-slate-300 flex flex-col shadow-2xl z-20 flex-shrink-0 transition-all duration-300">
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-10 md:hidden" onclick="closeSidebar()"></div>
+
+    <aside id="main-sidebar" class="w-64 bg-sidebar text-slate-300 flex flex-col shadow-2xl z-20 flex-shrink-0 fixed md:relative h-full md:h-auto transition-all duration-300">
         <!-- Logo Area -->
         <div class="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/50">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/30 mr-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg mr-3" style="background:linear-gradient(135deg,#C9A227,#8B1E24)">
                 <i class="fa-solid fa-landmark text-white text-lg"></i>
             </div>
             <div>
@@ -136,7 +147,7 @@
         <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
             <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">Menu Chính</p>
             
-            <a href="#" onclick="app.switchView('dashboard')" id="nav-dashboard" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 bg-brand-500/10 text-brand-400">
+            <a href="#" onclick="app.switchView('dashboard')" id="nav-dashboard" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200" style="background:rgba(201,162,39,.15);color:#C9A227">
                 <i class="fa-solid fa-chart-pie w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
                 Tổng quan
             </a>
@@ -161,7 +172,7 @@
             <a href="#" onclick="app.switchView('feedbacks')" id="nav-feedbacks" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
                 <i class="fa-regular fa-comments w-6 text-center mr-2 text-lg transition-transform group-hover:scale-110"></i>
                 Đánh giá & Phản hồi
-                <span class="ml-auto bg-brand-500 text-white py-0.5 px-2 rounded-full text-xs font-bold shadow-sm">14</span>
+                <span class="ml-auto py-0.5 px-2 rounded-full text-xs font-bold shadow-sm" style="background:#C9A227;color:#2A2320">14</span>
             </a>
 
             <a href="#" onclick="app.switchView('events')" id="nav-events" class="nav-item group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-sidebarHover hover:text-white transition-all duration-200 text-slate-400">
@@ -193,6 +204,10 @@
         <!-- Top Header Bar -->
         <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 flex-shrink-0">
             
+            <!-- Mobile hamburger -->
+            <button class="md:hidden mr-4 text-slate-500 hover:text-brand-600 transition-colors" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
             <!-- Left: Page Title / Search -->
             <div class="flex items-center">
                 <h2 id="header-title" class="text-xl font-bold text-slate-800 capitalize tracking-tight">Tổng quan hệ thống</h2>
@@ -205,7 +220,7 @@
             <!-- Right: Notifications & Profile -->
             <div class="flex items-center space-x-6">
                 <!-- Notifications -->
-                <button class="relative p-2 text-slate-400 hover:text-brand-500 transition-colors">
+                <button class="relative p-2 text-slate-400 hover:text-red-700 transition-colors">
                     <i class="fa-regular fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
                 </button>
@@ -216,11 +231,11 @@
                 <!-- User Profile -->
                 <div class="flex items-center cursor-pointer group">
                     <div class="text-right mr-3 hidden md:block">
-                        <p class="text-sm font-bold text-slate-700 group-hover:text-brand-600 transition-colors">Quản trị viên</p>
+                        <p class="text-sm font-bold text-slate-700 group-hover:text-red-800 transition-colors">Quản trị viên</p>
                         <p class="text-xs text-slate-500">admin@dinhdoclap.gov.vn</p>
                     </div>
                     <div class="relative">
-                        <img src="https://placehold.co/100x100/14b8a6/ffffff?text=AD" alt="Admin" class="w-10 h-10 rounded-full border-2 border-slate-100 shadow-sm object-cover">
+                        <img src="https://placehold.co/100x100/8B1E24/C9A227?text=AD" alt="Admin" class="w-10 h-10 rounded-full border-2 border-slate-100 shadow-sm object-cover">
                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
                     </div>
                 </div>
@@ -236,14 +251,14 @@
             <section id="view-dashboard" class="view-section active max-w-7xl mx-auto">
                 
                 <!-- Welcome Banner -->
-                <div class="bg-gradient-to-r from-brand-600 to-brand-400 rounded-2xl p-8 mb-8 text-white shadow-lg shadow-brand-500/20 flex justify-between items-center relative overflow-hidden">
+                <div class="rounded-2xl p-8 mb-8 text-white shadow-lg flex justify-between items-center relative overflow-hidden" style="background:linear-gradient(135deg,#5E1216 0%,#8B1E24 60%,#6B5443 100%)">
                     <div class="relative z-10">
                         <h2 class="text-3xl font-bold mb-2">Xin chào, Admin! 👋</h2>
-                        <p class="text-brand-100 text-sm md:text-base max-w-xl">Hệ thống thuyết minh đa ngôn ngữ Dinh Độc Lập đang hoạt động ổn định. Dưới đây là báo cáo thống kê các chỉ số tương tác mới nhất trong ngày.</p>
+                        <p class="text-white/80 text-sm md:text-base max-w-xl">Hệ thống thuyết minh đa ngôn ngữ Dinh Độc Lập đang hoạt động ổn định. Dưới đây là báo cáo thống kê các chỉ số tương tác mới nhất trong ngày.</p>
                     </div>
                     <div class="hidden lg:block relative z-10">
                         <div class="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30">
-                            <p class="text-xs uppercase tracking-wider text-brand-100 mb-1">Thời gian hiện tại</p>
+                            <p class="text-xs uppercase tracking-wider text-white/60 mb-1">Thời gian hiện tại</p>
                             <p class="text-xl font-bold font-mono" id="real-time-clock">--:--:--</p>
                             <p class="text-sm" id="real-time-date">--/--/----</p>
                         </div>
@@ -307,7 +322,7 @@
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 lg:col-span-2 relative">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-slate-800 text-lg">Biểu đồ lượt truy cập 7 ngày qua</h3>
-                            <select class="text-sm border-slate-200 rounded-lg text-slate-600 py-1.5 pl-3 pr-8 focus:ring-brand-500 focus:border-brand-500 bg-slate-50">
+                            <select class="text-sm border-slate-200 rounded-lg text-slate-600 py-1.5 pl-3 pr-8 focus:ring-red-700 focus:border-red-700 bg-slate-50">
                                 <option>7 ngày qua</option>
                                 <option>30 ngày qua</option>
                                 <option>Năm nay</option>
@@ -347,7 +362,7 @@
                         <h2 class="text-2xl font-bold text-slate-800">Quản lý Khu vực Tham quan</h2>
                         <p class="text-slate-500 text-sm mt-1">Thêm, sửa, xóa các phân khu để nhóm các công trình hiện vật.</p>
                     </div>
-                    <button onclick="categoryManager.toggleForm()" class="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm shadow-brand-500/30 transition-all flex items-center">
+                    <button onclick="categoryManager.toggleForm()" class="text-white font-medium py-2 px-5 rounded-lg shadow-sm transition-all flex items-center" style="background:#8B1E24" onmouseover="this.style.background='#5E1216'" onmouseout="this.style.background='#8B1E24'">
                         <i class="fa-solid fa-plus mr-2"></i> Thêm khu vực mới
                     </button>
                 </div>
@@ -367,18 +382,18 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
                                 <label for="cat-name" class="block text-sm font-semibold text-slate-700 mb-2">Tên khu vực <span class="text-rose-500">*</span></label>
-                                <input type="text" id="cat-name" required placeholder="Ví dụ: Tầng trệt, Tầng 2, Sân vườn..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700 placeholder-slate-400">
+                                <input type="text" id="cat-name" required placeholder="Ví dụ: Tầng trệt, Tầng 2, Sân vườn..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-red-800 focus:ring-2 focus:ring-red-100 outline-none transition-all text-slate-700 placeholder-slate-400">
                             </div>
                             <div>
                                 <label for="cat-status" class="block text-sm font-semibold text-slate-700 mb-2">Trạng thái hiển thị</label>
-                                <select id="cat-status" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700">
+                                <select id="cat-status" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-red-800 focus:ring-2 focus:ring-red-100 outline-none transition-all text-slate-700">
                                     <option value="active">Đang hoạt động (Hiển thị cho khách)</option>
                                     <option value="inactive">Tạm ẩn (Đang bảo trì/cập nhật)</option>
                                 </select>
                             </div>
                             <div class="md:col-span-2">
                                 <label for="cat-desc" class="block text-sm font-semibold text-slate-700 mb-2">Mô tả ngắn</label>
-                                <textarea id="cat-desc" rows="3" placeholder="Nhập một đoạn mô tả ngắn về khu vực này..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-slate-700 resize-none"></textarea>
+                                <textarea id="cat-desc" rows="3" placeholder="Nhập một đoạn mô tả ngắn về khu vực này..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:border-red-800 focus:ring-2 focus:ring-red-100 outline-none transition-all text-slate-700 resize-none"></textarea>
                             </div>
                         </div>
                         <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
@@ -397,10 +412,10 @@
                     <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <div class="relative">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input type="text" id="cat-search" onkeyup="categoryManager.filterTable()" placeholder="Tìm tên khu vực..." class="pl-9 pr-4 py-2 rounded-md border border-slate-200 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none w-64">
+                            <input type="text" id="cat-search" onkeyup="categoryManager.filterTable()" placeholder="Tìm tên khu vực..." class="pl-9 pr-4 py-2 rounded-md border border-slate-200 text-sm focus:border-red-700 focus:ring-1 focus:ring-red-200 outline-none w-64">
                         </div>
                         <div class="text-sm text-slate-500 font-medium">
-                            Tổng cộng: <span id="cat-total-count" class="text-brand-600 font-bold">0</span> khu vực
+                            Tổng cộng: <span id="cat-total-count" class="font-bold" style="color:#8B1E24">0</span> khu vực
                         </div>
                     </div>
 
@@ -581,7 +596,7 @@
                 this.views.forEach(v => {
                     const navEl = document.getElementById(`nav-${v}`);
                     if(navEl) {
-                        navEl.classList.remove('bg-brand-500/10', 'text-brand-400');
+                        navEl.classList.remove('bg-brand-500/10', 'text-brand-400'); navEl.style.background=''; navEl.style.color='';
                         navEl.classList.add('hover:bg-sidebarHover', 'hover:text-white', 'text-slate-400');
                     }
                     
@@ -651,7 +666,7 @@
                 
                 // Cấu hình icon và màu sắc theo loại (success/error/info)
                 let icon = 'fa-check-circle';
-                let colorClass = 'bg-emerald-500';
+                let colorClass = 'bg-emerald-600';
                 
                 if(type === 'error') {
                     icon = 'fa-circle-xmark';
@@ -741,11 +756,11 @@
                             {
                                 label: 'Lượt tham quan',
                                 data: [450, 520, 480, 610, 590, 850, 920],
-                                borderColor: '#0ea5e9', // Sky 500
-                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                borderColor: '#8B1E24', // Heritage Red
+                                backgroundColor: 'rgba(139, 30, 36, 0.08)',
                                 borderWidth: 3,
                                 pointBackgroundColor: '#ffffff',
-                                pointBorderColor: '#0ea5e9',
+                                pointBorderColor: '#8B1E24',
                                 pointBorderWidth: 2,
                                 pointRadius: 4,
                                 fill: true,
@@ -754,11 +769,11 @@
                             {
                                 label: 'Lượt quét QR Audio',
                                 data: [310, 390, 320, 450, 480, 710, 800],
-                                borderColor: '#14b8a6', // Teal 500
+                                borderColor: '#C9A227', // Heritage Gold
                                 backgroundColor: 'transparent',
                                 borderWidth: 3,
                                 borderDash: [5, 5],
-                                pointBackgroundColor: '#14b8a6',
+                                pointBackgroundColor: '#C9A227',
                                 pointRadius: 3,
                                 fill: false,
                                 tension: 0.4
@@ -789,10 +804,10 @@
                         datasets: [{
                             data: [65, 20, 10, 5],
                             backgroundColor: [
-                                '#14b8a6', // Teal
-                                '#3b82f6', // Blue
-                                '#8b5cf6', // Violet
-                                '#cbd5e1'  // Slate
+                                '#8B1E24', // Heritage Red
+                                '#C9A227', // Heritage Gold
+                                '#6B5443', // Heritage Brown
+                                '#cbd5e1'  // Slate neutral
                             ],
                             borderWidth: 0,
                             hoverOffset: 4
@@ -1003,9 +1018,27 @@
             }
         };
 
+        // ===== MOBILE SIDEBAR TOGGLE =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+        function closeSidebar() {
+            document.getElementById('main-sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('open');
+        }
+
         // Chạy khởi tạo ứng dụng khi DOM tải xong
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
+            // Auto close sidebar khi chuyển view trên mobile
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    if (window.innerWidth < 768) closeSidebar();
+                });
+            });
         });
 
     </script>

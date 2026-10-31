@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Dinh Độc Lập – Thuyết minh đa ngôn ngữ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,19 +38,36 @@
     @keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
     .lang-btn[aria-pressed="true"] { background: #C9A227; color: #2A2320; border-color: #C9A227; }
     html { scroll-behavior: smooth; }
+    .img-band { background: linear-gradient(135deg, #5E1216 0%, #8B1E24 50%, #6B5443 100%); }
+    .img-band img { transition: transform .5s ease; }
+    .card:hover .img-band img { transform: scale(1.06); }
+    /* Mobile area chips: horizontal scroll thay vì wrap */
+    @media (max-width: 1023px) {
+      #areaChips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      #areaChips::-webkit-scrollbar { display: none; }
+      #areaChips button { flex-shrink: 0; }
+    }
+    /* Search input full-width trên mobile */
+    @media (max-width: 640px) {
+      #search { width: 100%; }
+    }
+    /* Lang bar compact trên màn hình rất nhỏ */
+    @media (max-width: 360px) {
+      #langBar button { font-size: 11px; padding: 4px 8px; }
+    }
   </style>
 </head>
 <body class="font-sans text-heritage-ink antialiased">
 
   <!-- ===== THANH ĐIỀU HƯỚNG ===== -->
   <header class="sticky top-0 z-40 bg-heritage-paper/95 backdrop-blur border-b border-heritage-gold/40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-2">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-full border-2 border-heritage-red text-heritage-red bg-white flex items-center justify-center shadow-sm">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-heritage-red text-heritage-red bg-white flex items-center justify-center shadow-sm flex-shrink-0">
           <i class="fa-solid fa-landmark"></i>
         </div>
         <div>
-          <p class="font-serif font-bold text-lg leading-tight text-heritage-red uppercase tracking-wide">Dinh Độc Lập</p>
+          <p class="font-serif font-bold text-base sm:text-lg leading-tight text-heritage-red uppercase tracking-wide">Dinh Độc Lập</p>
           <p class="text-xs text-heritage-brown" id="brandSub">Thuyết minh đa ngôn ngữ</p>
         </div>
       </div>
@@ -61,9 +78,9 @@
 
   <!-- ===== HERO ===== -->
   <section class="hero-bg text-heritage-paper relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-6 py-16 md:py-20 text-center relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-20 text-center relative">
       <p class="uppercase tracking-[0.3em] text-xs text-heritage-goldSoft mb-4" id="heroKicker"></p>
-      <h2 class="font-serif text-4xl md:text-5xl font-bold mb-5 leading-tight" id="heroTitle"></h2>
+      <h2 class="font-serif text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 leading-tight" id="heroTitle"></h2>
       <p class="max-w-2xl mx-auto text-heritage-paper/85 leading-relaxed" id="heroDesc"></p>
       <div class="mt-8 inline-flex items-center gap-2 bg-black/20 border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
         <i class="fa-solid fa-qrcode text-heritage-gold"></i>
@@ -77,7 +94,7 @@
 
       <!-- Cột khu vực (bên trái): Tất cả khu vực + từng khu vực -->
       <aside class="lg:sticky lg:top-32">
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown mb-3" id="areaTitle"></p>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown mb-2 lg:mb-3" id="areaTitle"></p>
         <div id="areaChips" class="flex flex-wrap lg:flex-col gap-2"></div>
       </aside>
 
@@ -106,7 +123,7 @@
 
   <!-- ===== MÃ QR CỦA TRANG WEB ===== -->
   <section class="bg-white border-y border-heritage-gold/40">
-    <div class="max-w-4xl mx-auto px-6 py-12 grid md:grid-cols-[auto,1fr] gap-8 items-center">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid md:grid-cols-[auto,1fr] gap-6 sm:gap-8 items-center">
       <div class="bg-heritage-paper p-5 rounded-2xl border border-heritage-gold/50 shadow-sm mx-auto">
         <img id="siteQrImg" alt="Mã QR trang web" class="w-48 h-48 object-contain bg-white">
         <p id="siteQrError" class="hidden text-xs text-red-700 mt-2 max-w-[12rem] text-center"></p>
@@ -124,12 +141,12 @@
 
   <!-- ===== CHI TIẾT / NGHE / QR ===== -->
   <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-heritage-redDeep/70 backdrop-blur-sm">
-    <div class="modal-in bg-heritage-paper rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto relative border border-heritage-gold/40">
+    <div class="modal-in bg-heritage-paper rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative border border-heritage-gold/40">
       <button id="modalClose" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-heritage-brown/20 text-heritage-brown hover:text-heritage-red" aria-label="Đóng">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
-      <div class="p-7 md:p-9">
+      <div class="p-5 sm:p-7 md:p-9">
         <div class="flex items-center gap-3 mb-4">
           <span id="mCode" class="text-xs font-bold tracking-wider bg-heritage-red text-white px-3 py-1 rounded-full"></span>
           <span id="mArea" class="text-xs text-heritage-brown flex items-center gap-1"></span>
@@ -173,7 +190,7 @@
 
   <footer class="bg-heritage-redDeep text-heritage-paper/80 mt-16">
     <div class="gold-rule"></div>
-    <div class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8 text-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid md:grid-cols-3 gap-6 sm:gap-8 text-sm">
       <div>
         <p class="font-serif text-lg font-bold text-heritage-goldSoft mb-2">Dinh Độc Lập</p>
         <p id="footDesc" class="leading-relaxed"></p>
@@ -315,10 +332,27 @@
       const area = AREAS[a.categorySlug];
       const card = el('article', 'card bg-white rounded-2xl overflow-hidden border border-heritage-gold/30 flex flex-col');
 
-      const band = el('div', 'relative h-28 bg-gradient-to-br from-heritage-red to-heritage-redDeep flex items-center justify-center');
-      band.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'} text-4xl text-heritage-goldSoft/90`));
-      band.append(el('span', 'absolute top-3 left-3 text-[11px] font-bold tracking-wider bg-white/90 text-heritage-red px-2.5 py-1 rounded-full', a.code));
-      if (a.fallback) band.append(el('span', 'absolute top-3 right-3 text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full', '!'));
+      // Band: hiển thị ảnh thực nếu có imageUrl, fallback về icon gradient
+      const band = el('div', 'img-band relative h-44 overflow-hidden flex items-center justify-center');
+      if (a.imageUrl) {
+        const img = document.createElement('img');
+        img.src = a.imageUrl;
+        img.alt = a.name;
+        img.className = 'absolute inset-0 w-full h-full object-cover';
+        img.loading = 'lazy';
+        // Fallback về icon nếu ảnh lỗi
+        img.addEventListener('error', () => {
+          img.remove();
+          band.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'} text-5xl text-heritage-goldSoft/70`));
+        });
+        // Overlay tối nhẹ để badge đọc được
+        const overlay = el('div', 'absolute inset-0 bg-gradient-to-t from-heritage-redDeep/60 via-transparent to-transparent');
+        band.append(img, overlay);
+      } else {
+        band.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'} text-5xl text-heritage-goldSoft/80`));
+      }
+      band.append(el('span', 'absolute top-3 left-3 text-[11px] font-bold tracking-wider bg-white/90 text-heritage-red px-2.5 py-1 rounded-full z-10', a.code));
+      if (a.fallback) band.append(el('span', 'absolute top-3 right-3 text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full z-10', '!'));
 
       const body = el('div', 'p-6 flex-1 flex flex-col');
       const title = el('h4', 'font-serif text-xl font-bold text-heritage-red mb-1', a.name);
@@ -363,7 +397,7 @@
           el('h4', 'font-serif text-2xl font-bold text-heritage-red', area ? area.name[lang] || area.name.vi : S().other),
           el('span', 'ml-auto text-sm text-heritage-brown', S().count(list.length)));
         head.firstChild.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'}`));
-        const row = el('div', 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7');
+        const row = el('div', 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-7');
         list.forEach((a) => row.append(makeCard(a)));
         section.append(head, row);
         grid.append(section);

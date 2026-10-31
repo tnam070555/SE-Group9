@@ -2,88 +2,240 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Dinh Độc Lập</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['"Be Vietnam Pro"', 'sans-serif'] },
+        colors: {
+          heritage: {
+            red: '#8B1E24', redDeep: '#5E1216',
+            gold: '#C9A227', goldSoft: '#E8D9A6',
+            paper: '#F7F3EA', ink: '#2A2320', brown: '#6B5443'
+          }
+        }
+      }}
+    };
+  </script>
+  <style>
+    body { background: #F7F3EA; }
+    .gold-rule { background: linear-gradient(90deg, transparent, #C9A227, transparent); height: 2px; }
+    .hero-banner {
+      background:
+        linear-gradient(180deg, rgba(94,18,22,.95) 0%, rgba(139,30,36,.9) 100%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 12px, transparent 12px 24px);
+    }
+    .lang-btn { transition: all .2s ease; }
+    .lang-btn[aria-pressed="true"] { background: #C9A227; color: #2A2320; border-color: #C9A227; font-weight: 600; }
+    .play-ring {
+      box-shadow: 0 0 0 0 rgba(139,30,36,.4);
+      animation: none;
+    }
+    .play-ring.playing {
+      animation: pulse-ring 1.4s ease-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(139,30,36,.4); }
+      70%  { box-shadow: 0 0 0 18px rgba(139,30,36,0); }
+      100% { box-shadow: 0 0 0 0 rgba(139,30,36,0); }
+    }
+    .progress-bar { transition: width .4s linear; }
+    /* Safe area cho thiết bị có notch */
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+  </style>
 </head>
-<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col justify-between">
+<body class="font-sans text-heritage-ink antialiased min-h-screen flex flex-col">
 
-  <header class="p-4 border-b border-slate-800">
-    <div class="flex justify-between items-center">
-      <a href="index.html" id="back-link" class="text-xs text-amber-400 font-bold flex items-center gap-1">
-        <i class="fa-solid fa-arrow-left"></i> <span id="back-text"></span>
+  <!-- HEADER -->
+  <header class="hero-banner text-heritage-paper sticky top-0 z-30">
+    <div class="px-4 pt-safe pt-3 pb-3 flex items-center justify-between gap-3">
+      <a href="index.html" id="back-link"
+         class="flex items-center gap-2 text-heritage-goldSoft text-sm font-medium hover:text-heritage-gold transition min-w-0">
+        <i class="fa-solid fa-arrow-left flex-shrink-0"></i>
+        <span id="back-text" class="truncate"></span>
       </a>
-      <span id="detail-code" class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded hidden"></span>
+      <span id="detail-code"
+            class="hidden flex-shrink-0 text-[10px] font-bold tracking-widest bg-heritage-gold text-heritage-ink px-2.5 py-1 rounded-full uppercase"></span>
     </div>
-    <div id="lang-bar" class="flex flex-wrap gap-2 justify-center mt-3 text-slate-200"></div>
+    <div class="gold-rule"></div>
+    <!-- Language bar -->
+    <div id="lang-bar" class="flex flex-wrap justify-center gap-2 px-4 py-3"></div>
   </header>
 
-  <main class="max-w-lg mx-auto px-4 py-8 text-center flex-1 flex flex-col justify-center">
-    <div class="mb-6">
-      <span id="subtitle" class="text-xs text-amber-400 font-semibold tracking-wider uppercase"></span>
-      <h1 id="detail-title" class="text-3xl font-extrabold text-white mt-1"></h1>
-      <p id="detail-location" class="text-xs text-slate-400 mt-2 flex items-center justify-center gap-1"></p>
+  <!-- MAIN -->
+  <main class="flex-1 max-w-lg mx-auto w-full px-4 py-6 flex flex-col gap-5">
+
+    <!-- Title block -->
+    <div class="text-center">
+      <p id="subtitle" class="text-xs text-heritage-gold font-semibold tracking-widest uppercase mb-1"></p>
+      <h1 id="detail-title" class="font-serif text-3xl font-bold text-heritage-red leading-tight"></h1>
+      <p id="detail-location" class="text-sm text-heritage-brown mt-2 flex items-center justify-center gap-1.5"></p>
     </div>
 
-    <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 shadow-2xl mb-6">
-      <div class="w-16 h-16 bg-amber-500 text-slate-900 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 shadow-lg">
-        <i class="fa-solid fa-headphones"></i>
-      </div>
-      <p id="detail-desc" class="text-slate-300 text-sm leading-relaxed mb-6 text-left bg-slate-900/60 p-4 rounded-xl border border-slate-700"></p>
-      <p id="fallback-note" class="text-xs text-amber-300 mb-4 hidden"></p>
-
-      <div class="flex justify-center gap-3">
-        <button id="play-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-6 py-3 rounded-xl transition flex items-center gap-2 shadow disabled:opacity-50">
-          <i class="fa-solid fa-play"></i> <span id="play-text"></span>
-        </button>
-        <button id="stop-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-3 rounded-xl transition">
-          <i class="fa-solid fa-square"></i> <span id="stop-text"></span>
-        </button>
-      </div>
-      <p id="speech-note" class="text-xs text-slate-400 mt-3 hidden"></p>
+    <!-- Fallback notice -->
+    <div id="fallback-note"
+         class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-4 py-2.5 flex items-start gap-2">
+      <i class="fa-solid fa-circle-info mt-0.5 flex-shrink-0"></i>
+      <span id="fallback-text"></span>
     </div>
+
+    <!-- Description card -->
+    <div class="bg-white rounded-2xl border border-heritage-gold/30 shadow-sm overflow-hidden">
+      <div class="bg-heritage-red/5 border-b border-heritage-gold/20 px-5 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-scroll text-heritage-gold text-sm"></i>
+        <span id="desc-label" class="text-xs font-semibold text-heritage-brown uppercase tracking-wider"></span>
+      </div>
+      <p id="detail-desc" class="px-5 py-5 text-[15px] leading-relaxed text-heritage-ink/90"></p>
+    </div>
+
+    <!-- Player card -->
+    <div class="bg-white rounded-2xl border border-heritage-gold/30 shadow-sm p-6">
+      <!-- Progress indicator (hiển thị khi đang phát) -->
+      <div id="progress-wrap" class="hidden mb-5">
+        <div class="h-1 bg-heritage-gold/20 rounded-full overflow-hidden">
+          <div id="progress-bar" class="progress-bar h-full bg-heritage-red rounded-full w-0"></div>
+        </div>
+        <p id="progress-label" class="text-xs text-heritage-brown mt-1.5 text-center"></p>
+      </div>
+
+      <!-- Play / Stop buttons -->
+      <div class="flex items-center justify-center gap-4">
+        <!-- Main play/pause button -->
+        <button id="play-btn"
+          class="play-ring w-20 h-20 rounded-full bg-heritage-red hover:bg-heritage-redDeep text-white flex items-center justify-center text-2xl shadow-lg transition disabled:opacity-40"
+          disabled>
+          <i id="play-icon" class="fa-solid fa-play ml-1"></i>
+        </button>
+        <!-- Stop button -->
+        <button id="stop-btn"
+          class="w-12 h-12 rounded-full border-2 border-heritage-brown/30 text-heritage-brown hover:border-heritage-red hover:text-heritage-red flex items-center justify-center transition">
+          <i class="fa-solid fa-stop text-sm"></i>
+        </button>
+      </div>
+
+      <p id="play-text-label" class="text-center text-sm font-medium text-heritage-brown mt-4"></p>
+      <p id="speech-note" class="hidden text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-3 text-center"></p>
+    </div>
+
+    <!-- Available languages -->
+    <div id="avail-langs-wrap" class="hidden bg-white rounded-2xl border border-heritage-gold/30 shadow-sm p-5">
+      <p class="text-xs font-semibold text-heritage-brown uppercase tracking-wider mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-globe text-heritage-gold"></i>
+        <span id="avail-label"></span>
+      </p>
+      <div id="avail-langs" class="flex flex-wrap gap-2"></div>
+    </div>
+
   </main>
 
-  <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-800">
-    © Đồ án Thuyết minh Tự động - ĐH Sài Gòn
+  <!-- FOOTER -->
+  <footer class="safe-bottom bg-heritage-redDeep text-heritage-paper/70 mt-auto">
+    <div class="gold-rule"></div>
+    <div class="text-center py-4 text-xs px-4">
+      <p class="font-serif text-heritage-goldSoft font-semibold mb-0.5">Dinh Độc Lập</p>
+      <p id="foot-copy">© Đồ án Thuyết minh Tự động – ĐH Sài Gòn</p>
+    </div>
   </footer>
 
   <script src="js/common.js"></script>
   <script>
-    let languages = [{ code: 'vi', label: 'Tiếng Việt', speech: 'vi-VN' }];
+    // ---------- I18n ----------
+    const DETAIL_STRINGS = {
+      vi: { back:'Trang chính', subtitle:'Di tích lịch sử quốc gia', descLabel:'Thuyết minh', playLabel:'Nhấn để nghe thuyết minh', pauseLabel:'Đang phát — nhấn để tạm dừng', stop:'Dừng', fallback:'Chưa có bản dịch, đang hiển thị tiếng Việt.', noSpeech:'Thiết bị không hỗ trợ đọc thuyết minh.', noVoice:'Chưa có giọng đọc cho ngôn ngữ này.', loading:'Đang tải...', errTitle:'Không tìm thấy', missingCode:'Thiếu mã công trình.', availLabel:'Có bản dịch', copy:'© Đồ án Thuyết minh Tự động – ĐH Sài Gòn' },
+      en: { back:'Home', subtitle:'National historic site', descLabel:'Audio guide', playLabel:'Tap to listen', pauseLabel:'Playing — tap to pause', stop:'Stop', fallback:'No translation yet — showing Vietnamese.', noSpeech:'Speech is not supported on this device.', noVoice:'No voice available for this language.', loading:'Loading...', errTitle:'Not found', missingCode:'Missing exhibit code.', availLabel:'Available in', copy:'© Multilingual Audio Guide – Saigon University' },
+      ja: { back:'ホーム', subtitle:'国の史跡', descLabel:'音声ガイド', playLabel:'タップして聴く', pauseLabel:'再生中 — タップで一時停止', stop:'停止', fallback:'翻訳がないため、ベトナム語を表示しています。', noSpeech:'このデバイスは音声読み上げに対応していません。', noVoice:'この言語の音声がありません。', loading:'読み込み中...', errTitle:'見つかりません', missingCode:'展示コードがありません。', availLabel:'対応言語', copy:'© 多言語音声ガイド – サイゴン大学' },
+      ko: { back:'홈', subtitle:'국가 사적지', descLabel:'음성 안내', playLabel:'탭하여 듣기', pauseLabel:'재생 중 — 탭하면 일시정지', stop:'정지', fallback:'번역이 없어 베트남어로 표시합니다.', noSpeech:'이 기기는 음성 읽기를 지원하지 않습니다.', noVoice:'이 언어의 음성이 없습니다.', loading:'불러오는 중...', errTitle:'찾을 수 없음', missingCode:'전시물 코드가 없습니다.', availLabel:'지원 언어', copy:'© 다국어 음성 안내 – 사이공 대학교' },
+      zh: { back:'首页', subtitle:'国家历史遗迹', descLabel:'语音讲解', playLabel:'点击聆听', pauseLabel:'正在播放 — 点击暂停', stop:'停止', fallback:'暂无翻译，正在显示越南语。', noSpeech:'此设备不支持语音朗读。', noVoice:'此语言暂无语音。', loading:'加载中...', errTitle:'未找到', missingCode:'缺少展品代码。', availLabel:'支持语言', copy:'© 多语种语音讲解 – 西贡大学' },
+    };
+    const ds = (key) => (DETAIL_STRINGS[lang] || DETAIL_STRINGS.vi)[key] || '';
+
+    let languages = [{ code:'vi', label:'Tiếng Việt', speech:'vi-VN' }];
     let lang = 'vi';
     let code = null;
     let current = null;
+    let isPlaying = false;
+    let progressTimer = null;
 
-    function speechCodeOf(langCode) {
-      const found = languages.find((l) => l.code === langCode);
-      return found ? found.speech : 'vi-VN';
+    const speechOf = (c) => (languages.find((l) => l.code === c) || { speech:'vi-VN' }).speech;
+
+    function setNote(id, msg) {
+      const n = document.getElementById(id);
+      n.textContent = msg || '';
+      n.classList.toggle('hidden', !msg);
     }
 
-    function setNote(id, message) {
-      const node = document.getElementById(id);
-      node.textContent = message || '';
-      node.classList.toggle('hidden', !message);
+    function setPlayState(playing) {
+      isPlaying = playing;
+      const btn = document.getElementById('play-btn');
+      const icon = document.getElementById('play-icon');
+      const label = document.getElementById('play-text-label');
+      icon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play ml-1';
+      label.textContent = playing ? ds('pauseLabel') : ds('playLabel');
+      btn.classList.toggle('playing', playing);
+      document.getElementById('progress-wrap').classList.toggle('hidden', !playing);
+      if (!playing) { clearInterval(progressTimer); document.getElementById('progress-bar').style.width = '0%'; }
     }
 
-    // Cập nhật chữ cố định của giao diện theo ngôn ngữ đang chọn
+    function startProgressSim() {
+      // Ước tính thời gian đọc: ~3 ký tự/giây cho tiếng Việt, 5 ký tự/giây cho latinh
+      const text = (current && current.description) || '';
+      const rate = ['ja','zh','ko'].includes(lang) ? 4 : 3;
+      const totalMs = Math.max((text.length / rate) * 1000, 3000);
+      const start = Date.now();
+      clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        const pct = Math.min(((Date.now() - start) / totalMs) * 100, 99);
+        document.getElementById('progress-bar').style.width = pct + '%';
+        const remaining = Math.max(0, Math.round((totalMs - (Date.now() - start)) / 1000));
+        document.getElementById('progress-label').textContent = remaining + 's';
+        if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+          clearInterval(progressTimer);
+          document.getElementById('progress-bar').style.width = '100%';
+          setTimeout(() => setPlayState(false), 500);
+        }
+      }, 300);
+    }
+
     function applyStaticText() {
       document.documentElement.lang = lang;
-      document.getElementById('back-text').textContent = t(lang, 'back');
-      document.getElementById('subtitle').textContent = t(lang, 'subtitle');
-      document.getElementById('play-text').textContent = t(lang, 'play');
-      document.getElementById('stop-text').textContent = t(lang, 'stop');
+      document.getElementById('back-text').textContent = ds('back');
+      document.getElementById('subtitle').textContent = ds('subtitle');
+      document.getElementById('desc-label').textContent = ds('descLabel');
+      document.getElementById('play-text-label').textContent = ds('playLabel');
+      document.getElementById('avail-label').textContent = ds('availLabel');
+      document.getElementById('foot-copy').textContent = ds('copy');
     }
 
     function showError(message) {
       current = null;
       document.getElementById('detail-code').classList.add('hidden');
-      document.getElementById('detail-title').textContent = t(lang, 'errTitle');
+      document.getElementById('detail-title').textContent = ds('errTitle');
       document.getElementById('detail-location').replaceChildren();
       document.getElementById('detail-desc').textContent = message;
-      setNote('fallback-note', '');
+      document.getElementById('fallback-note').classList.add('hidden');
       document.getElementById('play-btn').disabled = true;
+    }
+
+    function renderAvailableLanguages(availCodes) {
+      const wrap = document.getElementById('avail-langs-wrap');
+      const box = document.getElementById('avail-langs');
+      box.replaceChildren();
+      const filtered = (availCodes || []).filter((c) => c !== lang);
+      if (!filtered.length) { wrap.classList.add('hidden'); return; }
+      wrap.classList.remove('hidden');
+      filtered.forEach((code) => {
+        const l = languages.find((x) => x.code === code);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'text-xs border border-heritage-brown/30 text-heritage-brown px-3 py-1.5 rounded-full hover:border-heritage-red hover:text-heritage-red transition';
+        btn.textContent = l ? l.label : code;
+        btn.addEventListener('click', () => changeLanguage(code));
+        box.append(btn);
+      });
     }
 
     function render() {
@@ -92,24 +244,32 @@
       badge.classList.remove('hidden');
       document.getElementById('detail-title').textContent = current.name;
       document.getElementById('detail-location').replaceChildren(
-        icon('fa-solid fa-location-dot text-amber-400'), document.createTextNode(' ' + (current.location || '')));
+        icon('fa-solid fa-location-dot text-heritage-gold text-xs'),
+        document.createTextNode(' ' + (current.location || '')));
       document.getElementById('detail-desc').textContent = current.description || '';
       document.getElementById('play-btn').disabled = false;
-      setNote('fallback-note', current.fallback ? t(lang, 'fallback') : '');
-      document.title = current.name;
+      const fb = document.getElementById('fallback-note');
+      document.getElementById('fallback-text').textContent = ds('fallback');
+      fb.classList.toggle('hidden', !current.fallback);
+      document.title = current.name + ' – Dinh Độc Lập';
+      renderAvailableLanguages(current.availableLanguages || []);
     }
 
     async function loadContent() {
       stopSpeech();
+      setPlayState(false);
       setNote('speech-note', '');
       applyStaticText();
-      if (!code) return showError(t(lang, 'missingCode'));
+      if (!code) return showError(ds('missingCode'));
 
-      document.getElementById('detail-desc').textContent = t(lang, 'loading');
+      document.getElementById('detail-desc').textContent = ds('loading');
+      document.getElementById('play-btn').disabled = true;
       try {
         const body = await fetchJson(`/api/artifacts/code/${encodeURIComponent(code)}?lang=${lang}`);
         current = body.data;
         render();
+        // Ghi nhận lượt xem
+        trackEvent(current.code, current.language || lang, 'view');
       } catch (err) {
         showError(err.message);
       }
@@ -121,35 +281,37 @@
       const url = new URL(window.location.href);
       url.searchParams.set('lang', lang);
       window.history.replaceState(null, '', url);
-      renderLanguageButtons(document.getElementById('lang-bar'), languages, lang, changeLanguage);
+      renderLanguageButtons(document.getElementById('lang-bar'), languages, lang, changeLanguage, 'text-xs');
       loadContent();
     }
 
     async function init() {
       code = new URLSearchParams(window.location.search).get('code');
-      try {
-        languages = (await fetchJson('/api/languages')).data;
-      } catch (err) { /* dùng danh sách mặc định (chỉ tiếng Việt) */ }
-
+      try { languages = (await fetchJson('/api/languages')).data; } catch (e) { /* giữ mặc định */ }
       lang = detectLanguage(languages.map((l) => l.code));
-      renderLanguageButtons(document.getElementById('lang-bar'), languages, lang, changeLanguage);
+      renderLanguageButtons(document.getElementById('lang-bar'), languages, lang, changeLanguage, 'text-xs');
       await loadContent();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Trình duyệt điện thoại chặn tự phát âm thanh, nên người dùng cần bấm nút để nghe
       document.getElementById('play-btn').addEventListener('click', () => {
         if (!current) return;
-        const speechLang = speechCodeOf(current.language);
-        if (!speak(current.description || '', speechLang)) {
-          setNote('speech-note', t(lang, 'noSpeech'));
-        } else if (hasVoice(speechLang) === false) {
-          setNote('speech-note', t(lang, 'noVoice'));
-        } else {
-          setNote('speech-note', '');
-        }
+        if (isPlaying) { stopSpeech(); setPlayState(false); return; }
+        const sLang = speechOf(current.language || lang);
+        const ok = speak(current.description || '', sLang);
+        if (!ok) { setNote('speech-note', ds('noSpeech')); return; }
+        if (hasVoice && hasVoice(sLang) === false) { setNote('speech-note', ds('noVoice')); }
+        else { setNote('speech-note', ''); }
+        setPlayState(true);
+        startProgressSim();
+        trackEvent(current.code, current.language || lang, 'play');
       });
-      document.getElementById('stop-btn').addEventListener('click', stopSpeech);
+
+      document.getElementById('stop-btn').addEventListener('click', () => {
+        stopSpeech();
+        setPlayState(false);
+      });
+
       init();
     });
   </script>
