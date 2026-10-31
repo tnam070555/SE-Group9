@@ -12,7 +12,11 @@ const Feedback = require('./models/feedback.model');
 const ScanLog = require('./models/scan_log.model');
 const Event = require('./models/event.model');
 // Cần model Artifact để lấy ID liên kết cho Feedback và ScanLog
-const Artifact = require('./models/artifact.model'); 
+const Artifact = require('./models/artifact.model');
+// Models module Tickets (đăng ký schema trước khi server chạy)
+const TicketType  = require('./models/ticket_type.model');
+const TimeSlot    = require('./models/time_slot.model');
+const TicketOrder = require('./models/ticket_order.model');
 
 const PORT = process.env.PORT || 5000;
 
@@ -44,6 +48,15 @@ async function startServer() {
             await Language.create({ code: 'en', name: 'English' });
             console.log('Đã tạo bảng languages!');
         }
+        // Seed dữ liệu loại vé nếu chưa có
+        if (await TicketType.countDocuments() === 0) {
+            await TicketType.create({ code: 'ADULT',   name: 'Người lớn',             description: 'Từ 16 tuổi trở lên',                                               price: 40000 });
+            await TicketType.create({ code: 'CHILD',   name: 'Trẻ em',                description: 'Từ 6 đến 15 tuổi',                                                  price: 20000 });
+            await TicketType.create({ code: 'STUDENT', name: 'Học sinh / Sinh viên',  description: 'Có thẻ học sinh hoặc thẻ sinh viên hợp lệ',                         price: 10000 });
+            await TicketType.create({ code: 'FREE',    name: 'Miễn phí',              description: 'Trẻ em dưới 6 tuổi, người cao tuổi từ 70 tuổi, người khuyết tật',   price: 0 });
+            console.log('Đã tạo dữ liệu loại vé (TicketTypes)!');
+        }
+
         if (await Event.countDocuments() === 0) {
             await Event.create({ title: 'Triển lãm Kỷ niệm 30/4', description: 'Trưng bày chuyên đề tại Dinh Độc Lập' });
             console.log('Đã tạo bảng events!');

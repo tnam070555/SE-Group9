@@ -6,6 +6,7 @@ const artifactRoutes = require('./routers/artifact.routes');
 const languageRoutes = require('./routers/language.routes');
 const trackRoutes = require('./routers/track.routes');
 const categoryRoutes = require('./routers/category.routes'); // Nhúng router quản lý khu vực
+const ticketRoutes = require('./routers/ticket.routes');
 const { notFound, errorHandler } = require('./middlewares/error.middleware');
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.use('/api/tickets', ticketRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
