@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 const { SOURCE_LANGUAGE, TARGET_CODES, parseTargetLanguage } = require('../config/languages');
 
 // Chỉ nhận các trường này từ client (chặn client tự gán _id, quyền...)
-const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'audioUrl'];
+const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'audioUrl', 'imageUrl', 'categorySlug'];
 // Các trường có bản dịch
 const TRANSLATABLE_FIELDS = ['name', 'description', 'location'];
 
@@ -63,6 +63,7 @@ function localize(doc, lang) {
         description: t.description || a.description,
         location: t.location || a.location,
         audioUrl: a.audioUrl,
+        imageUrl: a.imageUrl || null,
         language: served,
         fallback: served !== lang,
         availableLanguages: available,

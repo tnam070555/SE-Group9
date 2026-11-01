@@ -305,6 +305,16 @@ const AREAS = {
 };
 const AREA_ORDER = ['tang-tret','lau-1','lau-2','san-thuong','tang-ham','ngoai-troi'];
 
+// Ảnh fallback theo khu vực (khi artifact chưa có imageUrl riêng)
+const AREA_IMAGES = {
+  'tang-tret':  '/img/palace-front.jpg',
+  'lau-1':      '/img/palace-side.jpg',
+  'lau-2':      '/img/palace-facade.jpg',
+  'san-thuong': '/img/palace-front.jpg',
+  'tang-ham':   '/img/palace-facade.jpg',
+  'ngoai-troi': '/img/palace-side.jpg',
+};
+
 const languages = [
   { code: 'vi', label: 'Tiếng Việt',  flag: '🇻🇳' },
   { code: 'en', label: 'English',     flag: '🇬🇧' },
@@ -525,11 +535,12 @@ function makeCard(a) {
   article.addEventListener('click', () => openModal(a));
   article.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(a); } });
 
+  const imgSrc = a.imageUrl || AREA_IMAGES[a.categorySlug] || '';
   const imgBand = `<div class="img-band w-full h-44 overflow-hidden relative flex items-center justify-center">
-    ${a.imageUrl
-      ? `<img src="${a.imageUrl}" alt="${a.name || ''}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    ${imgSrc
+      ? `<img src="${imgSrc}" alt="${a.name || ''}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       : ''}
-    <div class="flex flex-col items-center justify-center text-white/60 gap-2 absolute inset-0 ${a.imageUrl ? 'hidden' : ''}">
+    <div class="flex flex-col items-center justify-center text-white/60 gap-2 absolute inset-0 ${imgSrc ? 'hidden' : ''}">
       <i class="${area.icon || 'fa-solid fa-landmark'} text-4xl text-white/50"></i>
       <span class="text-xs text-white/40">${areaName}</span>
     </div>
@@ -693,8 +704,9 @@ function openModal(a) {
   // Image band
   const modalImg = document.getElementById('modalImg');
   const modalImgIcon = document.getElementById('modalImgIcon');
-  if (a.imageUrl) {
-    modalImg.src = a.imageUrl;
+  const modalImgSrc = a.imageUrl || AREA_IMAGES[a.categorySlug] || '';
+  if (modalImgSrc) {
+    modalImg.src = modalImgSrc;
     modalImg.alt = a.name || '';
     modalImg.classList.remove('hidden');
     modalImgIcon.style.display = 'none';
@@ -708,6 +720,7 @@ function openModal(a) {
     };
   } else {
     modalImg.classList.add('hidden');
+    modalImg.src = '';
     modalImgIcon.style.display = 'flex';
     const i = modalImgIcon.querySelector('i');
     const sp = modalImgIcon.querySelector('span');
