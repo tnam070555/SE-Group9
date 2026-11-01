@@ -84,22 +84,6 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-    <div class="space-y-4">
-      <div>
-        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Tên đăng nhập</label>
-        <input id="loginUser" type="text" placeholder="admin" class="mt-1" />
-      </div>
-      <div>
-        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Mật khẩu</label>
-        <input id="loginPass" type="password" placeholder="••••••••" class="mt-1" onkeydown="if(event.key==='Enter')doLogin()" />
-      </div>
-      <p id="loginErr" class="text-red-500 text-sm hidden"></p>
-      <button class="btn-primary w-full py-2.5" onclick="doLogin()">Đăng nhập</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 <div id="sideOverlay" onclick="closeSidebar()"></div>
 
