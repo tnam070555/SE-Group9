@@ -26,7 +26,7 @@ app.use('/api/languages', languageRoutes);
 app.use('/api/track', trackRoutes);
 app.use('/api/artifacts', artifactRoutes);
 app.get('/api/site/qr', (req, res, next) => require('./controllers/artifact.controller').getSiteQr(req, res).catch(next));
-app.use('/api/admin/categories', categoryRoutes); // Định tuyến API
+app.use('/api/categories', categoryRoutes); // Định tuyến API
 // Ép server trả về file admin.html khi truy cập /admin
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
