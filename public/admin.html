@@ -409,15 +409,6 @@ function showSection(id) {
   if (id === 'tickets') loadTickets();
   if (id === 'stats') loadStats();
 }
-    document.getElementById('adminAvatar').textContent = username[0].toUpperCase();
-    const app = document.getElementById('app');
-    app.classList.remove('hidden'); app.classList.add('flex');
-    loadDashboard();
-  } catch(e) {
-    errEl.textContent = e.message === 'HTTP 401' ? 'Sai ten dang nhap hoac mat khau' : e.message;
-    errEl.classList.remove('hidden');
-  }
-}
 const fmtNum = n => Number(n).toLocaleString('vi-VN');
 const fmtMoney = n => Number(n).toLocaleString('vi-VN') + ' đ';
 function statusBadge(s) {
