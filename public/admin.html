@@ -72,7 +72,6 @@
     }
     .modal-backdrop { position:fixed; inset:0; background:#00000088; z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
     .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:16px; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; padding:28px; }
-    #loginScreen { position:fixed; inset:0; background:var(--bg); z-index:200; display:flex; align-items:center; justify-content:center; }
     #toast { position:fixed; bottom:24px; right:24px; z-index:300; pointer-events:none; }
     .toast-item { padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; margin-top:8px; opacity:0; transform:translateY(8px); transition:all .25s; }
     .toast-item.show { opacity:1; transform:translateY(0); }
@@ -86,12 +85,6 @@
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen">
-  <div class="card w-full max-w-sm p-8">
-    <div class="text-center mb-8">
-      <h1 class="font-serif text-2xl font-bold" style="color:var(--accent)">Dinh Độc Lập</h1>
-      <p style="color:var(--text2)" class="text-sm mt-1">Hệ thống quản trị</p>
-    </div>
     <div class="space-y-4">
       <div>
         <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Tên đăng nhập</label>
@@ -111,7 +104,7 @@
 <div id="sideOverlay" onclick="closeSidebar()"></div>
 
 <!-- APP SHELL -->
-<div id="app" class="hidden flex min-h-screen">
+<div id="app" class="flex min-h-screen">
 
   <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar flex flex-col" style="width:var(--sidebar-w); flex-shrink:0">
@@ -144,9 +137,6 @@
     <div class="px-3 py-4 border-t space-y-1" style="border-color:var(--border)">
       <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="toggleTheme()">
         <i id="themeIcon" class="fa-solid fa-moon w-4 text-center"></i><span id="themeLabel" class="text-sm font-medium">Chế độ sáng</span>
-      </div>
-      <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="doLogout()">
-        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i><span class="text-sm font-medium">Đăng xuất</span>
       </div>
     </div>
   </aside>
@@ -379,13 +369,11 @@
 </div>
 
 <script>
-let TOKEN = localStorage.getItem('adminToken') || '';
 let allArtifacts = [];
 let allCategories = [];
 
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
-  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
   const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
@@ -437,19 +425,7 @@ function showSection(id) {
   if (id === 'tickets') loadTickets();
   if (id === 'stats') loadStats();
 }
-async function doLogin() {
-  const username = document.getElementById('loginUser').value.trim();
-  const password = document.getElementById('loginPass').value;
-  const errEl = document.getElementById('loginErr');
-  errEl.classList.add('hidden');
-  if (!username || !password) { errEl.textContent = 'Vui long nhap du thong tin'; errEl.classList.remove('hidden'); return; }
-  try {
-    const res = await api('POST', '/admin/login', { username, password });
-    TOKEN = res.token || res.data?.token || '';
-    if (!TOKEN) throw new Error('Khong nhan duoc token');
-    localStorage.setItem('adminToken', TOKEN);
     document.getElementById('adminAvatar').textContent = username[0].toUpperCase();
-    document.getElementById('loginScreen').classList.add('hidden');
     const app = document.getElementById('app');
     app.classList.remove('hidden'); app.classList.add('flex');
     loadDashboard();
@@ -458,24 +434,6 @@ async function doLogin() {
     errEl.classList.remove('hidden');
   }
 }
-function doLogout() {
-  TOKEN = ''; localStorage.removeItem('adminToken');
-  const app = document.getElementById('app');
-  app.classList.add('hidden'); app.classList.remove('flex');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
-}
-(async function tryAutoLogin() {
-  if (!TOKEN) return;
-  try {
-    await api('GET', '/admin/stats');
-    document.getElementById('loginScreen').classList.add('hidden');
-    const app = document.getElementById('app');
-    app.classList.remove('hidden'); app.classList.add('flex');
-    loadDashboard();
-  } catch { TOKEN = ''; localStorage.removeItem('adminToken'); }
-})();
 const fmtNum = n => Number(n).toLocaleString('vi-VN');
 const fmtMoney = n => Number(n).toLocaleString('vi-VN') + ' đ';
 function statusBadge(s) {
@@ -632,6 +590,7 @@ async function loadStats(){
     document.getElementById('statsArtifactBody').innerHTML=(stats.byBuilding||[]).map(b=>'<tr><td><code class="text-xs" style="color:var(--accent)">'+b.code+'</code></td><td>'+(b.name||'--')+'</td><td class="text-right font-semibold">'+fmtNum(b.views)+'</td><td class="text-right" style="color:var(--gold)">'+fmtNum(b.plays)+'</td></tr>').join('')||'<tr><td colspan="4" class="text-center py-8" style="color:var(--text2)">Chua co du lieu</td></tr>';
   }catch(e){toast('Loi thong ke: '+e.message,'err');}
 }
+document.addEventListener("DOMContentLoaded", () => loadDashboard());
 </script>
 </body>
 </html>
