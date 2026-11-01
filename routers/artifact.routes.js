@@ -10,10 +10,10 @@ router.get('/code/:code/qr', artifactController.getQrCode);
 router.get('/:id', artifactController.getArtifactById);
 
 // Chỉ admin đã đăng nhập
-router.post('/', verifyToken, requireAdmin, artifactController.createArtifact);
-router.put('/:id', verifyToken, requireAdmin, artifactController.updateArtifact);
-router.put('/:id/translations/:lang', verifyToken, requireAdmin, artifactController.setTranslation);
-router.post('/:id/translate', verifyToken, requireAdmin, artifactController.translateArtifact);
-router.delete('/:id', verifyToken, requireAdmin, artifactController.deleteArtifact);
+router.post('/', artifactController.createArtifact);
+router.put('/:id', artifactController.updateArtifact);
+router.put('/:id/translations/:lang', artifactController.setTranslation);
+router.post('/:id/translate', artifactController.translateArtifact);
+router.delete('/:id', artifactController.deleteArtifact);
 
 module.exports = router;

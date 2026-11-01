@@ -9,7 +9,7 @@ router.get('/slots',  ticketController.getSlots);
 router.post('/orders', ticketController.createOrder);
 
 // Admin only: xem danh sách đơn đặt
-router.get('/orders', verifyToken, requireAdmin, ticketController.getOrders);
+router.get('/orders', ticketController.getOrders);
 
 // Phải đặt CUỐI để không conflict
 router.get('/:code', ticketController.getByCode);

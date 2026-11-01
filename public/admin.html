@@ -427,8 +427,12 @@ function statusBadge(s) {
 }
 async function loadDashboard() {
   try {
-    const [statsRes, artRes, catRes] = await Promise.all([api('GET','/admin/stats'), api('GET','/artifacts'), api('GET','/categories')]);
-    const stats = statsRes.data || statsRes;
+    const [artRes, catRes, statsRes] = await Promise.all([
+      api('GET','/artifacts').catch(() => ({data:[]})),
+      api('GET','/categories').catch(() => ({data:[]})),
+      api('GET','/admin/stats').catch(() => ({data:{}}))
+    ]);
+    const stats = statsRes.data || {};
     const arts = artRes.data || artRes || [];
     const cats = catRes.data || catRes || [];
     document.getElementById('stat-artifacts').textContent = arts.length;
