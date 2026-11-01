@@ -187,6 +187,25 @@
   <div id="grid"></div>
 </main>
 
+
+<!-- ===== MÃ QR CỦA TRANG WEB ===== -->
+<section class="bg-white border-y border-heritage-gold/40">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid md:grid-cols-[auto,1fr] gap-6 sm:gap-8 items-center">
+    <div class="bg-heritage-paper p-5 rounded-2xl border border-heritage-gold/50 shadow-sm mx-auto">
+      <img id="siteQrImg" alt="Mã QR trang web" class="w-48 h-48 object-contain bg-white">
+      <p id="siteQrError" class="hidden text-xs text-red-700 mt-2 max-w-[12rem] text-center"></p>
+    </div>
+    <div>
+      <h3 class="font-serif text-2xl font-bold text-heritage-red mb-2" id="siteQrTitle">Quét mã để mở trang này</h3>
+      <p class="text-heritage-ink/80 leading-relaxed mb-4" id="siteQrDesc">Du khách dùng điện thoại quét mã để mở trang thuyết minh ngay trên thiết bị của mình.</p>
+      <label class="block text-xs font-semibold text-heritage-brown mb-1" for="siteBase" id="siteBaseLabel">Địa chỉ server (để điện thoại truy cập)</label>
+      <input id="siteBase" type="text" class="w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
+      <p id="siteWarn" class="text-xs text-amber-700 mt-2 hidden">Đang dùng localhost, điện thoại không quét được.</p>
+      <a id="siteDownload" download="QR-Dinh-Doc-Lap.png" class="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-heritage-red underline underline-offset-4">Tải ảnh mã QR</a>
+    </div>
+  </div>
+</section>
+
 <!-- ===== FLOATING LANG PILL ===== -->
 <div id="floatLang" aria-label="Chọn ngôn ngữ nhanh">
   <i class="fa-solid fa-language text-heritage-red text-sm mr-1"></i>
@@ -240,6 +259,27 @@
         <div id="modalAudioWrap" class="hidden mb-5">
           <p class="text-xs font-semibold uppercase tracking-wider text-heritage-brown/60 mb-2" id="modalAudioLabel">Âm thanh thuyết minh</p>
           <audio id="modalAudio" controls class="w-full h-10 rounded-lg accent-heritage-red" preload="none"></audio>
+        </div>
+
+
+        <!-- Tab QR trong modal -->
+        <div id="modalQrSection" class="mt-5 border-t border-heritage-gold/20 pt-5">
+          <div class="flex gap-6 border-b border-heritage-brown/15 mb-5">
+            <button id="tabAudio2" class="pb-2 font-semibold text-sm border-b-2 border-heritage-red text-heritage-red" id="tabAudio2"></button>
+            <button id="tabQr2" class="pb-2 font-semibold text-sm border-b-2 border-transparent text-heritage-brown hover:text-heritage-red"></button>
+          </div>
+          <div id="viewAudio2" class="text-center py-2">
+            <p class="text-sm text-heritage-brown/60 italic" id="audioTabNote">Nghe thuyết minh qua audio bên trên</p>
+          </div>
+          <div id="viewQr2" class="hidden text-center">
+            <div class="inline-block bg-white p-4 rounded-2xl border border-heritage-gold/50 shadow-sm">
+              <img id="qrImg" alt="QR" class="w-52 h-52 object-contain">
+            </div>
+            <p class="text-sm text-heritage-brown mt-4" id="qrHint"></p>
+            <label class="block text-left mt-4 text-xs font-semibold text-heritage-brown" for="qrBase" id="qrBaseLabel"></label>
+            <input id="qrBase" type="text" class="mt-1 w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
+            <p id="qrWarn" class="text-xs text-amber-700 mt-2 text-left hidden"></p>
+          </div>
         </div>
 
         <!-- Footer -->
@@ -337,6 +377,7 @@ let artifacts = [];
 let areaFilter = 'all';
 let searchQ = '';
 let scrollObs;
+let currentArtifact = null;
 
 const S = () => STRINGS[lang] || STRINGS['vi'];
 
@@ -428,6 +469,8 @@ function changeLanguage(code) {
   renderFloatLang();
   updateTexts();
   updateOpenBadge();
+  updateQrStrings();
+  updateSiteQr();
   renderAreaChips();
   renderGrid();
 }
@@ -583,8 +626,66 @@ function renderGrid() {
 </script>
 
 <script>
+
+// ===== QR FUNCTIONS =====
+function getQrBase(inputId) {
+  const raw = (document.getElementById(inputId)?.value || '').trim() || window.location.origin;
+  try { return new URL(raw).origin; } catch (e) { return window.location.origin; }
+}
+
+function updateQr(artifact) {
+  if (!artifact) return;
+  const base = getQrBase('qrBase');
+  const img = document.getElementById('qrImg');
+  if (img) img.src = `/api/artifacts/code/${encodeURIComponent(artifact.code)}/qr?base=${encodeURIComponent(base)}`;
+  const warn = document.getElementById('qrWarn');
+  if (warn) warn.classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
+}
+
+function updateSiteQr() {
+  const base = getQrBase('siteBase');
+  const src = `/api/site/qr?base=${encodeURIComponent(base)}`;
+  const img = document.getElementById('siteQrImg');
+  const dl = document.getElementById('siteDownload');
+  const warn = document.getElementById('siteWarn');
+  const errEl = document.getElementById('siteQrError');
+  if (img) { img.src = src; img.onerror = () => { if (errEl) errEl.classList.remove('hidden'); }; img.onload = () => { if (errEl) errEl.classList.add('hidden'); }; }
+  if (dl) dl.href = src;
+  if (warn) warn.classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
+}
+
+function showTab2(which) {
+  const isAudio = which === 'audio';
+  const v1 = document.getElementById('viewAudio2');
+  const v2 = document.getElementById('viewQr2');
+  const t1 = document.getElementById('tabAudio2');
+  const t2 = document.getElementById('tabQr2');
+  if (v1) v1.classList.toggle('hidden', !isAudio);
+  if (v2) v2.classList.toggle('hidden', isAudio);
+  const activeClass = 'pb-2 font-semibold text-sm border-b-2 border-heritage-red text-heritage-red';
+  const inactClass  = 'pb-2 font-semibold text-sm border-b-2 border-transparent text-heritage-brown hover:text-heritage-red';
+  if (t1) t1.className = isAudio ? activeClass : inactClass;
+  if (t2) t2.className = !isAudio ? activeClass : inactClass;
+}
+
+function updateQrStrings() {
+  const s = S();
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  set('qrHint', s.qrHint || (lang === 'vi' ? 'Quét mã bằng điện thoại để mở trang thuyết minh.' : 'Scan with your phone to open the guide.'));
+  set('qrBaseLabel', s.qrBase || (lang === 'vi' ? 'Địa chỉ server' : 'Server address'));
+  set('siteQrTitle', s.siteQrTitle || 'Quét mã để mở trang này');
+  set('siteQrDesc', s.siteQrDesc || '');
+  set('siteBaseLabel', s.siteBaseLabel || '');
+  set('siteDownload', s.siteDownload || 'Tải ảnh mã QR');
+  const t1 = document.getElementById('tabAudio2'); if (t1) t1.textContent = s.tabAudio || 'Nghe';
+  const t2 = document.getElementById('tabQr2'); if (t2) t2.textContent = s.tabQr || 'Mã QR';
+  const note = document.getElementById('audioTabNote');
+  if (note) note.textContent = lang === 'vi' ? 'Nghe thuyết minh qua audio bên trên' : (lang === 'en' ? 'Listen via the audio player above' : '');
+}
+
 // ===== MODAL =====
 function openModal(a) {
+  currentArtifact = a;
   const s = S();
   const area = AREAS[a.categorySlug] || {};
   const areaName = area.name ? (area.name[lang] || area.name.vi) : '';
@@ -644,6 +745,11 @@ function openModal(a) {
   document.getElementById('modalFooter').textContent = s.modalFooter;
   const closeBtn2 = document.getElementById('modalCloseBtn2') || document.getElementById('modalClose2');
   if (closeBtn2) closeBtn2.textContent = s.modalCloseBtn;
+
+  // Init QR tab
+  updateQrStrings();
+  showTab2('audio');
+  updateQr(a);
 
   document.getElementById('modal').classList.remove('hidden');
   document.getElementById('modalName').focus();
@@ -715,6 +821,22 @@ document.addEventListener('DOMContentLoaded', () => {
       renderGrid();
     });
   }
+
+  // QR tab buttons
+  const tb2 = document.getElementById('tabAudio2');
+  const tq2 = document.getElementById('tabQr2');
+  if (tb2) tb2.addEventListener('click', () => showTab2('audio'));
+  if (tq2) tq2.addEventListener('click', () => showTab2('qr'));
+
+  // QR base input
+  const qrBaseEl = document.getElementById('qrBase');
+  if (qrBaseEl) qrBaseEl.addEventListener('input', () => updateQr(currentArtifact));
+  const siteBaseEl = document.getElementById('siteBase');
+  if (siteBaseEl) siteBaseEl.addEventListener('input', updateSiteQr);
+
+  // Init site QR
+  updateSiteQr();
+  updateQrStrings();
 
   // Load data
   loadArtifacts();
