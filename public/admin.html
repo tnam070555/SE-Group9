@@ -77,6 +77,10 @@
     .toast-item.show { opacity:1; transform:translateY(0); }
     .toast-ok  { background:#14532d; color:#bbf7d0; }
     .toast-err { background:#7f1d1d; color:#fecaca; }
+    #loginScreen { position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:16px; }
+    #loginScreen.hidden { display:none; }
+    .lang-chip { font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid var(--border); color:var(--text2); cursor:pointer; background:transparent; }
+    .lang-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
     ::-webkit-scrollbar { width:6px; height:6px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:999px; }
@@ -85,6 +89,25 @@
 <body>
 
 <div id="toast"></div>
+
+<!-- ĐĂNG NHẬP (UC08) -->
+<div id="loginScreen" class="hidden">
+  <form id="loginForm" class="card w-full p-8" style="max-width:380px" autocomplete="on">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="stat-icon" style="background:color-mix(in srgb,var(--accent) 18%,transparent)"><i class="fa-solid fa-landmark" style="color:var(--accent)"></i></div>
+      <div>
+        <div class="font-serif font-semibold">Dinh Độc Lập</div>
+        <div class="text-xs" style="color:var(--text2)">Đăng nhập quản trị</div>
+      </div>
+    </div>
+    <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)" for="loginUser">Tên đăng nhập</label>
+    <input id="loginUser" name="username" type="text" autocomplete="username" class="mt-1 mb-4" required />
+    <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)" for="loginPass">Mật khẩu</label>
+    <input id="loginPass" name="password" type="password" autocomplete="current-password" class="mt-1" required />
+    <p id="loginError" class="text-sm mt-3 hidden" style="color:#dc2626"></p>
+    <button id="loginBtn" type="submit" class="btn-primary w-full mt-6">Đăng nhập</button>
+  </form>
+</div>
 <div id="sideOverlay" onclick="closeSidebar()"></div>
 
 <!-- APP SHELL -->
@@ -121,6 +144,9 @@
     <div class="px-3 py-4 border-t space-y-1" style="border-color:var(--border)">
       <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="toggleTheme()">
         <i id="themeIcon" class="fa-solid fa-moon w-4 text-center"></i><span id="themeLabel" class="text-sm font-medium">Chế độ sáng</span>
+      </div>
+      <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="logout()">
+        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i><span class="text-sm font-medium">Đăng xuất</span>
       </div>
     </div>
   </aside>
@@ -209,7 +235,7 @@
           <button class="btn-primary flex items-center gap-2" onclick="openCatModal()"><i class="fa-solid fa-plus text-xs"></i> Thêm khu vực</button>
         </div>
         <div class="card overflow-hidden">
-          <table><thead><tr><th>Tên</th><th>Mô tả</th><th>Ảnh</th><th></th></tr></thead>
+          <table><thead><tr><th>Mã (slug)</th><th>Tên</th><th>Mô tả</th><th>Ảnh</th><th></th></tr></thead>
           <tbody id="catTableBody"></tbody></table>
           <div id="catEmpty" class="hidden text-center py-12" style="color:var(--text2)"><i class="fa-solid fa-inbox text-3xl mb-2 block"></i>Chưa có khu vực nào</div>
         </div>
@@ -323,6 +349,50 @@
   </div>
 </div>
 
+<!-- TRANSLATION MODAL (UC10) -->
+<div id="transModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeTransModal()">
+  <div class="modal-box" style="max-width:640px">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-serif text-lg font-semibold">Bản dịch</h3>
+        <div id="transTitle" class="text-xs mt-1" style="color:var(--text2)"></div>
+      </div>
+      <button class="btn-ghost px-2 py-1" onclick="closeTransModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <input type="hidden" id="transId" />
+    <div id="transTabs" class="flex flex-wrap gap-2 mb-4"></div>
+    <div class="card p-4 mb-4" style="background:var(--bg)">
+      <div class="text-xs font-semibold uppercase tracking-widest mb-1" style="color:var(--text2)">Bản gốc tiếng Việt</div>
+      <div id="transSource" class="text-sm whitespace-pre-line" style="max-height:120px;overflow-y:auto"></div>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Tên</label>
+        <input id="transName" type="text" class="mt-1" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Vị trí</label>
+        <input id="transLocation" type="text" class="mt-1" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Nội dung thuyết minh</label>
+        <textarea id="transDesc" rows="6" class="mt-1"></textarea>
+      </div>
+    </div>
+    <div id="transReport" class="text-xs mt-4 hidden" style="color:var(--text2)"></div>
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-6">
+      <div class="flex items-center gap-3">
+        <button id="autoBtn" class="btn-ghost" onclick="autoTranslate(false)"><i class="fa-solid fa-language mr-1"></i> Dịch tự động phần còn thiếu</button>
+        <button class="btn-ghost" onclick="autoTranslate(true)" title="Dịch lại cả các trường đã có bản dịch">Dịch lại tất cả</button>
+      </div>
+      <div class="flex gap-3">
+        <button class="btn-ghost" onclick="closeTransModal()">Đóng</button>
+        <button class="btn-primary" onclick="saveTranslation()">Lưu bản dịch</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CATEGORY MODAL -->
 <div id="catModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeCatModal()">
   <div class="modal-box">
@@ -335,6 +405,10 @@
       <div>
         <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Tên khu vực *</label>
         <input id="catName" type="text" placeholder="Tầng trệt" class="mt-1" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Mã khu vực (slug)</label>
+        <input id="catSlug" type="text" placeholder="tang-tret (để trống sẽ tự tạo từ tên)" class="mt-1" />
       </div>
       <div>
         <label class="text-xs font-semibold uppercase tracking-widest" style="color:var(--text2)">Mô tả</label>
@@ -356,13 +430,62 @@
 let allArtifacts = [];
 let allCategories = [];
 
+// ---------- Xác thực (UC08) ----------
+const TOKEN_KEY = 'adminToken';
+function getToken() { try { return localStorage.getItem(TOKEN_KEY); } catch (e) { return null; } }
+function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+function tokenPayload() {
+  const t = getToken(); if (!t) return null;
+  try { return JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); } catch (e) { return null; }
+}
+function tokenValid() { const p = tokenPayload(); return !!(p && p.role === 'admin' && (!p.exp || p.exp * 1000 > Date.now())); }
+function showLogin(message) {
+  setToken(null);
+  document.getElementById('loginScreen').classList.remove('hidden');
+  const err = document.getElementById('loginError');
+  if (message) { err.textContent = message; err.classList.remove('hidden'); } else err.classList.add('hidden');
+  setTimeout(() => document.getElementById('loginUser').focus(), 50);
+}
+function enterApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  const p = tokenPayload() || {};
+  document.getElementById('adminAvatar').textContent = (p.username || 'A').charAt(0).toUpperCase();
+  document.getElementById('adminAvatar').title = p.username || '';
+  showSection('dashboard');
+}
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!username || !password) return showLogin('Cần nhập tên đăng nhập và mật khẩu');
+  btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
+  try {
+    const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.token) throw new Error(data.message || 'Đăng nhập thất bại');
+    setToken(data.token);
+    document.getElementById('loginPass').value = '';
+    enterApp();
+  } catch (err) {
+    showLogin(err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Đăng nhập';
+  }
+}
+function logout() { setToken(null); location.reload(); }
+
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers.Authorization = 'Bearer ' + token;
   const res = await fetch('/api' + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { showLogin('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại'); throw new Error(data.message || 'Chưa đăng nhập'); }
   if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
   return data;
 }
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function toast(msg, type) {
   type = type || 'ok';
   const box = document.getElementById('toast');
@@ -453,7 +576,7 @@ async function loadArtifacts() {
   } catch(e) { toast('Loi tai cong trinh: '+e.message,'err'); }
 }
 function populateCatFilters() {
-  const opts = allCategories.map(c => '<option value="'+c._id+'">'+c.name+'</option>').join('');
+  const opts = allCategories.map(c => '<option value="'+esc(c.slug)+'">'+esc(c.name)+'</option>').join('');
   document.getElementById('artifactCatFilter').innerHTML = '<option value="">Tat ca khu vuc</option>' + opts;
   document.getElementById('artifactCat').innerHTML = '<option value="">-- Chon khu vuc --</option>' + opts;
 }
@@ -462,7 +585,7 @@ function filterArtifacts() {
   const cat = document.getElementById('artifactCatFilter').value;
   renderArtifacts(allArtifacts.filter(a =>
     (!q||(a.name||'').toLowerCase().includes(q)||(a.code||'').toLowerCase().includes(q)) &&
-    (!cat||a.categorySlug===cat||a.categoryId===cat)
+    (!cat||a.categorySlug===cat)
   ));
 }
 function renderArtifacts(list) {
@@ -470,11 +593,11 @@ function renderArtifacts(list) {
   if (!list.length) { tbody.innerHTML=''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
   tbody.innerHTML = list.map(a => {
-    const cn=(allCategories.find(c=>c._id===a.categorySlug||c._id===a.categoryId)||{}).name||a.categorySlug||'--';
-    const lg=['en','ja','ko','zh'].filter(l=>a.translations?.[l]?.name).map(l=>'<span class="text-xs px-1.5 py-0.5 rounded" style="background:var(--border)">'+l+'</span>').join(' ');
+    const cn=(allCategories.find(c=>c.slug===a.categorySlug)||{}).name||a.categorySlug||'--';
+    const lg=(a.availableLanguages||[]).filter(l=>l!=='vi').map(l=>'<span class="text-xs px-1.5 py-0.5 rounded" style="background:var(--border)">'+l+'</span>').join(' ');
     const aJ=JSON.stringify(a).replace(/'/g,'’');
     const sN=a.name.replace(/'/g,'’');
-    return '<tr><td><code class="text-xs" style="color:var(--accent)">'+a.code+'</code></td><td class="font-medium">'+a.name+'</td><td class="text-sm" style="color:var(--text2)">'+cn+'</td><td><div class="flex gap-1 flex-wrap">'+(lg||'<span style="color:var(--text2)" class="text-xs">--</span>')+'</div></td><td><div class="flex gap-2"><button class="btn-ghost text-xs py-1 px-3" onclick=\'openArtifactModal('+aJ+')\'>Sua</button><button class="btn-danger text-xs py-1 px-3" onclick="deleteArtifact(\''+a._id+'\',\''+sN+'\')">Xoa</button></div></td></tr>';
+    return '<tr><td><code class="text-xs" style="color:var(--accent)">'+a.code+'</code></td><td class="font-medium">'+a.name+'</td><td class="text-sm" style="color:var(--text2)">'+cn+'</td><td><div class="flex gap-1 flex-wrap">'+(lg||'<span style="color:var(--text2)" class="text-xs">--</span>')+'</div></td><td><div class="flex gap-2"><button class="btn-ghost text-xs py-1 px-3" onclick="openTransModal(\''+a._id+'\')">Bản dịch</button><button class="btn-ghost text-xs py-1 px-3" onclick=\'openArtifactModal('+aJ+')\'>Sua</button><button class="btn-danger text-xs py-1 px-3" onclick="deleteArtifact(\''+a._id+'\',\''+sN+'\')">Xoa</button></div></td></tr>';
   }).join('');
 }
 function openArtifactModal(a) {
@@ -487,7 +610,7 @@ function openArtifactModal(a) {
     document.getElementById('artifactLocation').value=a.location||'';
     document.getElementById('artifactDesc').value=a.description||'';
     document.getElementById('artifactAudio').value=a.audioUrl||'';
-    document.getElementById('artifactCat').value=a.categorySlug||a.categoryId||'';
+    document.getElementById('artifactCat').value=a.categorySlug||'';
   } else {
     document.getElementById('artifactModalTitle').textContent='Them cong trinh moi';
     document.getElementById('artifactId').value='';
@@ -519,18 +642,19 @@ function renderCategories(list){
   tbody.innerHTML=list.map(c=>{
     const sN=c.name.replace(/'/g,'’');
     const cJ=JSON.stringify(c).replace(/'/g,'’');
-    return '<tr><td class="font-medium">'+c.name+'</td><td class="text-sm" style="color:var(--text2);max-width:280px">'+(c.description||'--')+'</td><td>'+(c.image?'<img src="'+c.image+'" class="w-12 h-8 object-cover rounded" onerror="this.style.display=\'none\'" />':'--')+'</td><td><div class="flex gap-2"><button class="btn-ghost text-xs py-1 px-3" onclick=\'openCatModal('+cJ+')\'>Sua</button><button class="btn-danger text-xs py-1 px-3" onclick="deleteCat(\''+c._id+'\',\''+sN+'\')">Xoa</button></div></td></tr>';
+    return '<tr><td><code class="text-xs" style="color:var(--accent)">'+esc(c.slug||'--')+'</code></td><td class="font-medium">'+esc(c.name)+'</td><td class="text-sm" style="color:var(--text2);max-width:280px">'+(c.description||'--')+'</td><td>'+(c.image?'<img src="'+c.image+'" class="w-12 h-8 object-cover rounded" onerror="this.style.display=\'none\'" />':'--')+'</td><td><div class="flex gap-2"><button class="btn-ghost text-xs py-1 px-3" onclick=\'openCatModal('+cJ+')\'>Sua</button><button class="btn-danger text-xs py-1 px-3" onclick="deleteCat(\''+c._id+'\',\''+sN+'\')">Xoa</button></div></td></tr>';
   }).join('');
 }
 function openCatModal(c){
   document.getElementById('catModal').classList.remove('hidden');
-  if(c&&typeof c==='object'){document.getElementById('catModalTitle').textContent='Chinh sua khu vuc';document.getElementById('catId').value=c._id;document.getElementById('catName').value=c.name||'';document.getElementById('catDesc').value=c.description||'';document.getElementById('catImage').value=c.image||'';}
-  else{document.getElementById('catModalTitle').textContent='Them khu vuc moi';document.getElementById('catId').value='';['catName','catDesc','catImage'].forEach(id=>document.getElementById(id).value='');}
+  if(c&&typeof c==='object'){document.getElementById('catModalTitle').textContent='Chinh sua khu vuc';document.getElementById('catId').value=c._id;document.getElementById('catName').value=c.name||'';document.getElementById('catSlug').value=c.slug||'';document.getElementById('catDesc').value=c.description||'';document.getElementById('catImage').value=c.image||'';}
+  else{document.getElementById('catModalTitle').textContent='Them khu vuc moi';document.getElementById('catId').value='';['catName','catSlug','catDesc','catImage'].forEach(id=>document.getElementById(id).value='');}
 }
 function closeCatModal(){document.getElementById('catModal').classList.add('hidden');}
 async function saveCat(){
   const id=document.getElementById('catId').value;
-  const body={name:document.getElementById('catName').value.trim(),description:document.getElementById('catDesc').value.trim(),image:document.getElementById('catImage').value.trim()};
+  const slug=document.getElementById('catSlug').value.trim();
+  const body={name:document.getElementById('catName').value.trim(),...(slug?{slug}:{}),description:document.getElementById('catDesc').value.trim(),image:document.getElementById('catImage').value.trim()};
   if(!body.name){toast('Nhap ten khu vuc','err');return;}
   try{if(id)await api('PUT','/categories/'+id,body);else await api('POST','/categories',body);toast(id?'Cap nhat khu vuc':'Them khu vuc moi');closeCatModal();loadCategories();}
   catch(e){toast('Loi: '+e.message,'err');}
@@ -569,7 +693,68 @@ async function loadStats(){
     document.getElementById('statsArtifactBody').innerHTML=(stats.byBuilding||[]).map(b=>'<tr><td><code class="text-xs" style="color:var(--accent)">'+b.code+'</code></td><td>'+(b.name||'--')+'</td><td class="text-right font-semibold">'+fmtNum(b.views)+'</td><td class="text-right" style="color:var(--gold)">'+fmtNum(b.plays)+'</td></tr>').join('')||'<tr><td colspan="4" class="text-center py-8" style="color:var(--text2)">Chua co du lieu</td></tr>';
   }catch(e){toast('Loi thong ke: '+e.message,'err');}
 }
-document.addEventListener("DOMContentLoaded", () => loadDashboard());
+// ---------- Bản dịch (UC10) ----------
+const TRANS_LANGS = [['en','English'],['ja','日本語'],['ko','한국어'],['zh','中文']];
+let transDoc = null, transLang = 'en';
+async function openTransModal(id) {
+  try {
+    const res = await api('GET', '/artifacts/' + id);
+    transDoc = res.data;
+    document.getElementById('transId').value = id;
+    document.getElementById('transTitle').textContent = transDoc.code + ' – ' + transDoc.name;
+    document.getElementById('transReport').classList.add('hidden');
+    transLang = 'en';
+    renderTrans();
+    document.getElementById('transModal').classList.remove('hidden');
+  } catch (e) { toast('Lỗi tải bản dịch: ' + e.message, 'err'); }
+}
+function renderTrans() {
+  const tr = (transDoc.translations || {});
+  document.getElementById('transTabs').innerHTML = TRANS_LANGS.map(([c, label]) =>
+    '<button type="button" class="lang-chip' + (c === transLang ? ' active' : '') + '" onclick="switchTrans(\'' + c + '\')">' + label +
+    (tr[c] && tr[c].description ? ' ✓' : '') + '</button>').join('');
+  document.getElementById('transSource').textContent = [transDoc.name, transDoc.location, transDoc.description].filter(Boolean).join('\n');
+  const t = tr[transLang] || {};
+  document.getElementById('transName').value = t.name || '';
+  document.getElementById('transLocation').value = t.location || '';
+  document.getElementById('transDesc').value = t.description || '';
+}
+function switchTrans(code) { transLang = code; renderTrans(); }
+function closeTransModal() { document.getElementById('transModal').classList.add('hidden'); }
+async function saveTranslation() {
+  const id = document.getElementById('transId').value;
+  const body = { name: document.getElementById('transName').value, location: document.getElementById('transLocation').value, description: document.getElementById('transDesc').value };
+  try {
+    const res = await api('PUT', '/artifacts/' + id + '/translations/' + transLang, body);
+    transDoc = res.data; renderTrans(); toast('Đã lưu bản dịch ' + transLang.toUpperCase()); loadArtifacts();
+  } catch (e) { toast('Lỗi: ' + e.message, 'err'); }
+}
+async function autoTranslate(force) {
+  const id = document.getElementById('transId').value;
+  const btn = document.getElementById('autoBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang dịch...';
+  try {
+    const res = await api('POST', '/artifacts/' + id + '/translate', { force: !!force });
+    transDoc = res.data; renderTrans(); loadArtifacts();
+    const rep = res.report || {};
+    const box = document.getElementById('transReport');
+    box.innerHTML = '<b>Kết quả dịch:</b> ' + Object.entries(rep).map(([l, m]) => esc(l.toUpperCase() + ': ' + m)).join(' · ');
+    box.classList.remove('hidden');
+    toast('Đã chạy dịch tự động');
+  } catch (e) { toast('Lỗi dịch: ' + e.message, 'err'); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-language mr-1"></i> Dịch tự động phần còn thiếu'; }
+}
+
+// Cập nhật số người online mỗi 30 giây
+setInterval(async () => {
+  if (!tokenValid()) return;
+  try { const r = await fetch('/api/track/online-count'); const d = await r.json(); document.getElementById('onlineCount').textContent = d.count ?? 0; } catch (e) {}
+}, 30000);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById('loginForm').addEventListener('submit', doLogin);
+  if (tokenValid()) enterApp(); else showLogin();
+});
 </script>
 </body>
 </html>

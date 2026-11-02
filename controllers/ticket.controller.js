@@ -1,6 +1,12 @@
 const ticketService = require('../services/ticket.service');
 const ticketOrderRepository = require('../repositories/ticketOrder.repository');
 
+// Địa chỉ gốc cho mã QR trên vé: PUBLIC_BASE_URL -> CLIENT_URL -> địa chỉ đang truy cập
+function baseUrlOf(req) {
+    const raw = process.env.PUBLIC_BASE_URL || process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`;
+    try { return new URL(raw).origin; } catch (e) { return `${req.protocol}://${req.get('host')}`; }
+}
+
 /**
  * Controller module Tickets.
  * Dùng Express 5 – async errors tự lan đến errorHandler, KHÔNG cần try/catch.
@@ -24,7 +30,7 @@ const ticketController = {
 
     /** POST /api/tickets/orders */
     createOrder: async (req, res) => {
-        const result = await ticketService.createOrder(req.body);
+        const result = await ticketService.createOrder(req.body, baseUrlOf(req));
         res.status(201).json({ success: true, data: result });
     },
 
@@ -38,7 +44,7 @@ const ticketController = {
 
     /** GET /api/tickets/:code */
     getByCode: async (req, res) => {
-        const ticket = await ticketService.getTicketByCode(req.params.code);
+        const ticket = await ticketService.getTicketByCode(req.params.code, baseUrlOf(req));
         res.json({ success: true, data: ticket });
     },
 };

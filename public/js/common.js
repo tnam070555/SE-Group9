@@ -139,3 +139,47 @@ function speak(text, lang = 'vi-VN', rate = 0.95) {
 function stopSpeech() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 }
+
+// ---------- Thống kê ẩn danh ----------
+
+// Mã thiết bị ngẫu nhiên lưu trên máy (không gắn với danh tính), dùng để đếm số người đang xem
+function getDeviceId() {
+  try {
+    let id = localStorage.getItem('deviceId');
+    if (!id || !/^[A-Za-z0-9-]{8,64}$/.test(id)) {
+      id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem('deviceId', id);
+    }
+    return id;
+  } catch (e) {
+    return `tmp-${Math.random().toString(36).slice(2, 12)}`;
+  }
+}
+
+// Ghi một lượt xem ('view') hoặc lượt nghe ('play'); lỗi bị bỏ qua để không ảnh hưởng du khách
+function trackEvent(code, language, type) {
+  try {
+    fetch('/api/track/event', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+      body: JSON.stringify({ code, language, type }),
+    }).catch(() => {});
+  } catch (e) { /* bỏ qua */ }
+}
+
+// Gửi tín hiệu "đang xem" mỗi 30 giây khi trang đang hiển thị (máy chủ coi là online trong 60 giây)
+function startHeartbeat() {
+  if (window.__heartbeatStarted) return;
+  window.__heartbeatStarted = true;
+  const deviceId = getDeviceId();
+  const beat = () => {
+    if (document.visibilityState === 'hidden') return;
+    fetch('/api/track/heartbeat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+      body: JSON.stringify({ deviceId }),
+    }).catch(() => {});
+  };
+  beat();
+  setInterval(beat, 30000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') beat(); });
+}

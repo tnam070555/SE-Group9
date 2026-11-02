@@ -16,6 +16,21 @@ const timeSlotRepository = {
             { new: true }
         ),
 
+    /**
+     * Giữ chỗ nguyên tử: chỉ cộng booked khi còn đủ chỗ (booked + qty <= capacity).
+     * Trả về slot sau khi cập nhật, hoặc null nếu không đủ chỗ.
+     */
+    reserve: (date, from, qty) =>
+        TimeSlot.findOneAndUpdate(
+            { date, from, $expr: { $lte: [{ $add: ['$booked', qty] }, '$capacity'] } },
+            { $inc: { booked: qty } },
+            { new: true }
+        ),
+
+    /** Trả lại chỗ đã giữ (khi lưu đơn thất bại) */
+    release: (date, from, qty) =>
+        TimeSlot.findOneAndUpdate({ date, from }, { $inc: { booked: -qty } }, { new: true }),
+
     /** Tạo nhiều slot cùng lúc (dùng khi seed / generate) */
     insertMany: (docs) => TimeSlot.insertMany(docs, { ordered: false }),
 

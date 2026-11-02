@@ -4,6 +4,7 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const adminService = require('./services/admin.service');
 const seedService = require('./services/seed.service');
+const categoryService = require('./services/category.service');
 
 // Nhúng toàn bộ các model để khởi tạo bảng trên MongoDB
 const Category = require('./models/category.model'); 
@@ -39,10 +40,10 @@ async function startServer() {
     // KHỞI TẠO DỮ LIỆU MẪU CHO TẤT CẢ CÁC BẢNG CÒN LẠI
     // =========================================================================
     try {
-        if (await Category.countDocuments() === 0) {
-            await Category.create({ name: 'Tầng trệt', description: 'Khu vực trưng bày chính tại Dinh Độc Lập' });
-            console.log('Đã tạo bảng categories!');
-        }
+        // Khu vực: tạo 6 khu vực mặc định nếu trống, bổ sung slug cho khu vực cũ
+        const areas = await categoryService.ensureDefaults();
+        if (areas.created) console.log(`Đã tạo ${areas.created} khu vực mặc định!`);
+        if (areas.fixed) console.log(`Đã bổ sung slug cho ${areas.fixed} khu vực.`);
         if (await Language.countDocuments() === 0) {
             await Language.create({ code: 'vi', name: 'Tiếng Việt' });
             await Language.create({ code: 'en', name: 'English' });

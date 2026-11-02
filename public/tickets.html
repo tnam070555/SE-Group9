@@ -382,6 +382,14 @@
       document.getElementById('newBtn').addEventListener('click', newOrder);
       document.getElementById('lookupForm').addEventListener('submit', lookup);
       updateTotals();
+      startHeartbeat();
+      // Mở từ mã QR trên vé (tickets.html?code=...): tự tra cứu vé
+      const qrCode = new URLSearchParams(window.location.search).get('code');
+      if (qrCode) {
+        document.getElementById('lookupCode').value = qrCode;
+        lookup({ preventDefault() {} });
+        document.getElementById('lookupForm').scrollIntoView({ behavior: 'smooth' });
+      }
     });
   </script>
 </body>
