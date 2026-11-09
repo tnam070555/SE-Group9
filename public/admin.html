@@ -134,9 +134,6 @@
       <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="showSection('categories')">
         <i class="fa-solid fa-layer-group w-4 text-center"></i><span class="text-sm font-medium">Khu vực</span>
       </div>
-      <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="showSection('tickets')">
-        <i class="fa-solid fa-ticket w-4 text-center"></i><span class="text-sm font-medium">Vé &amp; Đơn đặt</span>
-      </div>
       <div class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg" onclick="showSection('stats')">
         <i class="fa-solid fa-chart-bar w-4 text-center"></i><span class="text-sm font-medium">Thống kê</span>
       </div>
@@ -238,38 +235,6 @@
           <table><thead><tr><th>Mã (slug)</th><th>Tên</th><th>Mô tả</th><th>Ảnh</th><th></th></tr></thead>
           <tbody id="catTableBody"></tbody></table>
           <div id="catEmpty" class="hidden text-center py-12" style="color:var(--text2)"><i class="fa-solid fa-inbox text-3xl mb-2 block"></i>Chưa có khu vực nào</div>
-        </div>
-      </section>
-
-      <!-- VÉ & ĐƠN ĐẶT -->
-      <section id="sec-tickets" class="hidden">
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div class="card p-5 stat-card">
-            <div class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:var(--text2)">Loại vé</div>
-            <div id="stat-ticketTypes" class="text-3xl font-bold font-serif">—</div>
-          </div>
-          <div class="card p-5 stat-card">
-            <div class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:var(--text2)">Tổng đơn đặt</div>
-            <div id="stat-ticketOrders" class="text-3xl font-bold font-serif">—</div>
-          </div>
-          <div class="card p-5 stat-card">
-            <div class="text-xs font-semibold uppercase tracking-widest mb-2" style="color:var(--text2)">Tổng vé đã phát</div>
-            <div id="stat-ticketCount" class="text-3xl font-bold font-serif">—</div>
-          </div>
-        </div>
-        <div class="card overflow-hidden mb-5">
-          <div class="px-5 py-4 border-b" style="border-color:var(--border)"><h3 class="font-semibold text-sm">Loại vé</h3></div>
-          <table><thead><tr><th>Mã</th><th>Tên</th><th>Giá</th><th>Trạng thái</th></tr></thead>
-          <tbody id="ticketTypeBody"></tbody></table>
-        </div>
-        <div class="card overflow-hidden">
-          <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color:var(--border)">
-            <h3 class="font-semibold text-sm">Đơn đặt vé gần đây</h3>
-            <button class="btn-ghost text-xs py-1.5 px-3" onclick="loadTickets()"><i class="fa-solid fa-rotate-right mr-1"></i>Làm mới</button>
-          </div>
-          <table><thead><tr><th>Ngày</th><th>Giờ</th><th>Liên hệ</th><th>Vé</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
-          <tbody id="orderTableBody"></tbody></table>
-          <div id="orderEmpty" class="hidden text-center py-12" style="color:var(--text2)"><i class="fa-solid fa-inbox text-3xl mb-2 block"></i>Chưa có đơn đặt vé nào</div>
         </div>
       </section>
 
@@ -516,7 +481,7 @@ function toggleTheme() {
 })();
 function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sideOverlay').classList.add('show'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sideOverlay').classList.remove('show'); }
-const TITLES = { dashboard:'Dashboard', artifacts:'Quan ly cong trinh', categories:'Quan ly khu vuc', tickets:'Ve & Don dat', stats:'Thong ke' };
+const TITLES = { dashboard:'Dashboard', artifacts:'Quan ly cong trinh', categories:'Quan ly khu vuc', stats:'Thong ke' };
 function showSection(id) {
   document.querySelectorAll('[id^="sec-"]').forEach(s => s.classList.add('hidden'));
   document.getElementById('sec-' + id)?.classList.remove('hidden');
@@ -529,7 +494,6 @@ function showSection(id) {
   if (id === 'dashboard') loadDashboard();
   if (id === 'artifacts') loadArtifacts();
   if (id === 'categories') loadCategories();
-  if (id === 'tickets') loadTickets();
   if (id === 'stats') loadStats();
 }
 const fmtNum = n => Number(n).toLocaleString('vi-VN');
@@ -663,22 +627,6 @@ async function deleteCat(id,name){
   if(!confirm('Xoa "'+name+'"?'))return;
   try{await api('DELETE','/categories/'+id);toast('Da xoa khu vuc');loadCategories();}
   catch(e){toast('Loi xoa: '+e.message,'err');}
-}
-async function loadTickets(){
-  try{
-    const typesRes=await api('GET','/tickets/types');
-    const types=typesRes.data||typesRes||[];
-    document.getElementById('stat-ticketTypes').textContent=types.length;
-    document.getElementById('ticketTypeBody').innerHTML=types.map(t=>'<tr><td><code class="text-xs" style="color:var(--accent)">'+t.code+'</code></td><td class="font-medium">'+t.name+'</td><td>'+fmtMoney(t.price)+'</td><td>'+(t.active?'<span class="badge-active">Hoat dong</span>':'<span class="badge-inactive">Tat</span>')+'</td></tr>').join('');
-    const ordersRes=await api('GET','/tickets/orders').catch(()=>({data:[]}));
-    const orders=ordersRes.data||ordersRes||[];
-    document.getElementById('stat-ticketOrders').textContent=orders.length;
-    document.getElementById('stat-ticketCount').textContent=orders.reduce((s,o)=>s+(o.tickets?.length||0),0);
-    const tbody=document.getElementById('orderTableBody'),empty=document.getElementById('orderEmpty');
-    if(!orders.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
-    empty.classList.add('hidden');
-    tbody.innerHTML=orders.slice(0,50).map(o=>'<tr><td class="text-sm">'+(o.date||'--')+'</td><td class="text-sm">'+(o.slot?.from||'--')+' - '+(o.slot?.to||'--')+'</td><td class="text-sm">'+(o.contact?.name?'<div class="font-medium">'+o.contact.name+'</div>':'')+(o.contact?.email?'<div style="color:var(--text2)">'+o.contact.email+'</div>':'')+(o.contact?.phone?'<div style="color:var(--text2)">'+o.contact.phone+'</div>':'')+'</td><td class="text-sm">'+(o.tickets?.length||0)+' ve</td><td class="text-sm font-semibold" style="color:var(--accent)">'+fmtMoney(o.totalPrice)+'</td><td>'+statusBadge(o.status)+'</td></tr>').join('');
-  }catch(e){toast('Loi tai ve: '+e.message,'err');}
 }
 async function loadStats(){
   try{

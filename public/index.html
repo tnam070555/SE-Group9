@@ -89,9 +89,6 @@
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <!-- Language bar -->
         <div id="langBar" class="flex gap-1.5 flex-wrap justify-end" role="group" aria-label="Ngôn ngữ"></div>
-        <a href="tickets.html" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-heritage-gold text-heritage-ink hover:bg-white transition-colors">
-          <i class="fa-solid fa-ticket"></i><span class="buyTicketText">Mua vé</span>
-        </a>
       </div>
     </div>
     <!-- Hero text -->
@@ -105,11 +102,6 @@
       </p>
     </div>
     <!-- Stats -->
-    <div class="flex justify-center mt-5">
-      <a href="tickets.html" class="inline-flex items-center gap-2 bg-heritage-gold text-heritage-ink font-bold text-sm px-6 py-2.5 rounded-full shadow-lg hover:bg-white transition-colors">
-        <i class="fa-solid fa-ticket"></i><span id="heroTicketBtn">Đặt vé tham quan</span>
-      </a>
-    </div>
     <div class="flex justify-center gap-6 sm:gap-10 mt-6 text-center">
       <div>
         <p class="text-xl sm:text-2xl font-bold text-heritage-gold" id="statCount">–</p>
@@ -412,30 +404,25 @@ let currentArtifact = null;
 
 const S = () => STRINGS[lang] || STRINGS['vi'];
 
-// Chữ cho nút nghe, mua vé, mã QR (5 ngôn ngữ)
+// Chữ cho nút nghe, mã QR (5 ngôn ngữ)
 const EXTRA = {
-  vi: { listen: 'Nghe thuyết minh', pause: 'Đang phát…', stop: 'Dừng', openDetail: 'Mở trang thuyết minh đầy đủ', buyTicket: 'Mua vé', heroTicket: 'Đặt vé tham quan',
-        tabAudio: 'Nghe thuyết minh', tabQr: 'Mã QR', noSpeech: 'Thiết bị này không hỗ trợ đọc thuyết minh, bạn có thể đọc nội dung phía trên.',
+  vi: { listen: 'Nghe thuyết minh', pause: 'Đang phát…', stop: 'Dừng', openDetail: 'Mở trang thuyết minh đầy đủ', tabAudio: 'Nghe thuyết minh', tabQr: 'Mã QR', noSpeech: 'Thiết bị này không hỗ trợ đọc thuyết minh, bạn có thể đọc nội dung phía trên.',
         qrHint: 'Quét mã bằng điện thoại để mở trang thuyết minh của công trình.', qrBase: 'Địa chỉ server (để điện thoại truy cập)',
         siteQrTitle: 'Quét mã để mở trang này', siteQrDesc: 'Du khách dùng điện thoại quét mã để mở trang thuyết minh ngay trên thiết bị của mình.',
         siteBaseLabel: 'Địa chỉ server (để điện thoại truy cập)', siteDownload: 'Tải ảnh mã QR' },
-  en: { listen: 'Listen to the guide', pause: 'Playing…', stop: 'Stop', openDetail: 'Open full guide page', buyTicket: 'Tickets', heroTicket: 'Book your visit',
-        tabAudio: 'Listen', tabQr: 'QR code', noSpeech: 'This device does not support speech. You can read the text above.',
+  en: { listen: 'Listen to the guide', pause: 'Playing…', stop: 'Stop', openDetail: 'Open full guide page', tabAudio: 'Listen', tabQr: 'QR code', noSpeech: 'This device does not support speech. You can read the text above.',
         qrHint: 'Scan with your phone to open the guide for this exhibit.', qrBase: 'Server address (so your phone can reach it)',
         siteQrTitle: 'Scan to open this guide', siteQrDesc: 'Visitors can scan this code to open the audio guide on their own phone.',
         siteBaseLabel: 'Server address (so your phone can reach it)', siteDownload: 'Download QR image' },
-  ja: { listen: '解説を聞く', pause: '再生中…', stop: '停止', openDetail: '解説ページを開く', buyTicket: 'チケット', heroTicket: '見学を予約する',
-        tabAudio: '解説を聞く', tabQr: 'QRコード', noSpeech: 'この端末は音声読み上げに対応していません。上の文章をお読みください。',
+  ja: { listen: '解説を聞く', pause: '再生中…', stop: '停止', openDetail: '解説ページを開く', tabAudio: '解説を聞く', tabQr: 'QRコード', noSpeech: 'この端末は音声読み上げに対応していません。上の文章をお読みください。',
         qrHint: 'スマートフォンで読み取ると、この展示の解説ページが開きます。', qrBase: 'サーバーのアドレス',
         siteQrTitle: 'QRコードでこのガイドを開く', siteQrDesc: 'スマートフォンで読み取ると、ご自身の端末で音声ガイドを開けます。',
         siteBaseLabel: 'サーバーのアドレス', siteDownload: 'QRコードをダウンロード' },
-  ko: { listen: '안내 듣기', pause: '재생 중…', stop: '정지', openDetail: '전체 안내 페이지 열기', buyTicket: '티켓', heroTicket: '관람 예약하기',
-        tabAudio: '안내 듣기', tabQr: 'QR 코드', noSpeech: '이 기기는 음성 읽기를 지원하지 않습니다. 위의 글을 읽어 주세요.',
+  ko: { listen: '안내 듣기', pause: '재생 중…', stop: '정지', openDetail: '전체 안내 페이지 열기', tabAudio: '안내 듣기', tabQr: 'QR 코드', noSpeech: '이 기기는 음성 읽기를 지원하지 않습니다. 위의 글을 읽어 주세요.',
         qrHint: '휴대폰으로 스캔하면 이 전시물의 안내 페이지가 열립니다.', qrBase: '서버 주소',
         siteQrTitle: '스캔하여 이 안내 열기', siteQrDesc: '휴대폰으로 스캔하면 자신의 기기에서 음성 안내를 열 수 있습니다.',
         siteBaseLabel: '서버 주소', siteDownload: 'QR 코드 다운로드' },
-  zh: { listen: '聆听讲解', pause: '播放中…', stop: '停止', openDetail: '打开完整讲解页面', buyTicket: '购票', heroTicket: '预订参观',
-        tabAudio: '聆听讲解', tabQr: '二维码', noSpeech: '此设备不支持语音朗读，请阅读上方文字。',
+  zh: { listen: '聆听讲解', pause: '播放中…', stop: '停止', openDetail: '打开完整讲解页面', tabAudio: '聆听讲解', tabQr: '二维码', noSpeech: '此设备不支持语音朗读，请阅读上方文字。',
         qrHint: '用手机扫描即可打开该展品的讲解页面。', qrBase: '服务器地址',
         siteQrTitle: '扫码打开本导览', siteQrDesc: '游客可用手机扫描此码，在自己的设备上打开语音讲解。',
         siteBaseLabel: '服务器地址', siteDownload: '下载二维码图片' },
@@ -465,7 +452,7 @@ function updateOpenBadge() {
   if (!badge) return;
   const now = new Date();
   const minutes = now.getHours() * 60 + now.getMinutes();
-  const isOpen = minutes >= 7 * 60 + 30 && minutes < 16 * 60 + 30; // 07:30 – 16:30, khớp khung giờ đặt vé
+  const isOpen = minutes >= 7 * 60 + 30 && minutes < 16 * 60 + 30; // giờ mở cửa 07:30 – 16:30
   badge.textContent = isOpen ? S().openBadge : S().closeBadge;
   badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full ' + (isOpen ? 'badge-open' : 'badge-close');
   badge.classList.remove('hidden');
@@ -746,8 +733,7 @@ function updateQrStrings() {
   set('qrBaseLabel', X('qrBase'));
   set('tabAudio2', X('tabAudio')); set('tabQr2', X('tabQr'));
   set('ttsPlayText', ttsPlaying ? X('pause') : X('listen')); set('ttsStopText', X('stop'));
-  set('detailLinkText', X('openDetail')); set('heroTicketBtn', X('heroTicket'));
-  document.querySelectorAll('.buyTicketText').forEach((e) => { e.textContent = X('buyTicket'); });
+  set('detailLinkText', X('openDetail'));
 }
 
 // ===== NGHE THUYẾT MINH (Web Speech API) =====
