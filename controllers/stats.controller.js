@@ -1,17 +1,21 @@
 const statsService = require('../services/stats.service');
 
 // Lớp 1: chỉ lo HTTP. Express 5 tự chuyển lỗi bất đồng bộ sang errorHandler.
-// Nguồn đếm online duy nhất: presenceService (qua statsService.heartbeat / statsService.getStats)
+// Nguồn đếm online duy nhất: collection device_sessions trong MongoDB (qua presence.service)
 class StatsController {
     async heartbeat(req, res) {
-        // deviceId dùng cho presence (đếm online); clientId không còn dùng riêng nữa
-        await statsService.heartbeat(req.body && req.body.deviceId);
+        const body = req.body || {};
+        await statsService.heartbeat(body.deviceId, {
+            ip: req.ip,
+            userAgent: req.get('user-agent'),
+            page: body.page,
+        });
         res.status(204).send();
     }
 
     async disconnect(req, res) {
-        // Tín hiệu ngắt kết nối tự nhiên — presence.service tự dọn khi TTL hết,
-        // nên không cần xử lý thêm ở đây. Giữ endpoint để frontend không bị lỗi.
+        // Thiết bị đóng tab: bỏ đếm ngay. Nếu tín hiệu không tới, thiết bị vẫn hết "online" sau 60 giây.
+        await statsService.disconnect(req.body && req.body.deviceId);
         res.status(204).send();
     }
 
@@ -21,12 +25,15 @@ class StatsController {
     }
 
     async getStats(req, res) {
-        res.status(200).json({ success: true, data: await statsService.getStats() });
+        res.status(200).json({ success: true, data: await statsService.getStats({ days: req.query.days }) });
     }
 
     async getOnlineCount(req, res) {
-        // Dùng cùng nguồn với getStats để số liệu nhất quán
-        res.status(200).json({ count: statsService.getOnlineCount() });
+        res.status(200).json({ count: await statsService.getOnlineCount() });
+    }
+
+    async getOnlineDevices(req, res) {
+        res.status(200).json({ success: true, data: await statsService.getOnlineDevices() });
     }
 }
 

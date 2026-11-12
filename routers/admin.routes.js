@@ -8,5 +8,7 @@ const statsController = require('../controllers/stats.controller');
 router.post('/login', adminController.login);
 
 router.get('/stats', verifyToken, requireAdmin, statsController.getStats);
+// Danh sách thiết bị đang truy cập (deviceId, IP, loại thiết bị...) lấy từ collection device_sessions
+router.get('/online-devices', verifyToken, requireAdmin, statsController.getOnlineDevices);
 
 module.exports = router;

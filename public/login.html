@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập quản trị – Dinh Độc Lập</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            500: '#C9A227', // Gold accent
+                            600: '#8B1E24', // Heritage red
+                            700: '#6d1a1f',
+                            800: '#5E1216',
+                        },
+                        sidebar: '#2A2320',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        // window.Auth chỉ tồn tại khi auth.js nạp được (tức là trang mở qua server).
+        // Mở thẳng file bằng file:// thì không nạp được -> bỏ qua, phần dưới sẽ báo rõ.
+        if (window.Auth) Auth.redirectIfLoggedIn();
+    </script>
+
+    <style>
+        body {
+            background-color: #2A2320;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(201, 162, 39, .14), transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(139, 30, 36, .35), transparent 50%);
+        }
+        .gold-rule {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #C9A227, transparent);
+        }
+    </style>
+</head>
+
+<body class="font-sans text-slate-800 min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-md">
+
+        <!-- Thương hiệu -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto rounded-full border-2 border-brand-500 bg-white/95 text-brand-600 flex items-center justify-center shadow-lg mb-4">
+                <i class="fa-solid fa-landmark text-2xl"></i>
+            </div>
+            <h1 class="font-serif text-2xl font-bold text-white uppercase tracking-wide">Dinh Độc Lập</h1>
+            <p class="text-sm text-brand-500 mt-1 tracking-widest uppercase">Khu vực quản trị</p>
+        </div>
+
+        <!-- Cảnh báo: trang đang mở sai cách (file:// thay vì qua server) -->
+        <div id="setup-warning" class="hidden mb-5 rounded-xl border border-amber-400/60 bg-amber-50 p-5 text-sm text-amber-900 shadow-lg">
+            <p class="font-bold flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Trang đang mở sai cách
+            </p>
+            <p class="mb-3">Bạn đang mở thẳng file từ ổ đĩa nên trang không gọi được API. Hãy chạy server rồi mở qua địa chỉ web:</p>
+            <ol class="list-decimal list-inside space-y-1 mb-3">
+                <li>Mở terminal tại thư mục dự án</li>
+                <li>Chạy <code class="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">npm start</code></li>
+                <li>Mở <code class="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">http://localhost:5000/admin</code></li>
+            </ol>
+            <p class="text-xs text-amber-800">Trên Windows nếu <code>npm start</code> báo lỗi "running scripts is disabled", gõ <code class="bg-amber-100 px-1 rounded font-mono">npm.cmd start</code>.</p>
+        </div>
+
+        <!-- Thẻ đăng nhập -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="gold-rule"></div>
+
+            <form id="login-form" class="p-8" novalidate>
+                <h2 class="text-lg font-bold text-slate-800 mb-1">Đăng nhập</h2>
+                <p class="text-sm text-slate-500 mb-6">Dành cho nhân viên quản lý nội dung thuyết minh.</p>
+
+                <!-- Thông báo lỗi -->
+                <div id="login-error"
+                     class="hidden mb-5 flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+                     role="alert" aria-live="polite">
+                    <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                    <span id="login-error-text"></span>
+                </div>
+
+                <!-- Tên đăng nhập -->
+                <label for="username" class="block text-sm font-medium text-slate-700 mb-1.5">Tên đăng nhập</label>
+                <div class="relative mb-5">
+                    <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="username" name="username" type="text"
+                           autocomplete="username" required autofocus
+                           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 transition"
+                           placeholder="Nhập tên đăng nhập">
+                </div>
+
+                <!-- Mật khẩu -->
+                <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">Mật khẩu</label>
+                <div class="relative mb-6">
+                    <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="password" name="password" type="password"
+                           autocomplete="current-password" required
+                           class="w-full pl-10 pr-11 py-2.5 rounded-lg border border-slate-300 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 transition"
+                           placeholder="Nhập mật khẩu">
+                    <button type="button" id="toggle-password"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition"
+                            aria-label="Hiện mật khẩu">
+                        <i class="fa-regular fa-eye" id="toggle-password-icon"></i>
+                    </button>
+                </div>
+
+                <!-- Nút gửi -->
+                <button type="submit" id="submit-btn"
+                        class="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed">
+                    <span id="submit-label">Đăng nhập</span>
+                    <i id="submit-spinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                </button>
+            </form>
+
+            <div class="px-8 pb-6 -mt-2">
+                <a href="/" class="text-sm text-slate-500 hover:text-brand-600 transition inline-flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left text-xs"></i> Quay lại trang du khách
+                </a>
+            </div>
+        </div>
+
+        <p class="text-center text-xs text-white/40 mt-6">
+            Tài khoản quản trị được cấp trong file <code>.env</code> của server.
+        </p>
+    </main>
+
+    <script>
+        var form = document.getElementById('login-form');
+        var errorBox = document.getElementById('login-error');
+        var errorText = document.getElementById('login-error-text');
+        var submitBtn = document.getElementById('submit-btn');
+        var submitLabel = document.getElementById('submit-label');
+        var submitSpinner = document.getElementById('submit-spinner');
+        var usernameInput = document.getElementById('username');
+        var passwordInput = document.getElementById('password');
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+
+        function setLoading(loading) {
+            submitBtn.disabled = loading;
+            submitLabel.textContent = loading ? 'Đang kiểm tra...' : 'Đăng nhập';
+            submitSpinner.classList.toggle('hidden', !loading);
+        }
+
+        // -----------------------------------------------------------------
+        // Kiểm tra trang có đang chạy qua server không
+        // -----------------------------------------------------------------
+        // Mở thẳng file (file://) thì auth.js không nạp được và cũng không gọi
+        // được API -> báo rõ ngay từ đầu, thay vì để người dùng bấm rồi chờ mãi.
+        function checkSetup() {
+            var viaFile = location.protocol === 'file:';
+            if (!viaFile && window.Auth) return true;
+
+            document.getElementById('setup-warning').classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitLabel.textContent = 'Chưa chạy server';
+            if (!viaFile) {
+                showError('Không nạp được /js/auth.js. Kiểm tra file có nằm trong thư mục public/js/ không.');
+            }
+            return false;
+        }
+
+        var ready = checkSetup();
+
+        // Hiện / ẩn mật khẩu
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            var icon = document.getElementById('toggle-password-icon');
+            var showing = passwordInput.type === 'text';
+            passwordInput.type = showing ? 'password' : 'text';
+            icon.className = showing ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+            this.setAttribute('aria-label', showing ? 'Hiện mật khẩu' : 'Ẩn mật khẩu');
+        });
+
+        // Gửi form
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (!ready) return;
+            hideError();
+
+            var username = usernameInput.value.trim();
+            var password = passwordInput.value;
+
+            if (!username || !password) {
+                showError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+                return;
+            }
+
+            setLoading(true);
+            try {
+                var result = await Auth.login(username, password);
+
+                if (!result.ok) {
+                    showError(result.message);
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    return;
+                }
+
+                // Quay lại đúng trang người dùng định vào, mặc định là /admin
+                var params = new URLSearchParams(location.search);
+                var next = params.get('next');
+                // Chỉ chấp nhận đường dẫn nội bộ, tránh bị chuyển sang web khác
+                var safeNext = (next && next.charAt(0) === '/' && next.charAt(1) !== '/') ? next : '/admin';
+                location.replace(safeNext);
+            } catch (err) {
+                // Bắt mọi lỗi ngoài dự kiến để nút không bị kẹt ở "Đang kiểm tra..."
+                console.error(err);
+                showError('Có lỗi không mong muốn: ' + (err && err.message ? err.message : err));
+            } finally {
+                // Luôn chạy, kể cả khi ở trên đã return hoặc ném lỗi
+                setLoading(false);
+            }
+        });
+
+        // Vừa bị đăng xuất do hết hạn token
+        if (new URLSearchParams(location.search).get('expired') === '1') {
+            showError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+    </script>
+</body>
+</html>

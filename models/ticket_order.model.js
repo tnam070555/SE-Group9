@@ -33,7 +33,6 @@ const ticketOrderSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-// Index để tra cứu vé theo mã nhanh
-ticketOrderSchema.index({ 'tickets.code': 1 });
+// Index tra cứu vé theo mã: đã được tạo sẵn bởi "unique: true" ở trường tickets.code
 
 module.exports = mongoose.model('TicketOrder', ticketOrderSchema);
