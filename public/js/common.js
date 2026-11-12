@@ -114,6 +114,66 @@ function renderLanguageButtons(container, languages, current, onChange, extraCla
   });
 }
 
+// ---------- Thống kê ----------
+
+// Ghi nhận lượt xem ('view') hoặc lượt nghe ('play'). Lỗi thống kê không được làm hỏng trang.
+function trackEvent(code, language, type) {
+  try {
+    fetch('/api/track/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language, type }),
+      keepalive: true,
+    }).catch(() => { /* bỏ qua */ });
+  } catch (e) { /* bỏ qua */ }
+}
+
+// ---------- Đếm người đang truy cập (heartbeat) ----------
+// Mỗi thiết bị có một mã ngẫu nhiên (không chứa thông tin cá nhân), gửi tín hiệu định kỳ khi đang mở trang.
+// Server đếm các thiết bị gửi tín hiệu trong 60 giây gần nhất. Nhiều tab trên cùng máy chỉ tính là 1.
+
+const HEARTBEAT_MS = 15 * 1000;
+
+function getDeviceId() {
+  let id = null;
+  try { id = localStorage.getItem('deviceId'); } catch (e) { /* bị chặn */ }
+  if (!id || !/^[A-Za-z0-9-]{8,64}$/.test(id)) {
+    // crypto.randomUUID chỉ có khi chạy HTTPS/localhost; điện thoại vào bằng http://IP thì dùng cách dự phòng
+    id = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+    try { localStorage.setItem('deviceId', id); } catch (e) { /* bị chặn: mỗi lần tải trang là mã mới */ }
+  }
+  return id;
+}
+
+function startPresence() {
+  const deviceId = getDeviceId();
+  const payload = JSON.stringify({ deviceId, page: window.location.pathname });
+
+  const beat = () => {
+    if (document.visibilityState === 'hidden') return; // tab đang ẩn thì không tính
+    fetch('/api/track/heartbeat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true,
+    }).catch(() => { /* mất mạng: thử lại ở lần sau */ });
+  };
+
+  const leave = () => {
+    const blob = new Blob([payload], { type: 'application/json' });
+    if (navigator.sendBeacon) navigator.sendBeacon('/api/track/disconnect', blob);
+  };
+
+  beat();
+  setInterval(beat, HEARTBEAT_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') beat();
+  });
+  window.addEventListener('pagehide', leave);
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startPresence);
+else startPresence();
+
 // ---------- Đọc to ----------
 
 // true: có giọng cho ngôn ngữ này; false: không có; null: trình duyệt chưa tải xong danh sách giọng

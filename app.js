@@ -21,6 +21,11 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Địa chỉ gốc cho mã QR (PUBLIC_BASE_URL trong .env), để trang web điền sẵn thay cho localhost
+app.get('/api/public-config', (req, res) => {
+    res.json({ publicBaseUrl: process.env.PUBLIC_BASE_URL || '' });
+});
+
 app.use('/api/admin', adminRoutes);
 app.use('/api/languages', languageRoutes);
 app.use('/api/track', trackRoutes);

@@ -67,11 +67,18 @@
           <i class="fa-solid fa-landmark"></i>
         </div>
         <div>
-          <p class="font-serif font-bold text-base sm:text-lg leading-tight text-heritage-red uppercase tracking-wide">Dinh Độc Lập</p>
+          <p class="font-serif font-bold text-base sm:text-lg leading-tight text-heritage-red uppercase tracking-wide whitespace-nowrap">Dinh Độc Lập</p>
           <p class="text-xs text-heritage-brown" id="brandSub">Thuyết minh đa ngôn ngữ</p>
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-2" id="langBar" aria-label="Chọn ngôn ngữ"></div>
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0" id="langBar" aria-label="Chọn ngôn ngữ"></div>
+        <!-- Nút vào trang quản trị (đã đăng nhập thì login.html tự chuyển sang trang admin) -->
+        <a href="login.html" title="Đăng nhập quản trị" aria-label="Đăng nhập quản trị"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full bg-heritage-red text-white text-xs font-semibold shadow-sm hover:bg-heritage-redDeep transition">
+          <i class="fa-solid fa-user-shield"></i><span class="hidden sm:inline">Admin</span>
+        </a>
+      </div>
     </div>
     <div class="gold-rule"></div>
   </header>
@@ -90,10 +97,11 @@
   </section>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-    <div class="grid lg:grid-cols-[260px_1fr] gap-8 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 items-start">
 
       <!-- Cột khu vực (bên trái): Tất cả khu vực + từng khu vực -->
-      <aside class="lg:sticky lg:top-32">
+      <!-- min-w-0: không cho hàng nút khu vực (cuộn ngang) kéo giãn cả trang trên điện thoại -->
+      <aside class="min-w-0 lg:sticky lg:top-32">
         <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown mb-2 lg:mb-3" id="areaTitle"></p>
         <div id="areaChips" class="flex flex-wrap lg:flex-col gap-2"></div>
       </aside>
@@ -541,8 +549,15 @@
       lang = detectLanguage(languages.map((l) => l.code));
       applyStatic();
       renderLangBar();
-      document.getElementById('qrBase').value = window.location.origin;
-      document.getElementById('siteBase').value = window.location.origin;
+      // Ưu tiên PUBLIC_BASE_URL từ server (IP LAN), nếu không có thì dùng địa chỉ đang mở trang
+      let defaultBase = window.location.origin;
+      try {
+        const cfg = await (await fetch('/api/public-config')).json();
+        if (cfg.publicBaseUrl) defaultBase = new URL(cfg.publicBaseUrl).origin;
+      } catch (e) { /* giữ địa chỉ hiện tại */ }
+      document.getElementById('qrBase').value = defaultBase;
+      document.getElementById('siteBase').value = defaultBase;
+      updateSiteQr();
       loadArtifacts();
     });
   </script>

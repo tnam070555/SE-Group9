@@ -17,6 +17,8 @@ const Artifact = require('./models/artifact.model');
 const TicketType  = require('./models/ticket_type.model');
 const TimeSlot    = require('./models/time_slot.model');
 const TicketOrder = require('./models/ticket_order.model');
+// Thiết bị đang truy cập (đếm "Đang truy cập" ở trang admin)
+const DeviceSession = require('./models/device_session.model');
 
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +41,10 @@ async function startServer() {
     // KHỞI TẠO DỮ LIỆU MẪU CHO TẤT CẢ CÁC BẢNG CÒN LẠI
     // =========================================================================
     try {
+        // Tạo sẵn collection device_sessions (kèm index) để xem được trong MongoDB Compass ngay cả khi chưa có ai truy cập
+        await DeviceSession.createCollection().catch(() => {});
+        await DeviceSession.syncIndexes();
+
         if (await Category.countDocuments() === 0) {
             await Category.create({ name: 'Tầng trệt', description: 'Khu vực trưng bày chính tại Dinh Độc Lập' });
             console.log('Đã tạo bảng categories!');
