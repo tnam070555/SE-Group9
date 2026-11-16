@@ -42,6 +42,7 @@ QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP 
 - Dịch tự động các phần còn thiếu: `POST /api/artifacts/:id/translate` (body tùy chọn `{"languages":["en","ja"],"force":false}`).
   Nhà cung cấp chọn bằng `TRANSLATE_PROVIDER` trong `.env`: `mymemory` (miễn phí, có hạn mức mỗi ngày), `google` (cần `GOOGLE_TRANSLATE_API_KEY`) hoặc `none`.
 - Sửa tay bản dịch: `PUT /api/artifacts/:id/translations/:lang` (body `{"name","description","location"}`).
+- Ngôn ngữ và khu vực lưu trong MongoDB, quản lý ở trang admin (mục *Ngôn ngữ hỗ trợ*, *Khu vực & Phân loại*). Lần chạy đầu, server tự tạo 5 ngôn ngữ (vi, en, ja, ko, zh) và 6 khu vực mặc định nếu database chưa có.
 - Khi sửa nội dung tiếng Việt của một trường, bản dịch của đúng trường đó bị xóa để tránh hiển thị bản dịch lỗi thời; hãy dịch lại.
 
 ## Kiểm thử
@@ -52,6 +53,7 @@ QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP 
 |---|---|---|
 | POST | `/api/admin/login` | Công khai |
 | GET | `/api/languages` | Công khai |
+| GET | `/api/categories` | Công khai (khu vực, tên theo ngôn ngữ, trạng thái hiện/ẩn) |
 | GET | `/api/artifacts?lang=ja` | Công khai |
 | GET | `/api/artifacts/code/:code?lang=ja` | Công khai (dùng cho trang quét QR) |
 | GET | `/api/artifacts/code/:code/qr?base=<địa chỉ server>` | Công khai (trả ảnh PNG) |
@@ -59,3 +61,7 @@ QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP 
 | POST, PUT, DELETE | `/api/artifacts`, `/api/artifacts/:id` | Admin (header `Authorization: Bearer <token>`) |
 | PUT | `/api/artifacts/:id/translations/:lang` | Admin |
 | POST | `/api/artifacts/:id/translate` | Admin |
+| GET, POST | `/api/admin/languages` | Admin (danh sách kèm tiến độ dịch; thêm ngôn ngữ) |
+| PUT, DELETE | `/api/admin/languages/:code` | Admin (sửa, bật/tắt; xóa kèm bản dịch). Không tắt/xóa được `vi` |
+| GET, POST | `/api/admin/categories` | Admin (danh sách kèm số công trình; thêm khu vực) |
+| PUT, DELETE | `/api/admin/categories/:id` | Admin. Không xóa được khu vực còn công trình |

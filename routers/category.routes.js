@@ -3,12 +3,12 @@ const router = express.Router();
 const categoryController = require('../controllers/category.controller');
 const { verifyToken, requireAdmin } = require('../middlewares/auth.middleware');
 
-// Công khai: du khách xem danh sách khu vực
+// Gắn tại /api/admin/categories: chỉ admin đã đăng nhập.
+// Du khách xem khu vực qua GET /api/categories (xem app.js)
+router.use(verifyToken, requireAdmin);
 router.get('/', categoryController.getAllCategories);
-
-// Chỉ admin đã đăng nhập
-router.post('/', verifyToken, requireAdmin, categoryController.createCategory);
-router.put('/:id', verifyToken, requireAdmin, categoryController.updateCategory);
-router.delete('/:id', verifyToken, requireAdmin, categoryController.deleteCategory);
+router.post('/', categoryController.createCategory);
+router.put('/:id', categoryController.updateCategory);
+router.delete('/:id', categoryController.deleteCategory);
 
 module.exports = router;

@@ -1,16 +1,24 @@
 const mongoose = require('mongoose');
-const { TARGET_CODES } = require('../config/languages');
+const { ALL_CODES, SOURCE_LANGUAGE } = require('../config/languages');
 
-// Bản dịch của một công trình sang một ngôn ngữ
-const translationSchema = new mongoose.Schema({
-    name: { type: String, trim: true },
-    description: { type: String, trim: true },
-    location: { type: String, trim: true },
-}, { _id: false });
+const TRANSLATION_FIELDS = ['name', 'description', 'location'];
 
-// translations: { en: {...}, ja: {...}, ko: {...}, zh: {...} }. Ngôn ngữ ngoài danh sách bị bỏ qua (strict).
-const translationsShape = {};
-TARGET_CODES.forEach((code) => { translationsShape[code] = translationSchema; });
+// translations: { en: { name, description, location }, fr: {...} }.
+// Danh sách ngôn ngữ do admin quản lý nên không cố định trong schema; chỉ giữ ngôn ngữ đang có
+// trong hệ thống và 3 trường dạng chuỗi (ngôn ngữ lạ hoặc trường lạ bị bỏ). Chạy trước khi validate.
+function cleanTranslations(value) {
+    if (!value || typeof value !== 'object') return undefined;
+    const cleaned = {};
+    for (const [lang, fields] of Object.entries(value)) {
+        if (lang === SOURCE_LANGUAGE || !ALL_CODES.includes(lang) || !fields || typeof fields !== 'object') continue;
+        const t = {};
+        for (const field of TRANSLATION_FIELDS) {
+            if (typeof fields[field] === 'string' && fields[field].trim()) t[field] = fields[field].trim();
+        }
+        if (Object.keys(t).length) cleaned[lang] = t;
+    }
+    return cleaned;
+}
 
 // Công trình / hiện vật tại Dinh Độc Lập
 const artifactSchema = new mongoose.Schema({
@@ -22,8 +30,17 @@ const artifactSchema = new mongoose.Schema({
     description: { type: String },                                      // Nội dung thuyết minh gốc (tiếng Việt)
     location: { type: String },
     categorySlug: { type: String, index: true },                        // Khu vực (tầng, khu) trong Dinh
+    imageUrl: { type: String, trim: true },                             // Ảnh minh họa (link http/https hoặc /img/...)
     audioUrl: { type: String },                                         // Đường dẫn audio đã lưu (chưa dùng)
-    translations: translationsShape,                                    // Bản dịch theo ngôn ngữ
+    qrLink: { type: String },                                           // Đường dẫn mã QR trỏ tới (trang thuyết minh)
+    qrImage: { type: String },                                          // Ảnh mã QR (PNG dạng data:image/png;base64,...)
+    translations: { type: mongoose.Schema.Types.Mixed },                // Bản dịch theo ngôn ngữ
 }, { timestamps: true });
+
+// Lọc bản dịch khi tạo/lưu document. Không dùng setter vì setter trên kiểu Mixed làm Mongoose
+// bỏ qua lệnh cập nhật lồng nhau ($set 'translations.fr.description'); các lệnh đó do service kiểm tra.
+artifactSchema.pre('validate', function cleanBeforeValidate() {
+    if (this.isModified('translations')) this.translations = cleanTranslations(this.translations);
+});
 
 module.exports = mongoose.model('Artifact', artifactSchema);

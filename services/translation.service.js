@@ -1,6 +1,7 @@
 const AppError = require('../utils/AppError');
 const { getLanguage } = require('../config/languages');
 
+const NO_SPACE_LANGUAGES = ['ja', 'zh', 'th', 'lo', 'km', 'my'];
 const MAX_CHUNK_BYTES = 400; // MyMemory giới hạn khoảng 500 byte mỗi lần gọi
 
 // Giải mã vài ký tự HTML mà một số dịch vụ trả về
@@ -95,8 +96,8 @@ async function translateText(text, target) {
     for (const chunk of splitIntoChunks(text)) {
         parts.push((await providers[name](chunk, target)).trim());
     }
-    // Tiếng Nhật/Trung không dùng khoảng trắng giữa các câu
-    return parts.join(target === 'ja' || target === 'zh' ? '' : ' ');
+    // Tiếng Nhật, Trung, Thái, Lào, Khmer, Miến Điện không dùng khoảng trắng giữa các câu
+    return parts.join(NO_SPACE_LANGUAGES.includes(target) ? '' : ' ');
 }
 
 module.exports = { translateText, splitIntoChunks, providers };

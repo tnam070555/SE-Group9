@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const buildingsData = require('./data/buildings.seed'); // Import 16 công trình từ thư mục data
+const categoriesData = require('./data/categories.seed'); // 6 khu vực (slug khớp categorySlug của công trình)
+const { DEFAULT_LANGUAGES } = require('./config/languages');
 
 async function runSeed() {
   const mongoUri = process.env.MONGO_URI;
@@ -21,26 +23,16 @@ async function runSeed() {
     // 1. Nạp Categories (Danh mục tầng/khu vực)
     const categoriesCol = db.collection('categories');
     await categoriesCol.deleteMany({});
-    await categoriesCol.insertMany([
-      { name: 'Tầng trệt', slug: 'tang-tret' },
-      { name: 'Lầu 1', slug: 'lau-1' },
-      { name: 'Lầu 2', slug: 'lau-2' },
-      { name: 'Tầng sân thượng', slug: 'san-thuong' },
-      { name: 'Tầng hầm', slug: 'tang-ham' },
-      { name: 'Khuôn viên ngoài trời', slug: 'ngoai-troi' }
-    ]);
+    const now = new Date();
+    await categoriesCol.insertMany(categoriesData.map((c) => ({ ...c, isActive: true, createdAt: now, updatedAt: now })));
     console.log('📂 Đã nạp xong các danh mục (Categories)!');
 
     // 2. Nạp Languages (Ngôn ngữ)
     const languagesCol = db.collection('languages');
     await languagesCol.deleteMany({});
-    await languagesCol.insertMany([
-      { code: 'vi', name: 'Tiếng Việt', isDefault: true },
-      { code: 'en', name: 'English', isDefault: false },
-      { code: 'ja', name: '日本語', isDefault: false },
-      { code: 'ko', name: '한국어', isDefault: false },
-      { code: 'zh', name: '中文', isDefault: false }
-    ]);
+    await languagesCol.insertMany(DEFAULT_LANGUAGES.map((l, order) => ({
+      code: l.code, name: l.label, speech: l.speech, provider: l.provider, isActive: true, order, createdAt: now, updatedAt: now,
+    })));
     console.log('🌐 Đã nạp xong danh sách ngôn ngữ (Languages)!');
 
     // 3. Nạp Artifacts (16 công trình Dinh Độc Lập)

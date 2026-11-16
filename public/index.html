@@ -266,8 +266,9 @@
         footProjTitle: '软件工程课程项目', footProj: '西贡大学 信息技术学院', copy: '© 多语种语音讲解 – 学生项目' },
     };
 
-    // Khu vực: slug khớp với categorySlug trong dữ liệu và 6 mục categories trong MongoDB
-    const AREAS = {
+    // Khu vực: slug khớp với categorySlug của công trình. Đọc từ GET /api/categories (admin quản lý);
+    // danh sách dưới đây chỉ dùng tạm khi không gọi được API.
+    let AREAS = {
       'tang-tret':  { icon: 'fa-door-open', name: { vi: 'Tầng trệt', en: 'Ground floor', ja: '1階', ko: '1층', zh: '一楼' } },
       'lau-1':      { icon: 'fa-stairs',    name: { vi: 'Lầu 1', en: 'First floor', ja: '2階', ko: '2층', zh: '二楼' } },
       'lau-2':      { icon: 'fa-stairs',    name: { vi: 'Lầu 2', en: 'Second floor', ja: '3階', ko: '3층', zh: '三楼' } },
@@ -276,6 +277,7 @@
       'ngoai-troi': { icon: 'fa-tree',      name: { vi: 'Khuôn viên ngoài trời', en: 'Outdoor grounds', ja: '屋外（前庭）', ko: '야외 부지', zh: '室外场地' } },
     };
 
+    let hiddenAreas = new Set(); // khu vực admin đang tạm ẩn: ẩn luôn các công trình bên trong
     let lang = 'vi';
     let languages = [{ code: 'vi', label: 'Tiếng Việt', speech: 'vi-VN' }];
     let artifacts = [];
@@ -498,12 +500,22 @@
       renderLanguageButtons(document.getElementById('langBar'), languages, lang, changeLanguage, 'text-xs');
     }
 
+    async function loadAreas() {
+      try {
+        const list = (await fetchJson('/api/categories')).data || [];
+        const areas = {};
+        list.filter((c) => c.isActive).forEach((c) => { areas[c.slug] = { icon: c.icon, name: c.names }; });
+        AREAS = areas;
+        hiddenAreas = new Set(list.filter((c) => !c.isActive).map((c) => c.slug));
+      } catch (e) { /* giữ danh sách mặc định */ }
+    }
+
     async function loadArtifacts() {
       const status = document.getElementById('status');
       status.textContent = S().loading; status.classList.remove('hidden');
       try {
         const body = await fetchJson(`/api/artifacts?lang=${lang}`);
-        artifacts = body.data || [];
+        artifacts = (body.data || []).filter((a) => !hiddenAreas.has(a.categorySlug));
         status.classList.add('hidden');
       } catch (err) {
         artifacts = [];
@@ -558,6 +570,7 @@
       document.getElementById('qrBase').value = defaultBase;
       document.getElementById('siteBase').value = defaultBase;
       updateSiteQr();
+      await loadAreas();
       loadArtifacts();
     });
   </script>

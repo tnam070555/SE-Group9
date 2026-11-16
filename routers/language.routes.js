@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { LANGUAGES, SOURCE_LANGUAGE } = require('../config/languages');
+const languageController = require('../controllers/language.controller');
 
-// Danh sách ngôn ngữ hỗ trợ (công khai), tiếng Việt là ngôn ngữ gốc
-router.get('/', (req, res) => {
-    const data = LANGUAGES.map(({ code, label, speech }) => ({ code, label, speech, isSource: code === SOURCE_LANGUAGE }));
-    res.json({ success: true, data });
-});
+// Danh sách ngôn ngữ đang bật (công khai). Quản lý ngôn ngữ nằm ở /api/admin/languages
+router.get('/', languageController.getPublic);
 
 module.exports = router;

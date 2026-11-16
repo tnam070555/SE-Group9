@@ -4,10 +4,10 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const adminService = require('./services/admin.service');
 const seedService = require('./services/seed.service');
+const languageService = require('./services/language.service');
+const categoryService = require('./services/category.service');
 
 // Nhúng toàn bộ các model để khởi tạo bảng trên MongoDB
-const Category = require('./models/category.model'); 
-const Language = require('./models/language.model');
 const Feedback = require('./models/feedback.model');
 const ScanLog = require('./models/scan_log.model');
 const Event = require('./models/event.model');
@@ -32,10 +32,20 @@ async function startServer() {
     const adminStatus = await adminService.ensureAdminFromEnv();
     if (adminStatus === 'created') console.log('Đã tạo tài khoản admin từ .env');
 
+    // Ngôn ngữ hỗ trợ: đọc từ database (database cũ được bổ sung đủ 5 ngôn ngữ mặc định)
+    await languageService.syncDefaults();
+    // Khu vực: database chưa có khu vực mang mã (slug) thì tạo 6 khu vực mặc định
+    const createdAreas = await categoryService.syncDefaults();
+    if (createdAreas) console.log(`Đã tạo ${createdAreas} khu vực mặc định.`);
+
     // Nạp dữ liệu công trình trước để có Artifact ID liên kết
     const seeded = await seedService.syncSampleData();
     if (seeded.created) console.log(`Đã nạp ${seeded.created} công trình mẫu (kèm bản dịch).`);
     if (seeded.updated) console.log(`Đã bổ sung bản dịch cho ${seeded.updated} công trình mẫu.`);
+
+    // Lưu mã QR của từng công trình vào MongoDB (trường qrLink, qrImage)
+    const qrUpdated = await require('./services/artifact.service').syncQrCodes();
+    if (qrUpdated) console.log(`Đã tạo/cập nhật mã QR cho ${qrUpdated} công trình.`);
 
     // =========================================================================
     // KHỞI TẠO DỮ LIỆU MẪU CHO TẤT CẢ CÁC BẢNG CÒN LẠI
@@ -45,15 +55,6 @@ async function startServer() {
         await DeviceSession.createCollection().catch(() => {});
         await DeviceSession.syncIndexes();
 
-        if (await Category.countDocuments() === 0) {
-            await Category.create({ name: 'Tầng trệt', description: 'Khu vực trưng bày chính tại Dinh Độc Lập' });
-            console.log('Đã tạo bảng categories!');
-        }
-        if (await Language.countDocuments() === 0) {
-            await Language.create({ code: 'vi', name: 'Tiếng Việt' });
-            await Language.create({ code: 'en', name: 'English' });
-            console.log('Đã tạo bảng languages!');
-        }
         // Seed dữ liệu loại vé nếu chưa có
         if (await TicketType.countDocuments() === 0) {
             await TicketType.create({ code: 'ADULT',   name: 'Người lớn',             description: 'Từ 16 tuổi trở lên',                                               price: 40000 });
@@ -96,6 +97,9 @@ async function startServer() {
 
     app.listen(PORT, () => {
         console.log(`Server đang chạy tại http://localhost:${PORT}`);
+        const lanUrl = require('./utils/network').getPublicBaseUrl(PORT);
+        if (lanUrl) console.log(`Điện thoại/máy khác (cùng Wi-Fi) truy cập: ${lanUrl}`);
+        else console.log('Không tìm thấy IP mạng LAN. Hãy kết nối Wi-Fi hoặc đặt PUBLIC_BASE_URL trong .env.');
     });
 }
 

@@ -2,6 +2,11 @@ const categoryService = require('../services/category.service');
 
 // Lớp 1: chỉ lo HTTP. Express 5 tự chuyển lỗi bất đồng bộ sang errorHandler.
 class CategoryController {
+    // Công khai: tên khu vực theo các ngôn ngữ, biểu tượng, trạng thái hiện/ẩn
+    async getPublicCategories(req, res) {
+        res.status(200).json({ success: true, data: await categoryService.getPublic() });
+    }
+
     async getAllCategories(req, res) {
         const categories = await categoryService.getAll();
         res.status(200).json({ success: true, data: categories });

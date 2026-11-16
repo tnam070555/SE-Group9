@@ -8,12 +8,23 @@ const timeSlotRepository = {
     /** Tìm một slot cụ thể theo ngày + giờ bắt đầu */
     findOne: (date, from) => TimeSlot.findOne({ date, from }),
 
-    /** Tăng số lượng đã đặt (booked) — dùng $inc để atomic */
-    incrementBooked: (date, from, qty) =>
+    /**
+     * Giữ chỗ: chỉ tăng booked khi còn đủ chỗ (kiểm tra và tăng trong CÙNG một lệnh,
+     * nên hai người đặt cùng lúc không thể làm vượt sức chứa).
+     * Trả về slot sau khi tăng, hoặc null nếu không đủ chỗ.
+     */
+    reserve: (date, from, qty) =>
         TimeSlot.findOneAndUpdate(
-            { date, from },
+            { date, from, $expr: { $lte: [{ $add: ['$booked', qty] }, '$capacity'] } },
             { $inc: { booked: qty } },
-            { new: true }
+            { returnDocument: 'after' }
+        ),
+
+    /** Trả lại chỗ khi đơn bị hủy / hết hạn (không để booked xuống dưới 0) */
+    release: (date, from, qty) =>
+        TimeSlot.updateOne(
+            { date, from, booked: { $gte: qty } },
+            { $inc: { booked: -qty } }
         ),
 
     /** Tạo nhiều slot cùng lúc (dùng khi seed / generate) */

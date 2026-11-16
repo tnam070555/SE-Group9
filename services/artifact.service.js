@@ -1,13 +1,32 @@
 const QRCode = require('qrcode');
 const artifactRepository = require('../repositories/artifact.repository');
 const translationService = require('./translation.service');
+const categoryService = require('./category.service');
 const AppError = require('../utils/AppError');
+const { getPublicBaseUrl } = require('../utils/network');
 const { SOURCE_LANGUAGE, TARGET_CODES, parseTargetLanguage } = require('../config/languages');
 
 // Chỉ nhận các trường này từ client (chặn client tự gán _id, quyền...)
-const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'audioUrl'];
+const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'categorySlug', 'imageUrl', 'audioUrl'];
 // Các trường có bản dịch
 const TRANSLATABLE_FIELDS = ['name', 'description', 'location'];
+
+// Đường dẫn trang thuyết minh của một công trình (nội dung của mã QR)
+function qrLinkFor(code, base) {
+    return `${base}/detail.html?code=${encodeURIComponent(code)}`;
+}
+
+// Địa chỉ gốc lưu vào QR trong database: PUBLIC_BASE_URL, không có thì IP LAN, cuối cùng là localhost
+function storedQrBase() {
+    return normalizeBaseUrl(getPublicBaseUrl() || `http://localhost:${process.env.PORT || 5000}`);
+}
+
+// Tạo { qrLink, qrImage } để lưu cùng công trình trong MongoDB
+async function buildQrFields(code) {
+    const qrLink = qrLinkFor(code, storedQrBase());
+    const qrImage = await QRCode.toDataURL(qrLink, { width: 320, margin: 2 });
+    return { qrLink, qrImage };
+}
 
 function pickFields(data) {
     const picked = {};
@@ -23,7 +42,18 @@ function cleanStrings(picked) {
         picked[field] = value.trim();
     }
     if (picked.code) picked.code = picked.code.toUpperCase();
+    // Ảnh: để trống, link http/https, hoặc đường dẫn trong trang (/img/...). Chặn javascript:, data:...
+    if (picked.imageUrl && !/^(https?:\/\/|\/(?!\/))\S+$/i.test(picked.imageUrl)) {
+        throw new AppError(400, 'Link ảnh phải bắt đầu bằng http://, https:// hoặc / (VD: /img/anh.jpg)');
+    }
     return picked;
+}
+
+// Khu vực phải tồn tại (để trống = chưa phân loại)
+async function checkCategory(picked) {
+    if (picked.categorySlug && !(await categoryService.existsSlug(picked.categorySlug))) {
+        throw new AppError(400, `Khu vực "${picked.categorySlug}" không tồn tại`);
+    }
 }
 
 // Chấp nhận cả document Mongoose lẫn object thường
@@ -62,6 +92,7 @@ function localize(doc, lang) {
         name: t.name || a.name,
         description: t.description || a.description,
         location: t.location || a.location,
+        imageUrl: a.imageUrl,
         audioUrl: a.audioUrl,
         language: served,
         fallback: served !== lang,
@@ -74,6 +105,8 @@ class ArtifactService {
         const picked = cleanStrings(pickFields(data));
         if (!picked.name) throw new AppError(400, 'Tên là bắt buộc');
         if (!picked.code) throw new AppError(400, 'Mã (code) là bắt buộc');
+        await checkCategory(picked);
+        Object.assign(picked, await buildQrFields(picked.code));
         return artifactRepository.create(picked);
     }
 
@@ -106,11 +139,11 @@ class ArtifactService {
         let targetBase = baseUrl;
         // Thêm đoạn điều kiện này vào: Nếu là localhost hoặc 127.0.0.1, tự ép sang IP Wi-Fi
         if (!targetBase || targetBase.includes('localhost') || targetBase.includes('127.0.0.1')) {
-            targetBase = process.env.PUBLIC_BASE_URL || 'http://localhost:5000';
+            targetBase = getPublicBaseUrl() || targetBase || 'http://localhost:5000';
         }
 
         const base = normalizeBaseUrl(targetBase);
-        const link = `${base}/detail.html?code=${encodeURIComponent(artifact.code)}`;
+        const link = qrLinkFor(artifact.code, base);
         return QRCode.toBuffer(link, { type: 'png', width: 320, margin: 2 });
     }
 
@@ -125,6 +158,7 @@ class ArtifactService {
         if (Object.keys(picked).length === 0) throw new AppError(400, 'Không có dữ liệu để cập nhật');
         if ('name' in picked && !picked.name) throw new AppError(400, 'Tên không được để trống');
         if ('code' in picked && !picked.code) throw new AppError(400, 'Mã (code) không được để trống');
+        await checkCategory(picked);
 
         // Trường tiếng Việt nào bị đổi nội dung thì bản dịch của trường đó đã lỗi thời -> xóa để dịch lại
         const existing = toPlain(await artifactRepository.findById(id));
@@ -135,6 +169,8 @@ class ArtifactService {
                 for (const lang of TARGET_CODES) unset[`translations.${lang}.${field}`] = 1;
             }
         }
+        // Đổi mã công trình thì tạo lại mã QR lưu trong database
+        if ('code' in picked && picked.code !== existing.code) Object.assign(picked, await buildQrFields(picked.code));
         const update = Object.keys(unset).length ? { ...picked, $unset: unset } : picked;
 
         const updated = await artifactRepository.updateById(id, update);
@@ -191,6 +227,19 @@ class ArtifactService {
         let result = artifact;
         if (Object.keys(set).length) result = await artifactRepository.updateById(id, { $set: set });
         return { artifact: result, report };
+    }
+
+    // Gọi khi server khởi động: công trình chưa có QR, hoặc QR trỏ tới địa chỉ cũ (đổi Wi-Fi, đổi IP,
+    // đặt PUBLIC_BASE_URL) thì tạo lại và lưu vào MongoDB. Trả về số công trình đã cập nhật.
+    async syncQrCodes() {
+        const base = storedQrBase();
+        let updated = 0;
+        for (const a of await artifactRepository.findAllForQr()) {
+            if (a.qrLink === qrLinkFor(a.code, base)) continue;
+            await artifactRepository.updateById(a._id, await buildQrFields(a.code));
+            updated += 1;
+        }
+        return updated;
     }
 
     async delete(id) {
