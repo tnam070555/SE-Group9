@@ -1,4 +1,5 @@
-const Category = require('../models/category.model');
+const categoryRepository = require('../repositories/category.repository');
+const artifactRepository = require('../repositories/artifact.repository');
 const AppError = require('../utils/AppError');
 
 // 6 khu vực mặc định của Dinh Độc Lập, theo đúng thứ tự tầng (BR-01)
@@ -39,7 +40,7 @@ function normalizeSlug(picked) {
 
 class CategoryService {
     async getAll() {
-        const list = await Category.find().lean();
+        const list = await categoryRepository.findAll();
         const order = DEFAULT_AREAS.map((a) => a.slug);
         const rank = (slug) => (order.indexOf(slug) < 0 ? 99 : order.indexOf(slug));
         return list.sort((a, b) => rank(a.slug) - rank(b.slug) || String(a.createdAt).localeCompare(String(b.createdAt)));
@@ -53,7 +54,7 @@ class CategoryService {
         picked.name = picked.name.trim();
         if (!picked.slug) picked.slug = slugify(picked.name);
         normalizeSlug(picked);
-        return Category.create(picked);
+        return categoryRepository.create(picked);
     }
 
     async update(id, data) {
@@ -66,35 +67,46 @@ class CategoryService {
             picked.name = picked.name.trim();
         }
         normalizeSlug(picked);
-        const category = await Category.findByIdAndUpdate(id, picked, { new: true, runValidators: true });
+
+        const existing = await categoryRepository.findById(id);
+        if (!existing) throw new AppError(404, 'Không tìm thấy khu vực');
+        // Công trình tham chiếu khu vực qua slug: đang có công trình thì không cho đổi slug (tránh công trình "mồ côi")
+        if ('slug' in picked && picked.slug !== existing.slug) {
+            const used = await artifactRepository.countByCategory(existing.slug);
+            if (used > 0) throw new AppError(409, `Khu vực đang có ${used} công trình nên không đổi được mã (slug)`);
+        }
+
+        const category = await categoryRepository.updateById(id, picked);
         if (!category) throw new AppError(404, 'Không tìm thấy khu vực');
         return category;
     }
 
     async delete(id) {
-        const category = await Category.findByIdAndDelete(id);
-        if (!category) throw new AppError(404, 'Không tìm thấy khu vực');
-        return category;
+        const existing = await categoryRepository.findById(id);
+        if (!existing) throw new AppError(404, 'Không tìm thấy khu vực');
+        const used = await artifactRepository.countByCategory(existing.slug);
+        if (used > 0) throw new AppError(409, `Khu vực đang có ${used} công trình, hãy chuyển hoặc xóa các công trình đó trước`);
+        return categoryRepository.deleteById(id);
     }
 
     // Khởi động: CSDL trống thì tạo 6 khu vực mặc định; khu vực cũ thiếu slug thì bổ sung
     async ensureDefaults() {
-        if ((await Category.countDocuments()) === 0) {
-            await Category.insertMany(DEFAULT_AREAS);
+        if ((await categoryRepository.count()) === 0) {
+            await categoryRepository.insertMany(DEFAULT_AREAS);
             return { created: DEFAULT_AREAS.length, fixed: 0 };
         }
-        const missing = await Category.collection.find({ $or: [{ slug: { $exists: false } }, { slug: null }, { slug: '' }] }).toArray();
+        const missing = await categoryRepository.findWithoutSlug();
         let fixed = 0;
         for (const doc of missing) {
             const known = DEFAULT_AREAS.find((a) => slugify(a.name) === slugify(doc.name)
                 || slugify(doc.name).endsWith(a.slug));
             let slug = known ? known.slug : slugify(doc.name) || `khu-vuc-${String(doc._id).slice(-6)}`;
-            if (await Category.collection.findOne({ slug, _id: { $ne: doc._id } })) slug = `${slug}-${String(doc._id).slice(-4)}`;
-            await Category.collection.updateOne({ _id: doc._id }, { $set: { slug } });
+            if (await categoryRepository.findOtherBySlug(slug, doc._id)) slug = `${slug}-${String(doc._id).slice(-4)}`;
+            await categoryRepository.setSlug(doc._id, slug);
             fixed += 1;
         }
         // Tạo lại chỉ mục duy nhất của slug sau khi đã bổ sung đủ
-        if (fixed) await Category.syncIndexes().catch((err) => console.error('Lỗi tạo chỉ mục slug:', err.message));
+        if (fixed) await categoryRepository.syncIndexes().catch((err) => console.error('Lỗi tạo chỉ mục slug:', err.message));
         return { created: 0, fixed };
     }
 }

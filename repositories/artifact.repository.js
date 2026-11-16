@@ -17,6 +17,10 @@ function count() {
     return Artifact.countDocuments();
 }
 
+function countByCategory(slug) {
+    return Artifact.countDocuments({ categorySlug: slug });
+}
+
 function create(data) {
     return Artifact.create(data);
 }
@@ -33,4 +37,4 @@ function deleteById(id) {
     return Artifact.findByIdAndDelete(id);
 }
 
-module.exports = { findAll, findById, findByCode, count, create, insertMany, updateById, deleteById };
+module.exports = { findAll, findById, findByCode, count, countByCategory, create, insertMany, updateById, deleteById };

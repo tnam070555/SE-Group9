@@ -7,8 +7,7 @@ const seedService = require('./services/seed.service');
 const categoryService = require('./services/category.service');
 
 // Nhúng toàn bộ các model để khởi tạo bảng trên MongoDB
-const Category = require('./models/category.model'); 
-const Language = require('./models/language.model');
+// (Khu vực được tạo qua categoryService.ensureDefaults bên dưới)
 const Feedback = require('./models/feedback.model');
 const ScanLog = require('./models/scan_log.model');
 const Event = require('./models/event.model');
@@ -46,11 +45,8 @@ async function startServer() {
         const areas = await categoryService.ensureDefaults();
         if (areas.created) console.log(`Đã tạo ${areas.created} khu vực mặc định!`);
         if (areas.fixed) console.log(`Đã bổ sung slug cho ${areas.fixed} khu vực.`);
-        if (await Language.countDocuments() === 0) {
-            await Language.create({ code: 'vi', name: 'Tiếng Việt' });
-            await Language.create({ code: 'en', name: 'English' });
-            console.log('Đã tạo bảng languages!');
-        }
+        // Ngôn ngữ: đồng bộ 5 ngôn ngữ hỗ trợ (vi, en, ja, ko, zh) từ config/languages.js
+        await seedService.syncLanguages();
 
         if (await Event.countDocuments() === 0) {
             await Event.create({ title: 'Triển lãm Kỷ niệm 30/4', description: 'Trưng bày chuyên đề tại Dinh Độc Lập' });

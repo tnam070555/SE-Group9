@@ -1,5 +1,6 @@
 const QRCode = require('qrcode');
 const artifactRepository = require('../repositories/artifact.repository');
+const categoryRepository = require('../repositories/category.repository');
 const translationService = require('./translation.service');
 const AppError = require('../utils/AppError');
 const { SOURCE_LANGUAGE, TARGET_CODES, parseTargetLanguage } = require('../config/languages');
@@ -24,6 +25,12 @@ function cleanStrings(picked) {
     }
     if (picked.code) picked.code = picked.code.toUpperCase();
     return picked;
+}
+
+// Công trình tham chiếu khu vực qua slug: slug (nếu có) phải là của một khu vực đang tồn tại
+async function assertCategoryExists(slug) {
+    if (!slug) return;
+    if (!(await categoryRepository.existsBySlug(slug))) throw new AppError(400, 'Khu vực không tồn tại');
 }
 
 // Chấp nhận cả document Mongoose lẫn object thường
@@ -75,6 +82,7 @@ class ArtifactService {
         const picked = cleanStrings(pickFields(data));
         if (!picked.name) throw new AppError(400, 'Tên là bắt buộc');
         if (!picked.code) throw new AppError(400, 'Mã (code) là bắt buộc');
+        await assertCategoryExists(picked.categorySlug);
         return artifactRepository.create(picked);
     }
 
@@ -104,10 +112,11 @@ class ArtifactService {
     async getQrPng(code, baseUrl) {
         const artifact = await this.getByCode(code);
         
+        // Điện thoại không mở được localhost / 127.0.0.1: nếu đã cấu hình PUBLIC_BASE_URL thì dùng địa chỉ đó,
+        // chưa cấu hình thì giữ nguyên địa chỉ được yêu cầu (giao diện đã cảnh báo)
         let targetBase = baseUrl;
-        // Thêm đoạn điều kiện này vào: Nếu là localhost hoặc 127.0.0.1, tự ép sang IP Wi-Fi
-        if (!targetBase || targetBase.includes('localhost') || targetBase.includes('127.0.0.1')) {
-            targetBase = process.env.PUBLIC_BASE_URL || 'http://localhost:5000';
+        if (!targetBase || /localhost|127\.0\.0\.1/.test(targetBase)) {
+            targetBase = process.env.PUBLIC_BASE_URL || targetBase;
         }
 
         const base = normalizeBaseUrl(targetBase);
@@ -130,6 +139,7 @@ class ArtifactService {
         // Trường tiếng Việt nào bị đổi nội dung thì bản dịch của trường đó đã lỗi thời -> xóa để dịch lại
         const existing = toPlain(await artifactRepository.findById(id));
         if (!existing) throw new AppError(404, 'Không tìm thấy công trình');
+        if (picked.categorySlug !== existing.categorySlug) await assertCategoryExists(picked.categorySlug);
         const unset = {};
         for (const field of TRANSLATABLE_FIELDS) {
             if (field in picked && picked[field] !== existing[field]) {
