@@ -2,11 +2,19 @@ const test = require('node:test');
 const assert = require('node:assert');
 const viewRepository = require('../repositories/view.repository');
 const artifactRepository = require('../repositories/artifact.repository');
-const presence = require('../services/presence.service');
+const deviceRepository = require('../repositories/device.repository');
+const feedbackRepository = require('../repositories/feedback.repository');
 const statsService = require('../services/stats.service');
 
-test.beforeEach(() => presence.reset());
 test.afterEach(() => test.mock.restoreAll());
+
+// Giả lập các truy vấn thống kê theo thời gian (không cần MongoDB thật)
+function mockTimeQueries({ online = 0, daily = [], between = 0, rating = { average: null, count: 0 } } = {}) {
+    test.mock.method(deviceRepository, 'countOnline', async () => online);
+    test.mock.method(viewRepository, 'countDailySince', async () => daily);
+    test.mock.method(viewRepository, 'countBetween', async () => between);
+    test.mock.method(feedbackRepository, 'getRatingSummary', async () => rating);
+}
 
 const reject = (body, status) => assert.rejects(() => statsService.recordEvent(body), (e) => e.status === status, JSON.stringify(body));
 
@@ -48,15 +56,37 @@ test('công trình không tồn tại thì lỗi 404 và không ghi', async () =
     assert.strictEqual(create.mock.callCount(), 0);
 });
 
-test('heartbeat ghi nhận thiết bị online', () => {
-    statsService.heartbeat('abcdefgh-1234');
-    assert.strictEqual(presence.countOnline(), 1);
-    assert.throws(() => statsService.heartbeat('x'), (e) => e.status === 400);
+test('heartbeat ghi thiết bị vào database; mã sai thì lỗi 400', async () => {
+    const upsert = test.mock.method(deviceRepository, 'upsertHeartbeat', async () => {});
+    await statsService.heartbeat('abcdefgh-1234', { ip: '::1' });
+    assert.strictEqual(upsert.mock.callCount(), 1);
+    await assert.rejects(() => statsService.heartbeat('x'), (e) => e.status === 400);
+    assert.strictEqual(upsert.mock.callCount(), 1);
+});
+
+test('getStats: số liệu theo ngày đủ số ngày, ngày trống = 0; tháng và đánh giá', async () => {
+    const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10); // ngày hôm nay theo giờ VN
+    mockTimeQueries({
+        daily: [{ _id: { day: today, type: 'view' }, count: 4 }, { _id: { day: today, type: 'play' }, count: 1 }],
+        between: 3,
+        rating: { average: 4.666, count: 3 },
+    });
+    test.mock.method(artifactRepository, 'findAll', async () => []);
+    test.mock.method(viewRepository, 'countViewsSince', async () => 0);
+    test.mock.method(viewRepository, 'countGroupedBy', async () => []);
+
+    const stats = await statsService.getStats({ days: '30' });
+    assert.strictEqual(stats.chartDays, 30);
+    assert.strictEqual(stats.daily.length, 30);
+    assert.deepStrictEqual(stats.daily[29], { date: today, views: 4, plays: 1 });
+    assert.deepStrictEqual([stats.daily[0].views, stats.daily[0].plays], [0, 0]);
+    assert.deepStrictEqual(stats.month, { scans: 3, scansLastMonth: 3, plays: 3 });
+    assert.deepStrictEqual(stats.rating, { average: 4.7, count: 3 });
+    assert.strictEqual((await statsService.getStats({ days: '999' })).chartDays, 7); // giá trị lạ -> 7 ngày
 });
 
 test('getStats: gom số liệu theo công trình, ngôn ngữ, tổng, online', async () => {
-    presence.touch('abcdefgh-0001');
-    presence.touch('abcdefgh-0002');
+    mockTimeQueries({ online: 2 });
     test.mock.method(artifactRepository, 'findAll', async () => [
         { code: 'DDL-01', name: 'Phòng Khánh Tiết' }, { code: 'DDL-02', name: 'Phòng Trình Quốc Thư' }, { code: 'DDL-03', name: 'Chưa ai xem' },
     ]);

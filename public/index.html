@@ -89,6 +89,11 @@
       <div class="flex items-center gap-2 flex-wrap justify-end">
         <!-- Language bar -->
         <div id="langBar" class="flex gap-1.5 flex-wrap justify-end" role="group" aria-label="Ngôn ngữ"></div>
+        <!-- Lối vào trang quản trị (đã đăng nhập thì login.html tự chuyển sang /admin) -->
+        <a href="login.html" title="Đăng nhập quản trị" aria-label="Đăng nhập quản trị"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full border border-heritage-gold/50 text-heritage-gold text-xs font-semibold hover:bg-heritage-gold/15 transition">
+          <i class="fa-solid fa-user-shield"></i><span class="hidden sm:inline">Admin</span>
+        </a>
       </div>
     </div>
     <!-- Hero text -->
@@ -921,10 +926,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ttsPlay').addEventListener('click', playTts);
   document.getElementById('ttsStop').addEventListener('click', () => { stopSpeech(); setTts(false); });
 
-  // Init site QR
-  updateSiteQr();
+  // Init site QR: ưu tiên PUBLIC_BASE_URL từ server (IP LAN), không có thì dùng địa chỉ đang mở trang
   updateQrStrings();
-  startHeartbeat();
+  updateSiteQr();
+  fetch('/api/public-config').then((r) => r.json()).then((cfg) => {
+    if (!cfg || !cfg.publicBaseUrl) return;
+    const base = new URL(cfg.publicBaseUrl).origin;
+    if (qrBaseEl && !qrBaseEl.value) qrBaseEl.value = base;
+    if (siteBaseEl && !siteBaseEl.value) siteBaseEl.value = base;
+    updateSiteQr();
+  }).catch(() => { /* giữ địa chỉ hiện tại */ });
 
   // Load data
   loadArtifacts();

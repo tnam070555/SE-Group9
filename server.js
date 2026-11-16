@@ -14,6 +14,8 @@ const ScanLog = require('./models/scan_log.model');
 const Event = require('./models/event.model');
 // Cần model Artifact để lấy ID liên kết cho Feedback và ScanLog
 const Artifact = require('./models/artifact.model');
+// Thiết bị đang truy cập (đếm "Đang truy cập" ở trang admin)
+const DeviceSession = require('./models/device_session.model');
 
 const PORT = process.env.PORT || 5000;
 
@@ -36,6 +38,10 @@ async function startServer() {
     // KHỞI TẠO DỮ LIỆU MẪU CHO TẤT CẢ CÁC BẢNG CÒN LẠI
     // =========================================================================
     try {
+        // Tạo sẵn collection device_sessions (kèm index) để xem được trong MongoDB Compass ngay cả khi chưa có ai truy cập
+        await DeviceSession.createCollection().catch(() => {});
+        await DeviceSession.syncIndexes();
+
         // Khu vực: tạo 6 khu vực mặc định nếu trống, bổ sung slug cho khu vực cũ
         const areas = await categoryService.ensureDefaults();
         if (areas.created) console.log(`Đã tạo ${areas.created} khu vực mặc định!`);
