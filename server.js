@@ -4,19 +4,15 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const adminService = require('./services/admin.service');
 const seedService = require('./services/seed.service');
+const categoryService = require('./services/category.service');
 
 // Nhúng toàn bộ các model để khởi tạo bảng trên MongoDB
-const Category = require('./models/category.model'); 
-const Language = require('./models/language.model');
+// (Khu vực được tạo qua categoryService.ensureDefaults bên dưới)
 const Feedback = require('./models/feedback.model');
 const ScanLog = require('./models/scan_log.model');
 const Event = require('./models/event.model');
 // Cần model Artifact để lấy ID liên kết cho Feedback và ScanLog
 const Artifact = require('./models/artifact.model');
-// Models module Tickets (đăng ký schema trước khi server chạy)
-const TicketType  = require('./models/ticket_type.model');
-const TimeSlot    = require('./models/time_slot.model');
-const TicketOrder = require('./models/ticket_order.model');
 // Thiết bị đang truy cập (đếm "Đang truy cập" ở trang admin)
 const DeviceSession = require('./models/device_session.model');
 
@@ -45,23 +41,12 @@ async function startServer() {
         await DeviceSession.createCollection().catch(() => {});
         await DeviceSession.syncIndexes();
 
-        if (await Category.countDocuments() === 0) {
-            await Category.create({ name: 'Tầng trệt', description: 'Khu vực trưng bày chính tại Dinh Độc Lập' });
-            console.log('Đã tạo bảng categories!');
-        }
-        if (await Language.countDocuments() === 0) {
-            await Language.create({ code: 'vi', name: 'Tiếng Việt' });
-            await Language.create({ code: 'en', name: 'English' });
-            console.log('Đã tạo bảng languages!');
-        }
-        // Seed dữ liệu loại vé nếu chưa có
-        if (await TicketType.countDocuments() === 0) {
-            await TicketType.create({ code: 'ADULT',   name: 'Người lớn',             description: 'Từ 16 tuổi trở lên',                                               price: 40000 });
-            await TicketType.create({ code: 'CHILD',   name: 'Trẻ em',                description: 'Từ 6 đến 15 tuổi',                                                  price: 20000 });
-            await TicketType.create({ code: 'STUDENT', name: 'Học sinh / Sinh viên',  description: 'Có thẻ học sinh hoặc thẻ sinh viên hợp lệ',                         price: 10000 });
-            await TicketType.create({ code: 'FREE',    name: 'Miễn phí',              description: 'Trẻ em dưới 6 tuổi, người cao tuổi từ 70 tuổi, người khuyết tật',   price: 0 });
-            console.log('Đã tạo dữ liệu loại vé (TicketTypes)!');
-        }
+        // Khu vực: tạo 6 khu vực mặc định nếu trống, bổ sung slug cho khu vực cũ
+        const areas = await categoryService.ensureDefaults();
+        if (areas.created) console.log(`Đã tạo ${areas.created} khu vực mặc định!`);
+        if (areas.fixed) console.log(`Đã bổ sung slug cho ${areas.fixed} khu vực.`);
+        // Ngôn ngữ: đồng bộ 5 ngôn ngữ hỗ trợ (vi, en, ja, ko, zh) từ config/languages.js
+        await seedService.syncLanguages();
 
         if (await Event.countDocuments() === 0) {
             await Event.create({ title: 'Triển lãm Kỷ niệm 30/4', description: 'Trưng bày chuyên đề tại Dinh Độc Lập' });

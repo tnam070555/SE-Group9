@@ -6,6 +6,7 @@ module.exports = [
     name: 'Phòng Khánh Tiết',
     categorySlug: 'tang-tret',
     location: 'Tầng trệt – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Phòng Khánh Tiết là không gian lớn nhất tại Dinh Độc Lập với sức chứa lên đến 500 người. Đây là nơi diễn ra các lễ ra mắt nội các, hội nghị quốc tế và các buổi dạ yến lịch sử.',
     translations: {
       en: {
@@ -35,6 +36,7 @@ module.exports = [
     name: 'Phòng Trình Quốc Thư',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
+    imageUrl: '/img/palace-facade.jpg',
     description: "Phòng Trình Quốc Thư là nơi Tổng thống nhận quốc thư của đại sứ các nước. Bức tranh sơn mài 'Bình Ngô Đại Cáo' trang trí trên tường mang đậm nét nghệ thuật truyền thống.",
     translations: {
       en: {
@@ -64,6 +66,7 @@ module.exports = [
     name: 'Phòng Hợp Hội Đồng Bộ Trưởng',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
+    imageUrl: '/img/palace-side.jpg',
     description: 'Nơi diễn ra các phiên họp kín của Nội các chính quyền Sài Gòn cũ với hệ thống tai nghe phiên dịch đa ngôn ngữ hiện đại thời bấy giờ.',
     translations: {
       en: {
@@ -93,6 +96,7 @@ module.exports = [
     name: 'Bến Đáp Trực Thăng & F5E',
     categorySlug: 'san-thuong',
     location: 'Tầng sân thượng – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Nơi đỗ chiếc trực thăng UH-1. Ghi dấu sự kiện phi công Nguyễn Thành Trung lái máy bay F5E ném bom vào sáng ngày 8 tháng 4 năm 1975.',
     translations: {
       en: {
@@ -122,6 +126,7 @@ module.exports = [
     name: 'Xe Tăng 390 & Cổng Chính',
     categorySlug: 'ngoai-troi',
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
+    imageUrl: '/img/palace-side.jpg',
     description: 'Chiếc xe tăng 390 huyền thoại đã húc văng cổng phụ Dinh Độc Lập vào lúc 10 giờ 45 phút ngày 30/4/1975, đánh dấu thời khắc hoàn toàn giải phóng miền Nam.',
     translations: {
       en: {
@@ -151,6 +156,7 @@ module.exports = [
     name: 'Khu Hầm Tác Chiến Lịch Sử',
     categorySlug: 'tang-ham',
     location: 'Tầng hầm – Dinh Độc Lập',
+    imageUrl: '/img/palace-facade.jpg',
     description: 'Hệ thống hầm kiên cố chịu được bom đạn hạng nặng, chứa đài vô tuyến, bản đồ tác chiến và phòng làm việc của Tổng thống.',
     translations: {
       en: {
@@ -180,6 +186,7 @@ module.exports = [
     name: 'Phòng Làm Việc Của Tổng Thống',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Không gian làm việc chính thức của Tổng thống, được bài trí trang trọng với các bản đồ quân sự và sa bàn chiến lược.',
     translations: {
       en: {
@@ -209,6 +216,7 @@ module.exports = [
     name: 'Xe Tăng 843',
     categorySlug: 'ngoai-troi',
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
+    imageUrl: '/img/palace-side.jpg',
     description: 'Cùng với xe tăng 390, xe tăng 843 do đồng chí Bùi Quang Thận chỉ huy đã húc tung cổng chính của Dinh Độc Lập vào trưa ngày 30/4/1975.',
     translations: {
       en: {
@@ -238,6 +246,7 @@ module.exports = [
     name: 'Phòng Đại Yến',
     categorySlug: 'tang-tret',
     location: 'Tầng trệt – Dinh Độc Lập',
+    imageUrl: '/img/palace-facade.jpg',
     description: 'Nơi tổ chức các buổi tiệc chiêu đãi quốc gia với sức chứa hơn 100 khách. Bàn ăn được bố trí theo hình chữ U với các trang thiết bị bàn tiệc sang trọng.',
     translations: {
       en: {
@@ -267,6 +276,7 @@ module.exports = [
     name: 'Phòng Khách Của Phó Tổng Thống',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Không gian tiếp khách riêng của Phó Tổng thống, được trang trí bằng các tác phẩm nghệ thuật truyền thống như tranh sơn mài và đồ gốm sứ.',
     translations: {
       en: {
@@ -296,6 +306,7 @@ module.exports = [
     name: 'Khu Sinh Hoạt Gia Đình Tổng Thống',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
+    imageUrl: '/img/palace-side.jpg',
     description: 'Khu vực riêng tư phía sau lầu 2 bao gồm phòng ngủ, phòng ăn gia đình và sân trong, nơi gia đình Tổng thống sinh sống thường ngày.',
     translations: {
       en: {
@@ -325,6 +336,7 @@ module.exports = [
     name: 'Phòng Chiếu Phim & Giải Trí',
     categorySlug: 'san-thuong',
     location: 'Tầng sân thượng – Dinh Độc Lập',
+    imageUrl: '/img/palace-facade.jpg',
     description: 'Nằm ở lầu cao nhất, phòng được trang bị máy chiếu phim màn ảnh rộng, bàn bi-da và quầy bar để phục vụ nhu cầu giải trí.',
     translations: {
       en: {
@@ -354,6 +366,7 @@ module.exports = [
     name: 'Đài Phát Thanh Dự Phòng',
     categorySlug: 'tang-ham',
     location: 'Tầng hầm – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Hệ thống thiết bị vô tuyến điện và máy phát sóng dự phòng, đảm bảo thông tin liên lạc không bị gián đoạn trong tình trạng khẩn cấp.',
     translations: {
       en: {
@@ -383,6 +396,7 @@ module.exports = [
     name: 'Phòng Khách Của Phu Nhân',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',
+    imageUrl: '/img/palace-side.jpg',
     description: 'Nơi Phu nhân Tổng thống tiếp đón các phu nhân đại sứ và khách quý. Căn phòng được trang trí thanh lịch, nữ tính với màu sắc tươi sáng và nhiều bức tranh nghệ thuật.',
     translations: {
       en: {
@@ -412,6 +426,7 @@ module.exports = [
     name: 'Thư Viện Tổng Thống',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
+    imageUrl: '/img/palace-facade.jpg',
     description: 'Không gian tĩnh lặng lưu trữ hàng ngàn cuốn sách quý, tài liệu lịch sử và sách luật, nơi Tổng thống thường xuyên đến đọc sách và nghiên cứu tài liệu.',
     translations: {
       en: {
@@ -441,6 +456,7 @@ module.exports = [
     name: 'Khu Vực Nhà Bếp',
     categorySlug: 'tang-ham',
     location: 'Tầng hầm – Dinh Độc Lập',
+    imageUrl: '/img/palace-front.jpg',
     description: 'Khu vực bếp rộng lớn được trang bị các thiết bị nấu nướng hiện đại bằng thép không gỉ vào thời bấy giờ, chịu trách nhiệm phục vụ hàng trăm suất ăn cho các buổi dạ tiệc lớn.',
     translations: {
       en: {

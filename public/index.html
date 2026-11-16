@@ -18,18 +18,15 @@
     };
   </script>
   <style>
-    body {
-      background: #F7F3EA;
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(139,30,36,.06) 1px, transparent 0);
-      background-size: 22px 22px;
-    }
+    body { background: #F7F3EA; background-image: radial-gradient(circle at 1px 1px, rgba(139,30,36,.06) 1px, transparent 0); background-size: 22px 22px; }
     .gold-rule { background: linear-gradient(90deg, transparent, #C9A227, transparent); height: 2px; }
     .hero-bg {
-      background:
-        linear-gradient(180deg, rgba(94,18,22,.92) 0%, rgba(139,30,36,.88) 60%, rgba(139,30,36,.95) 100%),
-        repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 12px, transparent 12px 24px);
+      position: relative;
+      background: linear-gradient(180deg, rgba(94,18,22,.88) 0%, rgba(139,30,36,.82) 55%, rgba(94,18,22,.93) 100%),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Independence_Palace_in_Ho_Chi_Minh_City%2C_Vietnam.jpg/1280px-Independence_Palace_in_Ho_Chi_Minh_City%2C_Vietnam.jpg') center/cover no-repeat fixed;
     }
+    .badge-open  { background: #16a34a; color: #fff; }
+    .badge-close { background: #9ca3af; color: #fff; }
     .card { transition: transform .35s ease, box-shadow .35s ease; }
     .card:hover { transform: translateY(-6px); box-shadow: 0 18px 30px -12px rgba(94,18,22,.35); }
     .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -41,525 +38,908 @@
     .img-band { background: linear-gradient(135deg, #5E1216 0%, #8B1E24 50%, #6B5443 100%); }
     .img-band img { transition: transform .5s ease; }
     .card:hover .img-band img { transform: scale(1.06); }
-    /* Mobile area chips: horizontal scroll thay vì wrap */
-    @media (max-width: 1023px) {
-      #areaChips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-      #areaChips::-webkit-scrollbar { display: none; }
-      #areaChips button { flex-shrink: 0; }
+    .skeleton { background: linear-gradient(90deg, #e8e0d0 25%, #f5efe0 50%, #e8e0d0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-card { background: #fff; border-radius: 16px; border: 1px solid rgba(201,162,39,.2); overflow: hidden; }
+    .fade-in-up { opacity: 0; transform: translateY(28px); transition: opacity .55s ease, transform .55s ease; }
+    .fade-in-up.visible { opacity: 1; transform: none; }
+    #floatLang {
+      position: fixed; bottom: 80px; right: 20px; z-index: 45;
+      background: rgba(247,243,234,.95); border: 1px solid rgba(201,162,39,.5);
+      border-radius: 9999px; padding: 6px 10px;
+      box-shadow: 0 4px 20px rgba(94,18,22,.2);
+      display: flex; gap: 4px; align-items: center; backdrop-filter: blur(6px);
     }
-    /* Search input full-width trên mobile */
-    @media (max-width: 640px) {
-      #search { width: 100%; }
+    #floatLang button { font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 9999px; border: 1px solid rgba(107,84,67,.3); background: transparent; color: #6B5443; cursor: pointer; transition: background .2s, color .2s; }
+    #floatLang button.active { background: #8B1E24; color: #fff; border-color: #8B1E24; }
+    #backToTop {
+      position: fixed; bottom: 20px; right: 20px; z-index: 45;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #8B1E24; color: #fff; border: 2px solid rgba(201,162,39,.5);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(94,18,22,.35); cursor: pointer;
+      opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; transform: translateY(10px);
     }
-    /* Lang bar compact trên màn hình rất nhỏ */
-    @media (max-width: 360px) {
-      #langBar button { font-size: 11px; padding: 4px 8px; }
-    }
+    #backToTop.show { opacity: 1; pointer-events: auto; transform: none; }
+    #backToTop:hover { background: #5E1216; }
+    @media (max-width: 1023px) { #areaChips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; } #areaChips::-webkit-scrollbar { display: none; } #areaChips button { flex-shrink: 0; } }
+    @media (max-width: 640px) { #search { width: 100%; } #floatLang { bottom: 70px; right: 12px; } #backToTop { bottom: 20px; right: 12px; } }
+    @media (max-width: 360px) { #langBar button { font-size: 11px; padding: 4px 8px; } }
   </style>
 </head>
 <body class="font-sans text-heritage-ink antialiased">
 
-  <!-- ===== THANH ĐIỀU HƯỚNG ===== -->
-  <header class="sticky top-0 z-40 bg-heritage-paper/95 backdrop-blur border-b border-heritage-gold/40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+<!-- ===== HEADER / HERO ===== -->
+<header class="hero-bg text-white">
+  <div class="max-w-5xl mx-auto px-4 pt-10 pb-8">
+    <!-- Top bar -->
+    <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-heritage-red text-heritage-red bg-white flex items-center justify-center shadow-sm flex-shrink-0">
-          <i class="fa-solid fa-landmark"></i>
+        <div class="w-10 h-10 rounded-full bg-heritage-gold/20 border border-heritage-gold/40 flex items-center justify-center">
+          <i class="fa-solid fa-landmark text-heritage-gold text-base"></i>
         </div>
         <div>
-          <p class="font-serif font-bold text-base sm:text-lg leading-tight text-heritage-red uppercase tracking-wide whitespace-nowrap">Dinh Độc Lập</p>
-          <p class="text-xs text-heritage-brown" id="brandSub">Thuyết minh đa ngôn ngữ</p>
+          <p class="text-[10px] uppercase tracking-widest text-heritage-gold/70 font-medium" id="subtitleText">Di tích lịch sử quốc gia đặc biệt</p>
+          <div class="flex items-center gap-2">
+            <p class="text-[11px] text-white/60">07:30 – 16:30</p>
+            <span id="openBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full hidden"></span>
+          </div>
         </div>
       </div>
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-        <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0" id="langBar" aria-label="Chọn ngôn ngữ"></div>
-        <!-- Nút vào trang quản trị (đã đăng nhập thì login.html tự chuyển sang trang admin) -->
+      <div class="flex items-center gap-2 flex-wrap justify-end">
+        <!-- Language bar -->
+        <div id="langBar" class="flex gap-1.5 flex-wrap justify-end" role="group" aria-label="Ngôn ngữ"></div>
+        <!-- Lối vào trang quản trị (đã đăng nhập thì login.html tự chuyển sang /admin) -->
         <a href="login.html" title="Đăng nhập quản trị" aria-label="Đăng nhập quản trị"
-           class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full bg-heritage-red text-white text-xs font-semibold shadow-sm hover:bg-heritage-redDeep transition">
+           class="flex-shrink-0 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full border border-heritage-gold/50 text-heritage-gold text-xs font-semibold hover:bg-heritage-gold/15 transition">
           <i class="fa-solid fa-user-shield"></i><span class="hidden sm:inline">Admin</span>
         </a>
       </div>
     </div>
-    <div class="gold-rule"></div>
-  </header>
-
-  <!-- ===== HERO ===== -->
-  <section class="hero-bg text-heritage-paper relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-20 text-center relative">
-      <p class="uppercase tracking-[0.3em] text-xs text-heritage-goldSoft mb-4" id="heroKicker"></p>
-      <h2 class="font-serif text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 leading-tight" id="heroTitle"></h2>
-      <p class="max-w-2xl mx-auto text-heritage-paper/85 leading-relaxed" id="heroDesc"></p>
-      <div class="mt-8 inline-flex items-center gap-2 bg-black/20 border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
-        <i class="fa-solid fa-qrcode text-heritage-gold"></i>
-        <span id="heroHint"></span>
-      </div>
+    <!-- Hero text -->
+    <div class="text-center pb-2">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-3" id="heroTitle">
+        Dinh Độc Lập
+      </h1>
+      <div class="gold-rule w-32 mx-auto mb-4"></div>
+      <p class="text-white/75 text-sm sm:text-base max-w-xl mx-auto leading-relaxed" id="heroSubtitle">
+        Khám phá từng phòng và hiện vật lịch sử qua thuyết minh đa ngôn ngữ
+      </p>
     </div>
-  </section>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-    <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 items-start">
-
-      <!-- Cột khu vực (bên trái): Tất cả khu vực + từng khu vực -->
-      <!-- min-w-0: không cho hàng nút khu vực (cuộn ngang) kéo giãn cả trang trên điện thoại -->
-      <aside class="min-w-0 lg:sticky lg:top-32">
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-heritage-brown mb-2 lg:mb-3" id="areaTitle"></p>
-        <div id="areaChips" class="flex flex-wrap lg:flex-col gap-2"></div>
-      </aside>
-
-      <!-- Cột công trình (bên phải) -->
-      <div class="min-w-0">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <h3 class="font-serif text-2xl font-bold text-heritage-red" id="listTitle"></h3>
-            <p class="text-sm text-heritage-brown mt-1" id="listCount"></p>
-          </div>
-          <label class="relative block w-full md:w-80">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-heritage-brown/60"></i>
-            <input id="search" type="search" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold focus:ring-2 focus:ring-heritage-gold/30" placeholder="">
-          </label>
-        </div>
-
-        <p id="status" class="text-center text-heritage-brown py-10 hidden"></p>
-        <div id="grid"></div>
-        <div id="empty" class="hidden text-center py-16">
-          <i class="fa-regular fa-folder-open text-4xl text-heritage-brown/40 mb-3"></i>
-          <p class="text-heritage-brown" id="emptyText"></p>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- ===== MÃ QR CỦA TRANG WEB ===== -->
-  <section class="bg-white border-y border-heritage-gold/40">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid md:grid-cols-[auto,1fr] gap-6 sm:gap-8 items-center">
-      <div class="bg-heritage-paper p-5 rounded-2xl border border-heritage-gold/50 shadow-sm mx-auto">
-        <img id="siteQrImg" alt="Mã QR trang web" class="w-48 h-48 object-contain bg-white">
-        <p id="siteQrError" class="hidden text-xs text-red-700 mt-2 max-w-[12rem] text-center"></p>
-      </div>
+    <!-- Stats -->
+    <div class="flex justify-center gap-6 sm:gap-10 mt-6 text-center">
       <div>
-        <h3 class="font-serif text-2xl font-bold text-heritage-red mb-2" id="siteQrTitle"></h3>
-        <p class="text-heritage-ink/80 leading-relaxed mb-4" id="siteQrDesc"></p>
-        <label class="block text-xs font-semibold text-heritage-brown mb-1" for="siteBase" id="siteBaseLabel"></label>
-        <input id="siteBase" type="text" class="w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
-        <p id="siteWarn" class="text-xs text-amber-700 mt-2 hidden"></p>
-        <a id="siteDownload" download="QR-Dinh-Doc-Lap.png" class="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-heritage-red underline underline-offset-4"></a>
+        <p class="text-xl sm:text-2xl font-bold text-heritage-gold" id="statCount">–</p>
+        <p class="text-[10px] text-white/55 uppercase tracking-wider mt-0.5" id="statLabel">hiện vật</p>
+      </div>
+      <div class="w-px bg-white/20"></div>
+      <div>
+        <p class="text-xl sm:text-2xl font-bold text-heritage-gold">5</p>
+        <p class="text-[10px] text-white/55 uppercase tracking-wider mt-0.5" id="statLangs">ngôn ngữ</p>
+      </div>
+      <div class="w-px bg-white/20"></div>
+      <div>
+        <p class="text-xl sm:text-2xl font-bold text-heritage-gold">6</p>
+        <p class="text-[10px] text-white/55 uppercase tracking-wider mt-0.5" id="statAreas">khu vực</p>
       </div>
     </div>
-  </section>
+  </div>
+</header>
 
-  <!-- ===== CHI TIẾT / NGHE / QR ===== -->
-  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-heritage-redDeep/70 backdrop-blur-sm">
-    <div class="modal-in bg-heritage-paper rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative border border-heritage-gold/40">
-      <button id="modalClose" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-heritage-brown/20 text-heritage-brown hover:text-heritage-red" aria-label="Đóng">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+<!-- ===== SEARCH + FILTER BAR ===== -->
+<div class="sticky top-0 z-30 bg-heritage-paper/95 backdrop-blur-sm border-b border-heritage-gold/20 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 items-center">
+    <div class="relative w-full sm:w-72 flex-shrink-0">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-heritage-brown/40 text-sm"></i>
+      <input id="search" type="search"
+        class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-heritage-gold/30 bg-white text-sm text-heritage-ink placeholder-heritage-brown/40 focus:outline-none focus:ring-2 focus:ring-heritage-red/30 focus:border-heritage-red/50"
+        placeholder="Tìm kiếm hiện vật…" autocomplete="off">
+    </div>
+    <div id="areaChips" class="flex gap-2 w-full sm:flex-1 overflow-x-auto" role="group" aria-label="Lọc theo khu vực"></div>
+  </div>
+</div>
 
-      <div class="p-5 sm:p-7 md:p-9">
-        <div class="flex items-center gap-3 mb-4">
-          <span id="mCode" class="text-xs font-bold tracking-wider bg-heritage-red text-white px-3 py-1 rounded-full"></span>
-          <span id="mArea" class="text-xs text-heritage-brown flex items-center gap-1"></span>
-        </div>
-        <h3 id="mTitle" class="font-serif text-3xl font-bold text-heritage-red mb-2"></h3>
-        <p id="mLocation" class="text-sm text-heritage-brown mb-5 flex items-center gap-2"></p>
-        <div class="gold-rule mb-5"></div>
-
-        <p id="mFallback" class="text-xs text-amber-800 bg-amber-100 border border-amber-200 rounded-lg px-3 py-2 mb-4 hidden"></p>
-        <p id="mDesc" class="leading-relaxed text-heritage-ink/90 text-[15px] mb-6"></p>
-
-        <!-- Tab -->
-        <div class="flex gap-6 border-b border-heritage-brown/20 mb-5">
-          <button id="tabAudio" class="pb-2 font-semibold text-sm border-b-2 border-heritage-red text-heritage-red"></button>
-          <button id="tabQr" class="pb-2 font-semibold text-sm border-b-2 border-transparent text-heritage-brown hover:text-heritage-red"></button>
-        </div>
-
-        <div id="viewAudio" class="text-center">
-          <button id="playBtn" class="inline-flex items-center gap-3 bg-heritage-red hover:bg-heritage-redDeep text-white font-semibold px-7 py-3 rounded-full shadow-lg transition">
-            <i class="fa-solid fa-play" id="playIcon"></i> <span id="playText"></span>
-          </button>
-          <button id="stopBtn" class="ml-2 inline-flex items-center gap-2 border border-heritage-brown/30 text-heritage-brown px-5 py-3 rounded-full hover:border-heritage-red hover:text-heritage-red">
-            <i class="fa-solid fa-stop"></i> <span id="stopText"></span>
-          </button>
-          <p id="speechNote" class="text-xs text-heritage-brown mt-4 hidden"></p>
-          <a id="detailLink" target="_blank" rel="noopener" class="block mt-5 text-sm text-heritage-red underline underline-offset-4"></a>
-        </div>
-
-        <div id="viewQr" class="hidden text-center">
-          <div class="inline-block bg-white p-4 rounded-2xl border border-heritage-gold/50 shadow-sm">
-            <img id="qrImg" alt="QR" class="w-56 h-56 object-contain">
-          </div>
-          <p class="text-sm text-heritage-brown mt-4" id="qrHint"></p>
-          <label class="block text-left mt-5 text-xs font-semibold text-heritage-brown" for="qrBase" id="qrBaseLabel"></label>
-          <input id="qrBase" type="text" class="mt-1 w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
-          <p id="qrWarn" class="text-xs text-amber-700 mt-2 text-left hidden"></p>
-        </div>
+<!-- ===== MAIN CONTENT ===== -->
+<main class="max-w-5xl mx-auto px-4 py-8" id="main">
+  <!-- Skeleton loading -->
+  <div id="skeleton" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-7 hidden">
+    <!-- Skeleton card x3 -->
+    <div class="skeleton-card" aria-hidden="true">
+      <div class="skeleton h-44"></div>
+      <div class="p-6 space-y-3">
+        <div class="skeleton h-6 w-3/4"></div>
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="skeleton h-4 w-full"></div>
+        <div class="skeleton h-4 w-5/6"></div>
+        <div class="skeleton h-10 w-full mt-4 rounded-xl"></div>
+      </div>
+    </div>
+    <div class="skeleton-card" aria-hidden="true">
+      <div class="skeleton h-44"></div>
+      <div class="p-6 space-y-3">
+        <div class="skeleton h-6 w-3/4"></div>
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="skeleton h-4 w-full"></div>
+        <div class="skeleton h-4 w-5/6"></div>
+        <div class="skeleton h-10 w-full mt-4 rounded-xl"></div>
+      </div>
+    </div>
+    <div class="skeleton-card hidden xl:block" aria-hidden="true">
+      <div class="skeleton h-44"></div>
+      <div class="p-6 space-y-3">
+        <div class="skeleton h-6 w-3/4"></div>
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="skeleton h-4 w-full"></div>
+        <div class="skeleton h-4 w-5/6"></div>
+        <div class="skeleton h-10 w-full mt-4 rounded-xl"></div>
       </div>
     </div>
   </div>
 
-  <footer class="bg-heritage-redDeep text-heritage-paper/80 mt-16">
-    <div class="gold-rule"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid md:grid-cols-3 gap-6 sm:gap-8 text-sm">
-      <div>
-        <p class="font-serif text-lg font-bold text-heritage-goldSoft mb-2">Dinh Độc Lập</p>
-        <p id="footDesc" class="leading-relaxed"></p>
+  <!-- Status message -->
+  <p id="status" class="hidden text-center text-sm text-heritage-brown/70 py-8"></p>
+
+  <!-- Empty state -->
+  <div id="empty" class="hidden text-center py-16">
+    <i class="fa-regular fa-folder-open text-4xl text-heritage-brown/40 mb-3 block"></i>
+    <p class="text-heritage-brown" id="emptyText"></p>
+    <button id="emptyReset" class="mt-4 inline-flex items-center gap-2 text-sm text-heritage-red underline underline-offset-4 hover:text-heritage-redDeep transition-colors">
+      <i class="fa-solid fa-rotate-left text-xs"></i>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div id="grid"></div>
+</main>
+
+
+<!-- ===== MÃ QR CỦA TRANG WEB ===== -->
+<section class="bg-white border-y border-heritage-gold/40">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid md:grid-cols-[auto,1fr] gap-6 sm:gap-8 items-center">
+    <div class="bg-heritage-paper p-5 rounded-2xl border border-heritage-gold/50 shadow-sm mx-auto">
+      <img id="siteQrImg" alt="Mã QR trang web" class="w-48 h-48 object-contain bg-white">
+      <p id="siteQrError" class="hidden text-xs text-red-700 mt-2 max-w-[12rem] text-center"></p>
+    </div>
+    <div>
+      <h3 class="font-serif text-2xl font-bold text-heritage-red mb-2" id="siteQrTitle">Quét mã để mở trang này</h3>
+      <p class="text-heritage-ink/80 leading-relaxed mb-4" id="siteQrDesc">Du khách dùng điện thoại quét mã để mở trang thuyết minh ngay trên thiết bị của mình.</p>
+      <label class="block text-xs font-semibold text-heritage-brown mb-1" for="siteBase" id="siteBaseLabel">Địa chỉ server (để điện thoại truy cập)</label>
+      <input id="siteBase" type="text" class="w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
+      <p id="siteWarn" class="text-xs text-amber-700 mt-2 hidden">Đang dùng localhost, điện thoại không quét được.</p>
+      <a id="siteDownload" download="QR-Dinh-Doc-Lap.png" class="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-heritage-red underline underline-offset-4">Tải ảnh mã QR</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FLOATING LANG PILL ===== -->
+<div id="floatLang" aria-label="Chọn ngôn ngữ nhanh">
+  <i class="fa-solid fa-language text-heritage-red text-sm mr-1"></i>
+</div>
+
+<!-- ===== BACK TO TOP ===== -->
+<button id="backToTop" aria-label="Lên đầu trang">
+  <i class="fa-solid fa-chevron-up text-sm"></i>
+</button>
+
+<!-- ===== MODAL ===== -->
+<div id="modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modalBackdrop"></div>
+  <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-heritage-paper rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto modal-in shadow-2xl border border-heritage-gold/20">
+
+      <!-- Image band -->
+      <div id="modalImgBand" class="img-band w-full h-52 sm:h-60 overflow-hidden relative rounded-t-2xl flex items-center justify-center">
+        <img id="modalImg" src="" alt="" class="w-full h-full object-cover hidden">
+        <div id="modalImgIcon" class="flex flex-col items-center justify-center text-white/60 gap-3">
+          <i class="text-5xl"></i>
+          <span class="text-sm font-medium tracking-wide opacity-70"></span>
+        </div>
       </div>
-      <div>
-        <p class="font-semibold text-heritage-goldSoft mb-2" id="footHowTitle"></p>
-        <p id="footHow" class="leading-relaxed"></p>
-      </div>
-      <div>
-        <p class="font-semibold text-heritage-goldSoft mb-2" id="footProjTitle"></p>
-        <p id="footProj" class="leading-relaxed"></p>
+
+      <div class="p-6 sm:p-7">
+        <!-- Header row -->
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span id="mAreaBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-heritage-red/10 text-heritage-red border border-heritage-red/20"></span>
+              <span id="mCodeBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-heritage-gold/10 text-heritage-brown/70 border border-heritage-gold/20"></span>
+            </div>
+            <h2 class="text-xl font-bold text-heritage-ink leading-snug" id="modalName"></h2>
+          </div>
+          <button id="modalClose" aria-label="Đóng"
+            class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-heritage-brown/10 hover:bg-heritage-red hover:text-white text-heritage-brown transition-colors">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+
+        <div class="gold-rule mb-4"></div>
+
+        <!-- Description -->
+        <p class="text-sm text-heritage-ink/80 leading-relaxed mb-5" id="modalDesc"></p>
+
+        <!-- Detail grid -->
+        <div class="grid grid-cols-2 gap-3 mb-5" id="modalDetails"></div>
+
+        <!-- Audio -->
+        <div id="modalAudioWrap" class="hidden mb-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-heritage-brown/60 mb-2" id="modalAudioLabel">Âm thanh thuyết minh</p>
+          <audio id="modalAudio" controls class="w-full h-10 rounded-lg accent-heritage-red" preload="none"></audio>
+        </div>
+
+
+        <!-- Tab QR trong modal -->
+        <div id="modalQrSection" class="mt-5 border-t border-heritage-gold/20 pt-5">
+          <div class="flex gap-6 border-b border-heritage-brown/15 mb-5">
+            <button id="tabAudio2" class="pb-2 font-semibold text-sm border-b-2 border-heritage-red text-heritage-red" id="tabAudio2"></button>
+            <button id="tabQr2" class="pb-2 font-semibold text-sm border-b-2 border-transparent text-heritage-brown hover:text-heritage-red"></button>
+          </div>
+          <div id="viewAudio2" class="text-center py-2">
+            <div class="flex flex-wrap justify-center gap-2">
+              <button id="ttsPlay" type="button" class="inline-flex items-center gap-2 bg-heritage-red hover:bg-heritage-redDeep text-white font-semibold px-6 py-2.5 rounded-full shadow transition-colors">
+                <i class="fa-solid fa-play" id="ttsIcon"></i><span id="ttsPlayText">Nghe thuyết minh</span>
+              </button>
+              <button id="ttsStop" type="button" class="inline-flex items-center gap-2 border border-heritage-brown/30 text-heritage-brown px-5 py-2.5 rounded-full hover:border-heritage-red hover:text-heritage-red">
+                <i class="fa-solid fa-stop"></i><span id="ttsStopText">Dừng</span>
+              </button>
+            </div>
+            <p id="ttsNote" class="text-xs text-heritage-brown mt-3 hidden"></p>
+            <a id="detailLink" href="#" class="inline-flex items-center gap-1.5 mt-4 text-sm text-heritage-red underline underline-offset-4 hover:text-heritage-redDeep">
+              <i class="fa-solid fa-up-right-from-square text-xs"></i><span id="detailLinkText">Mở trang thuyết minh đầy đủ</span>
+            </a>
+          </div>
+          <div id="viewQr2" class="hidden text-center">
+            <div class="inline-block bg-white p-4 rounded-2xl border border-heritage-gold/50 shadow-sm">
+              <img id="qrImg" alt="QR" class="w-52 h-52 object-contain">
+            </div>
+            <p class="text-sm text-heritage-brown mt-4" id="qrHint"></p>
+            <label class="block text-left mt-4 text-xs font-semibold text-heritage-brown" for="qrBase" id="qrBaseLabel"></label>
+            <input id="qrBase" type="text" class="mt-1 w-full font-mono text-xs px-3 py-2 rounded-lg border border-heritage-brown/25 bg-white focus:outline-none focus:border-heritage-gold" placeholder="http://192.168.1.10:5000">
+            <p id="qrWarn" class="text-xs text-amber-700 mt-2 text-left hidden"></p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-3 border-t border-heritage-gold/20">
+          <p class="text-xs text-heritage-brown/50" id="modalFooter"></p>
+          <button id="modalClose2"
+            class="text-sm font-semibold text-heritage-red hover:text-heritage-redDeep transition-colors" id="modalCloseBtn2"></button>
+        </div>
       </div>
     </div>
-    <div class="border-t border-white/10 py-4 text-center text-xs text-heritage-paper/60" id="footCopy"></div>
-  </footer>
+  </div>
+</div>
 
-  <script src="js/common.js"></script>
-  <script>
-    // ---------- Chữ giao diện (5 ngôn ngữ) ----------
-    const STRINGS = {
-      vi: { areaTitle: 'Khu vực', other: 'Khác', siteQrError: 'Không tải được mã QR. Hãy kiểm tra server đã được cập nhật (có API /api/site/qr) và đang chạy.', siteQrTitle: 'Quét mã để mở trang này', siteQrDesc: 'Du khách dùng điện thoại quét mã để mở trang thuyết minh ngay trên thiết bị của mình.', siteBaseLabel: 'Địa chỉ server (để điện thoại truy cập)', siteWarn: 'Đang dùng localhost, điện thoại không quét được. Hãy nhập IP của máy chạy server.', siteDownload: 'Tải ảnh mã QR', brandSub: 'Thuyết minh đa ngôn ngữ', kicker: 'Di tích lịch sử quốc gia', heroTitle: 'Hành trình qua những căn phòng lịch sử',
-        heroDesc: 'Mỗi công trình trong Dinh Độc Lập có một câu chuyện riêng. Quét mã QR tại hiện vật để nghe thuyết minh bằng ngôn ngữ của bạn.',
-        heroHint: 'Quét mã QR tại mỗi công trình để nghe thuyết minh', listTitle: 'Danh mục công trình', search: 'Tìm công trình...', all: 'Tất cả khu vực',
-        count: (n) => `${n} công trình`, empty: 'Không tìm thấy công trình phù hợp.', loading: 'Đang tải dữ liệu...', error: 'Không tải được dữ liệu',
-        listen: 'Nghe thuyết minh', stop: 'Dừng', tabAudio: 'Nghe thuyết minh', tabQr: 'Mã QR', detail: 'Mở trang chi tiết',
+<script src="js/common.js"></script>
+<script>
+// ===== CONSTANTS =====
+const AREAS = {
+  'tang-tret':  { icon: 'fa-solid fa-door-open',       name: { vi: 'Tầng trệt',    en: 'Ground Floor',    ja: '1階',        ko: '1층',       zh: '底层'   } },
+  'lau-1':      { icon: 'fa-solid fa-stairs',           name: { vi: 'Lầu 1',        en: '1st Floor',       ja: '2階',        ko: '2층',       zh: '一楼'   } },
+  'lau-2':      { icon: 'fa-solid fa-building',         name: { vi: 'Lầu 2',        en: '2nd Floor',       ja: '3階',        ko: '3층',       zh: '二楼'   } },
+  'san-thuong':  { icon: 'fa-solid fa-sun',             name: { vi: 'Sân thượng',   en: 'Rooftop',         ja: '屋上',       ko: '옥상',      zh: '天台'   } },
+  'tang-ham':   { icon: 'fa-solid fa-vault',            name: { vi: 'Tầng hầm',     en: 'Basement',        ja: '地下',       ko: '지하',      zh: '地下室' } },
+  'ngoai-troi': { icon: 'fa-solid fa-tree',             name: { vi: 'Ngoài trời',   en: 'Outdoor',         ja: '屋外',       ko: '야외',      zh: '室外'   } }
+};
+const AREA_ORDER = ['tang-tret','lau-1','lau-2','san-thuong','tang-ham','ngoai-troi'];
+
+// Ảnh fallback theo khu vực (khi artifact chưa có imageUrl riêng)
+const AREA_IMAGES = {
+  'tang-tret':  '/img/palace-front.jpg',
+  'lau-1':      '/img/palace-side.jpg',
+  'lau-2':      '/img/palace-facade.jpg',
+  'san-thuong': '/img/palace-front.jpg',
+  'tang-ham':   '/img/palace-facade.jpg',
+  'ngoai-troi': '/img/palace-side.jpg',
+};
+
+const languages = [
+  { code: 'vi', label: 'Tiếng Việt',  flag: '🇻🇳' },
+  { code: 'en', label: 'English',     flag: '🇬🇧' },
+  { code: 'ja', label: '日本語',      flag: '🇯🇵' },
+  { code: 'ko', label: '한국어',      flag: '🇰🇷' },
+  { code: 'zh', label: '中文',        flag: '🇨🇳' }
+];
+
+const STRINGS = {
+  vi: {
+    heroTitle: 'Dinh Độc Lập', heroSubtitle: 'Khám phá từng phòng và hiện vật lịch sử qua thuyết minh đa ngôn ngữ',
+    subtitle: 'Di tích lịch sử quốc gia đặc biệt',
+    statLabel: 'hiện vật', statLangs: 'ngôn ngữ', statAreas: 'khu vực',
+    allAreas: 'Tất cả', searchPlaceholder: 'Tìm kiếm hiện vật…',
+    modalAudioLabel: 'Âm thanh thuyết minh', modalCode: 'Mã', modalCloseBtn: 'Đóng',
+    modalUpdated: 'Cập nhật', error: 'Lỗi tải dữ liệu',
+    emptyTitle: 'Không tìm thấy hiện vật phù hợp', emptyReset: 'Xem tất cả công trình',
+    openBadge: '● Đang mở cửa', closeBadge: '● Đã đóng cửa',
+    modalFooter: 'Thông tin từ hệ thống thuyết minh Dinh Độc Lập'
+  },
+  en: {
+    heroTitle: 'Independence Palace', heroSubtitle: 'Explore each room and historical artifact with multilingual audio guides',
+    subtitle: 'Special National Historical Monument',
+    statLabel: 'artifacts', statLangs: 'languages', statAreas: 'areas',
+    allAreas: 'All', searchPlaceholder: 'Search artifacts…',
+    modalAudioLabel: 'Audio Guide', modalCode: 'Code', modalCloseBtn: 'Close',
+    modalUpdated: 'Updated', error: 'Error loading data',
+    emptyTitle: 'No matching artifacts found', emptyReset: 'View all artifacts',
+    openBadge: '● Open now', closeBadge: '● Closed',
+    modalFooter: 'Data from Independence Palace Audio Guide System'
+  },
+  ja: {
+    heroTitle: '統一会堂', heroSubtitle: '多言語音声ガイドで各部屋・歴史的遺物を探索',
+    subtitle: '国家特別史跡',
+    statLabel: '展示物', statLangs: '言語', statAreas: 'エリア',
+    allAreas: 'すべて', searchPlaceholder: '展示物を検索…',
+    modalAudioLabel: '音声ガイド', modalCode: 'コード', modalCloseBtn: '閉じる',
+    modalUpdated: '更新', error: 'データ読み込みエラー',
+    emptyTitle: '該当する展示物はありません', emptyReset: 'すべての展示物を見る',
+    openBadge: '● 開館中', closeBadge: '● 閉館',
+    modalFooter: '統一会堂音声ガイドシステムより'
+  },
+  ko: {
+    heroTitle: '통일궁', heroSubtitle: '다국어 오디오 가이드로 역사적 전시물 탐방',
+    subtitle: '국가 특별 역사 유적지',
+    statLabel: '전시물', statLangs: '언어', statAreas: '구역',
+    allAreas: '전체', searchPlaceholder: '전시물 검색…',
+    modalAudioLabel: '오디오 가이드', modalCode: '코드', modalCloseBtn: '닫기',
+    modalUpdated: '업데이트', error: '데이터 로드 오류',
+    emptyTitle: '일치하는 전시물이 없습니다', emptyReset: '모든 전시물 보기',
+    openBadge: '● 개관 중', closeBadge: '● 휴관',
+    modalFooter: '통일궁 오디오 가이드 시스템'
+  },
+  zh: {
+    heroTitle: '统一宫', heroSubtitle: '通过多语言语音导览探索每个房间和历史文物',
+    subtitle: '国家特别历史遗迹',
+    statLabel: '文物', statLangs: '语言', statAreas: '区域',
+    allAreas: '全部', searchPlaceholder: '搜索文物…',
+    modalAudioLabel: '语音导览', modalCode: '编号', modalCloseBtn: '关闭',
+    modalUpdated: '更新', error: '数据加载错误',
+    emptyTitle: '未找到匹配的文物', emptyReset: '查看所有文物',
+    openBadge: '● 开放中', closeBadge: '● 已关闭',
+    modalFooter: '数据来自统一宫语音导览系统'
+  }
+};
+
+// ===== STATE =====
+let lang = localStorage.getItem('lang') || 'vi';
+let artifacts = [];
+let areaFilter = 'all';
+let searchQ = '';
+let scrollObs;
+let currentArtifact = null;
+
+const S = () => STRINGS[lang] || STRINGS['vi'];
+
+// Chữ cho nút nghe, mã QR (5 ngôn ngữ)
+const EXTRA = {
+  vi: { listen: 'Nghe thuyết minh', pause: 'Đang phát…', stop: 'Dừng', openDetail: 'Mở trang thuyết minh đầy đủ', tabAudio: 'Nghe thuyết minh', tabQr: 'Mã QR', noSpeech: 'Thiết bị này không hỗ trợ đọc thuyết minh, bạn có thể đọc nội dung phía trên.',
         qrHint: 'Quét mã bằng điện thoại để mở trang thuyết minh của công trình.', qrBase: 'Địa chỉ server (để điện thoại truy cập)',
-        qrWarn: 'Đang dùng localhost, điện thoại không quét được. Hãy nhập IP của máy chạy server.', fallback: 'Công trình này chưa có bản dịch, đang hiển thị tiếng Việt.',
-        noSpeech: 'Thiết bị này không hỗ trợ đọc thuyết minh.', footHowTitle: 'Cách sử dụng', footHow: 'Quét mã QR gắn tại công trình, chọn ngôn ngữ và nhấn nghe.',
-        footProjTitle: 'Đồ án môn Công Nghệ Phần Mềm', footProj: 'Đại học Sài Gòn – Khoa Công nghệ thông tin', copy: '© Đồ án Thuyết minh tự động đa ngôn ngữ' },
-      en: { areaTitle: 'Areas', other: 'Other', siteQrError: 'The QR code could not be loaded. Check that the server is updated (has /api/site/qr) and running.', siteQrTitle: 'Scan to open this guide', siteQrDesc: 'Visitors can scan this code with their phone to open the audio guide on their own device.', siteBaseLabel: 'Server address (so your phone can reach it)', siteWarn: 'Using localhost, phones cannot scan this. Enter the IP address of the server computer.', siteDownload: 'Download QR image', brandSub: 'Multilingual audio guide', kicker: 'National historic site', heroTitle: 'A journey through the historic rooms',
-        heroDesc: 'Every exhibit in Independence Palace has its own story. Scan the QR code at each exhibit to listen to the guide in your language.',
-        heroHint: 'Scan the QR code at each exhibit to listen', listTitle: 'Exhibits', search: 'Search exhibits...', all: 'All areas',
-        count: (n) => `${n} exhibits`, empty: 'No exhibits match your search.', loading: 'Loading...', error: 'Could not load data',
-        listen: 'Listen to the guide', stop: 'Stop', tabAudio: 'Listen', tabQr: 'QR code', detail: 'Open detail page',
+        siteQrTitle: 'Quét mã để mở trang này', siteQrDesc: 'Du khách dùng điện thoại quét mã để mở trang thuyết minh ngay trên thiết bị của mình.',
+        siteBaseLabel: 'Địa chỉ server (để điện thoại truy cập)', siteDownload: 'Tải ảnh mã QR' },
+  en: { listen: 'Listen to the guide', pause: 'Playing…', stop: 'Stop', openDetail: 'Open full guide page', tabAudio: 'Listen', tabQr: 'QR code', noSpeech: 'This device does not support speech. You can read the text above.',
         qrHint: 'Scan with your phone to open the guide for this exhibit.', qrBase: 'Server address (so your phone can reach it)',
-        qrWarn: 'Using localhost, phones cannot scan this. Enter the IP address of the server computer.', fallback: 'This exhibit has no translation yet; showing Vietnamese.',
-        noSpeech: 'This device does not support speech.', footHowTitle: 'How to use', footHow: 'Scan the QR code at an exhibit, choose a language and press listen.',
-        footProjTitle: 'Software Engineering project', footProj: 'Saigon University – Faculty of Information Technology', copy: '© Multilingual audio guide – student project' },
-      ja: { areaTitle: 'エリア', other: 'その他', siteQrError: 'QRコードを読み込めませんでした。サーバーが更新済み（/api/site/qr）で起動しているか確認してください。', siteQrTitle: 'QRコードを読み取ってこのガイドを開く', siteQrDesc: 'スマートフォンで読み取ると、ご自身の端末で音声ガイドを開けます。', siteBaseLabel: 'サーバーのアドレス（スマートフォンからアクセス用）', siteWarn: 'localhostを使用しているため、スマートフォンでは読み取れません。サーバーのIPアドレスを入力してください。', siteDownload: 'QRコードの画像をダウンロード', brandSub: '多言語音声ガイド', kicker: '国の史跡', heroTitle: '歴史ある部屋をめぐる旅',
-        heroDesc: '独立宮殿の一つひとつの展示には、それぞれの物語があります。展示のQRコードを読み取り、お好きな言語で解説をお聞きください。',
-        heroHint: '各展示のQRコードを読み取って解説を聞く', listTitle: '展示一覧', search: '展示を検索...', all: 'すべてのエリア',
-        count: (n) => `${n} 件の展示`, empty: '一致する展示がありません。', loading: '読み込み中...', error: 'データを読み込めませんでした',
-        listen: '解説を聞く', stop: '停止', tabAudio: '解説を聞く', tabQr: 'QRコード', detail: '詳細ページを開く',
-        qrHint: 'スマートフォンで読み取ると、この展示の解説ページが開きます。', qrBase: 'サーバーのアドレス（スマートフォンからアクセス用）',
-        qrWarn: 'localhostを使用しているため、スマートフォンでは読み取れません。サーバーのIPアドレスを入力してください。', fallback: 'この展示にはまだ翻訳がないため、ベトナム語で表示しています。',
-        noSpeech: 'この端末は音声読み上げに対応していません。', footHowTitle: '使い方', footHow: '展示のQRコードを読み取り、言語を選んで再生を押してください。',
-        footProjTitle: 'ソフトウェア工学の課題', footProj: 'サイゴン大学 情報技術学部', copy: '© 多言語音声ガイド – 学生プロジェクト' },
-      ko: { areaTitle: '구역', other: '기타', siteQrError: 'QR 코드를 불러올 수 없습니다. 서버가 업데이트되었는지(/api/site/qr) 및 실행 중인지 확인하세요。', siteQrTitle: '이 안내를 열려면 스캔하세요', siteQrDesc: '휴대폰으로 스캔하면 자신의 기기에서 음성 안내 페이지를 열 수 있습니다.', siteBaseLabel: '서버 주소 (휴대폰에서 접속용)', siteWarn: 'localhost를 사용 중이라 휴대폰에서 스캔할 수 없습니다. 서버 컴퓨터의 IP 주소를 입력하세요.', siteDownload: 'QR 코드 이미지 다운로드', brandSub: '다국어 음성 안내', kicker: '국가 사적지', heroTitle: '역사의 방들을 따라 떠나는 여정',
-        heroDesc: '독립궁의 모든 전시물에는 저마다의 이야기가 있습니다. 전시물의 QR 코드를 스캔하고 원하는 언어로 안내를 들어 보세요.',
-        heroHint: '각 전시물의 QR 코드를 스캔해 안내 듣기', listTitle: '전시물 목록', search: '전시물 검색...', all: '모든 구역',
-        count: (n) => `전시물 ${n}개`, empty: '검색 결과가 없습니다.', loading: '불러오는 중...', error: '데이터를 불러올 수 없습니다',
-        listen: '안내 듣기', stop: '정지', tabAudio: '안내 듣기', tabQr: 'QR 코드', detail: '상세 페이지 열기',
-        qrHint: '휴대폰으로 스캔하면 이 전시물의 안내 페이지가 열립니다.', qrBase: '서버 주소 (휴대폰에서 접속용)',
-        qrWarn: 'localhost를 사용 중이라 휴대폰에서 스캔할 수 없습니다. 서버 컴퓨터의 IP 주소를 입력하세요.', fallback: '이 전시물은 아직 번역이 없어 베트남어로 표시합니다.',
-        noSpeech: '이 기기는 음성 읽기를 지원하지 않습니다.', footHowTitle: '이용 방법', footHow: '전시물의 QR 코드를 스캔하고 언어를 고른 뒤 재생을 누르세요.',
-        footProjTitle: '소프트웨어 공학 프로젝트', footProj: '사이공 대학교 정보기술학부', copy: '© 다국어 음성 안내 – 학생 프로젝트' },
-      zh: { areaTitle: '区域', other: '其他', siteQrError: '无法加载二维码。请检查服务器是否已更新（有 /api/site/qr 接口）并正在运行。', siteQrTitle: '扫码打开本导览', siteQrDesc: '游客可用手机扫描此码，在自己的设备上打开语音讲解页面。', siteBaseLabel: '服务器地址（供手机访问）', siteWarn: '当前使用 localhost，手机无法扫描。请输入运行服务器的电脑 IP 地址。', siteDownload: '下载二维码图片', brandSub: '多语种语音讲解', kicker: '国家历史遗迹', heroTitle: '穿越历史厅室的旅程',
-        heroDesc: '独立宫的每一件展品都有自己的故事。扫描展品上的二维码，即可用您的语言聆听讲解。',
-        heroHint: '扫描每件展品的二维码聆听讲解', listTitle: '展品列表', search: '搜索展品...', all: '全部区域',
-        count: (n) => `共 ${n} 件展品`, empty: '没有找到符合条件的展品。', loading: '加载中...', error: '无法加载数据',
-        listen: '聆听讲解', stop: '停止', tabAudio: '聆听讲解', tabQr: '二维码', detail: '打开详情页',
-        qrHint: '用手机扫描，即可打开该展品的讲解页面。', qrBase: '服务器地址（供手机访问）',
-        qrWarn: '当前使用 localhost，手机无法扫描。请输入运行服务器的电脑 IP 地址。', fallback: '该展品暂无翻译，正在显示越南语。',
-        noSpeech: '此设备不支持语音朗读。', footHowTitle: '使用方法', footHow: '扫描展品上的二维码，选择语言后点击播放。',
-        footProjTitle: '软件工程课程项目', footProj: '西贡大学 信息技术学院', copy: '© 多语种语音讲解 – 学生项目' },
+        siteQrTitle: 'Scan to open this guide', siteQrDesc: 'Visitors can scan this code to open the audio guide on their own phone.',
+        siteBaseLabel: 'Server address (so your phone can reach it)', siteDownload: 'Download QR image' },
+  ja: { listen: '解説を聞く', pause: '再生中…', stop: '停止', openDetail: '解説ページを開く', tabAudio: '解説を聞く', tabQr: 'QRコード', noSpeech: 'この端末は音声読み上げに対応していません。上の文章をお読みください。',
+        qrHint: 'スマートフォンで読み取ると、この展示の解説ページが開きます。', qrBase: 'サーバーのアドレス',
+        siteQrTitle: 'QRコードでこのガイドを開く', siteQrDesc: 'スマートフォンで読み取ると、ご自身の端末で音声ガイドを開けます。',
+        siteBaseLabel: 'サーバーのアドレス', siteDownload: 'QRコードをダウンロード' },
+  ko: { listen: '안내 듣기', pause: '재생 중…', stop: '정지', openDetail: '전체 안내 페이지 열기', tabAudio: '안내 듣기', tabQr: 'QR 코드', noSpeech: '이 기기는 음성 읽기를 지원하지 않습니다. 위의 글을 읽어 주세요.',
+        qrHint: '휴대폰으로 스캔하면 이 전시물의 안내 페이지가 열립니다.', qrBase: '서버 주소',
+        siteQrTitle: '스캔하여 이 안내 열기', siteQrDesc: '휴대폰으로 스캔하면 자신의 기기에서 음성 안내를 열 수 있습니다.',
+        siteBaseLabel: '서버 주소', siteDownload: 'QR 코드 다운로드' },
+  zh: { listen: '聆听讲解', pause: '播放中…', stop: '停止', openDetail: '打开完整讲解页面', tabAudio: '聆听讲解', tabQr: '二维码', noSpeech: '此设备不支持语音朗读，请阅读上方文字。',
+        qrHint: '用手机扫描即可打开该展品的讲解页面。', qrBase: '服务器地址',
+        siteQrTitle: '扫码打开本导览', siteQrDesc: '游客可用手机扫描此码，在自己的设备上打开语音讲解。',
+        siteBaseLabel: '服务器地址', siteDownload: '下载二维码图片' },
+};
+const X = (k) => (EXTRA[lang] && EXTRA[lang][k]) || EXTRA.vi[k];
+const SPEECH = { vi: 'vi-VN', en: 'en-US', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN' };
+let ttsPlaying = false, ttsTimer = null;
+
+// ===== UTILITY =====
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleDateString(lang === 'vi' ? 'vi-VN' : lang, { year:'numeric', month:'short', day:'numeric' }); }
+  catch { return iso.slice(0,10); }
+}
+</script>
+
+<script>
+// ===== OPEN/CLOSE BADGE =====
+function updateOpenBadge() {
+  const badge = document.getElementById('openBadge');
+  if (!badge) return;
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const isOpen = minutes >= 7 * 60 + 30 && minutes < 16 * 60 + 30; // giờ mở cửa 07:30 – 16:30
+  badge.textContent = isOpen ? S().openBadge : S().closeBadge;
+  badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full ' + (isOpen ? 'badge-open' : 'badge-close');
+  badge.classList.remove('hidden');
+}
+
+// ===== FLOATING LANG PILL =====
+function renderFloatLang() {
+  const pill = document.getElementById('floatLang');
+  if (!pill) return;
+  const ico = pill.querySelector('i');
+  pill.replaceChildren(ico);
+  languages.forEach((lng) => {
+    const btn = document.createElement('button');
+    btn.textContent = lng.code.toUpperCase();
+    btn.title = lng.label;
+    if (lng.code === lang) btn.classList.add('active');
+    btn.addEventListener('click', () => changeLanguage(lng.code));
+    pill.append(btn);
+  });
+}
+
+// ===== BACK TO TOP =====
+function initBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 400), { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+// ===== SCROLL FADE-IN =====
+function initScrollFade() {
+  if (!window.IntersectionObserver) return;
+  scrollObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); scrollObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in-up').forEach((el) => scrollObs.observe(el));
+}
+function observeCards() {
+  if (!scrollObs) return;
+  document.querySelectorAll('.fade-in-up:not(.visible)').forEach((el) => scrollObs.observe(el));
+}
+
+// ===== LANGUAGE =====
+function renderLangBar() {
+  const bar = document.getElementById('langBar');
+  if (!bar) return;
+  bar.replaceChildren();
+  languages.forEach(({ code, label, flag }) => {
+    const btn = document.createElement('button');
+    btn.setAttribute('aria-pressed', code === lang);
+    btn.className = 'lang-btn text-xs font-semibold px-2.5 py-1 rounded-full border border-white/25 text-white/80 hover:bg-white/15 transition-colors';
+    btn.innerHTML = `<span class="mr-1">${flag}</span>${code.toUpperCase()}`;
+    btn.title = label;
+    btn.addEventListener('click', () => changeLanguage(code));
+    bar.appendChild(btn);
+  });
+}
+
+function changeLanguage(code) {
+  lang = code;
+  localStorage.setItem('lang', lang);
+  renderLangBar();
+  renderFloatLang();
+  updateTexts();
+  updateOpenBadge();
+  updateQrStrings();
+  updateSiteQr();
+  stopSpeech(); setTts(false);
+  // Tải lại nội dung theo ngôn ngữ mới; nếu đang mở hộp chi tiết thì làm mới luôn
+  const openCode = document.getElementById('modal').classList.contains('hidden') ? null : currentArtifact && currentArtifact.code;
+  loadArtifacts().then(() => {
+    if (!openCode) return;
+    const fresh = artifacts.find((x) => x.code === openCode);
+    if (fresh) openModal(fresh);
+  });
+}
+
+// ===== UPDATE UI TEXTS =====
+function updateTexts() {
+  const s = S();
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.textContent = val; };
+  set('heroTitle', s.heroTitle); set('heroSubtitle', s.heroSubtitle);
+  set('subtitleText', s.subtitle);
+  set('statLabel', s.statLabel); set('statLangs', s.statLangs); set('statAreas', s.statAreas);
+  const inp = document.getElementById('search');
+  if (inp) inp.placeholder = s.searchPlaceholder;
+  // emptyReset button text
+  const resetBtn = document.getElementById('emptyReset');
+  if (resetBtn) { const sp = resetBtn.querySelector('span'); if (sp) sp.textContent = s.emptyReset; }
+}
+
+// ===== AREA CHIPS =====
+function renderAreaChips() {
+  const s = S();
+  const wrap = document.getElementById('areaChips');
+  if (!wrap) return;
+  wrap.replaceChildren();
+  const mkChip = (slug, label) => {
+    const btn = document.createElement('button');
+    const isActive = areaFilter === slug;
+    btn.textContent = label;
+    btn.className = 'text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ' +
+      (isActive ? 'chip-active border-heritage-red' : 'border-heritage-gold/30 bg-white text-heritage-brown hover:bg-heritage-red/10 hover:border-heritage-red/40');
+    btn.addEventListener('click', () => { areaFilter = slug; renderAreaChips(); renderGrid(); });
+    wrap.appendChild(btn);
+  };
+  mkChip('all', s.allAreas);
+  AREA_ORDER.forEach((slug) => {
+    const a = AREAS[slug]; if (!a) return;
+    mkChip(slug, a.name[lang] || a.name.vi);
+  });
+}
+
+// ===== MAKE CARD =====
+function makeCard(a) {
+  const area = AREAS[a.categorySlug] || {};
+  const areaName = area.name ? (area.name[lang] || area.name.vi) : (a.categorySlug || '');
+  const s = S();
+
+  const article = document.createElement('article');
+  article.className = 'card bg-white rounded-2xl border border-heritage-gold/20 overflow-hidden cursor-pointer fade-in-up';
+  article.setAttribute('role', 'button');
+  article.setAttribute('tabindex', '0');
+  article.setAttribute('aria-label', a.name || '');
+  article.addEventListener('click', () => openModal(a));
+  article.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(a); } });
+
+  const imgSrc = a.imageUrl || AREA_IMAGES[a.categorySlug] || '';
+  const imgBand = `<div class="img-band w-full h-44 overflow-hidden relative flex items-center justify-center">
+    ${imgSrc
+      ? `<img src="${imgSrc}" alt="${a.name || ''}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : ''}
+    <div class="flex flex-col items-center justify-center text-white/60 gap-2 absolute inset-0 ${imgSrc ? 'hidden' : ''}">
+      <i class="${area.icon || 'fa-solid fa-landmark'} text-4xl text-white/50"></i>
+      <span class="text-xs text-white/40">${areaName}</span>
+    </div>
+  </div>`;
+
+  const body = `<div class="p-5">
+    <div class="flex items-start justify-between gap-2 mb-2">
+      <h3 class="text-base font-bold text-heritage-ink leading-snug flex-1">${a.name || '—'}</h3>
+      <span class="flex-shrink-0 text-xs font-mono px-1.5 py-0.5 rounded bg-heritage-gold/10 text-heritage-brown/60 border border-heritage-gold/15 mt-0.5">${a.code || ''}</span>
+    </div>
+    <div class="flex items-center gap-1.5 mb-2.5">
+      <i class="${area.icon || 'fa-solid fa-layer-group'} text-[10px] text-heritage-red/70"></i>
+      <span class="text-[11px] text-heritage-brown/60 font-medium">${areaName}</span>
+    </div>
+    <p class="text-sm text-heritage-ink/70 leading-relaxed line-clamp-3 mb-4">${a.description || ''}</p>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-1">
+        ${a.audioUrl ? `<span class="flex items-center gap-1 text-[10px] text-heritage-brown/50"><i class="fa-solid fa-headphones text-heritage-red/60 text-xs"></i> Audio</span>` : ''}
+      </div>
+      <span class="text-xs text-heritage-red font-semibold flex items-center gap-1">
+        ${s.modalCode === 'Mã' ? 'Chi tiết' : (s.modalCode === 'Code' ? 'Details' : s.modalCode)}
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </span>
+    </div>
+  </div>`;
+
+  article.innerHTML = imgBand + body;
+  return article;
+}
+
+// ===== RENDER GRID =====
+function renderGrid() {
+  const s = S();
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const emptyText = document.getElementById('emptyText');
+  if (!grid) return;
+  grid.replaceChildren();
+
+  const q = (document.getElementById('search')?.value || '').toLowerCase().trim();
+
+  let filtered = artifacts.filter((a) => {
+    const matchArea = areaFilter === 'all' || a.categorySlug === areaFilter;
+    const matchQ = !q || (a.name || '').toLowerCase().includes(q) || (a.description || '').toLowerCase().includes(q) || (a.code || '').toLowerCase().includes(q);
+    return matchArea && matchQ;
+  });
+
+  if (filtered.length === 0) {
+    empty.classList.remove('hidden');
+    if (emptyText) emptyText.textContent = s.emptyTitle;
+    document.getElementById('statCount').textContent = 0;
+    return;
+  }
+  empty.classList.add('hidden');
+  document.getElementById('statCount').textContent = artifacts.length;
+
+  // Group by area in floor order
+  const groups = {};
+  AREA_ORDER.forEach((slug) => { groups[slug] = []; });
+  const otherKey = '__other__';
+  groups[otherKey] = [];
+  filtered.forEach((a) => {
+    if (groups[a.categorySlug] !== undefined) groups[a.categorySlug].push(a);
+    else groups[otherKey].push(a);
+  });
+
+  const allKeys = [...AREA_ORDER, otherKey];
+  allKeys.forEach((slug) => {
+    const items = groups[slug];
+    if (!items || items.length === 0) return;
+    const area = AREAS[slug];
+    if (area) {
+      const section = document.createElement('section');
+      section.className = 'mb-10';
+      const h2 = document.createElement('div');
+      h2.className = 'flex items-center gap-2 mb-4';
+      h2.innerHTML = `<i class="${area.icon} text-heritage-red text-sm"></i><h2 class="text-base font-bold text-heritage-ink">${area.name[lang] || area.name.vi}</h2><span class="text-xs text-heritage-brown/50 ml-1">(${items.length})</span>`;
+      section.appendChild(h2);
+      const cardGrid = document.createElement('div');
+      cardGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6';
+      items.forEach((a) => cardGrid.appendChild(makeCard(a)));
+      section.appendChild(cardGrid);
+      grid.appendChild(section);
+    } else {
+      const cardGrid = document.createElement('div');
+      cardGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6';
+      items.forEach((a) => cardGrid.appendChild(makeCard(a)));
+      grid.appendChild(cardGrid);
+    }
+  });
+
+  observeCards();
+}
+</script>
+
+<script>
+
+// ===== QR FUNCTIONS =====
+function getQrBase(inputId) {
+  const raw = (document.getElementById(inputId)?.value || '').trim() || window.location.origin;
+  try { return new URL(raw).origin; } catch (e) { return window.location.origin; }
+}
+
+function updateQr(artifact) {
+  if (!artifact) return;
+  const base = getQrBase('qrBase');
+  const img = document.getElementById('qrImg');
+  if (img) img.src = `/api/artifacts/code/${encodeURIComponent(artifact.code)}/qr?base=${encodeURIComponent(base)}`;
+  const warn = document.getElementById('qrWarn');
+  if (warn) warn.classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
+}
+
+function updateSiteQr() {
+  const base = getQrBase('siteBase');
+  const src = `/api/site/qr?base=${encodeURIComponent(base)}`;
+  const img = document.getElementById('siteQrImg');
+  const dl = document.getElementById('siteDownload');
+  const warn = document.getElementById('siteWarn');
+  const errEl = document.getElementById('siteQrError');
+  if (img) { img.src = src; img.onerror = () => { if (errEl) errEl.classList.remove('hidden'); }; img.onload = () => { if (errEl) errEl.classList.add('hidden'); }; }
+  if (dl) dl.href = src;
+  if (warn) warn.classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
+}
+
+function showTab2(which) {
+  const isAudio = which === 'audio';
+  const v1 = document.getElementById('viewAudio2');
+  const v2 = document.getElementById('viewQr2');
+  const t1 = document.getElementById('tabAudio2');
+  const t2 = document.getElementById('tabQr2');
+  if (v1) v1.classList.toggle('hidden', !isAudio);
+  if (v2) v2.classList.toggle('hidden', isAudio);
+  const activeClass = 'pb-2 font-semibold text-sm border-b-2 border-heritage-red text-heritage-red';
+  const inactClass  = 'pb-2 font-semibold text-sm border-b-2 border-transparent text-heritage-brown hover:text-heritage-red';
+  if (t1) t1.className = isAudio ? activeClass : inactClass;
+  if (t2) t2.className = !isAudio ? activeClass : inactClass;
+}
+
+function updateQrStrings() {
+  const s = S();
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  ['qrHint', 'siteQrTitle', 'siteQrDesc', 'siteBaseLabel', 'siteDownload'].forEach((k) => set(k, X(k)));
+  set('qrBaseLabel', X('qrBase'));
+  set('tabAudio2', X('tabAudio')); set('tabQr2', X('tabQr'));
+  set('ttsPlayText', ttsPlaying ? X('pause') : X('listen')); set('ttsStopText', X('stop'));
+  set('detailLinkText', X('openDetail'));
+}
+
+// ===== NGHE THUYẾT MINH (Web Speech API) =====
+function setTts(playing) {
+  ttsPlaying = playing;
+  const icon = document.getElementById('ttsIcon');
+  if (icon) icon.className = playing ? 'fa-solid fa-volume-high' : 'fa-solid fa-play';
+  const t = document.getElementById('ttsPlayText'); if (t) t.textContent = playing ? X('pause') : X('listen');
+  if (!playing && ttsTimer) { clearInterval(ttsTimer); ttsTimer = null; }
+}
+function playTts() {
+  const a = currentArtifact; if (!a) return;
+  if (ttsPlaying) { stopSpeech(); setTts(false); return; }
+  const note = document.getElementById('ttsNote');
+  const sLang = SPEECH[a.language] || SPEECH[lang] || 'vi-VN';
+  const text = [a.name, a.description].filter(Boolean).join('. ');
+  if (!speak(text, sLang)) { note.textContent = X('noSpeech'); note.classList.remove('hidden'); return; }
+  note.classList.add('hidden');
+  setTts(true);
+  trackEvent(a.code, a.language || lang, 'play');
+  ttsTimer = setInterval(() => {
+    if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) setTts(false);
+  }, 500);
+}
+
+// ===== MODAL =====
+function openModal(a) {
+  currentArtifact = a;
+  const s = S();
+  const area = AREAS[a.categorySlug] || {};
+  const areaName = area.name ? (area.name[lang] || area.name.vi) : '';
+
+  // Image band
+  const modalImg = document.getElementById('modalImg');
+  const modalImgIcon = document.getElementById('modalImgIcon');
+  const modalImgSrc = a.imageUrl || AREA_IMAGES[a.categorySlug] || '';
+  if (modalImgSrc) {
+    modalImg.src = modalImgSrc;
+    modalImg.alt = a.name || '';
+    modalImg.classList.remove('hidden');
+    modalImgIcon.style.display = 'none';
+    modalImg.onerror = () => {
+      modalImg.classList.add('hidden');
+      modalImgIcon.style.display = 'flex';
+      const i = modalImgIcon.querySelector('i');
+      const sp = modalImgIcon.querySelector('span');
+      if (i) i.className = (area.icon || 'fa-solid fa-landmark') + ' text-5xl text-white/50';
+      if (sp) sp.textContent = areaName;
     };
+  } else {
+    modalImg.classList.add('hidden');
+    modalImg.src = '';
+    modalImgIcon.style.display = 'flex';
+    const i = modalImgIcon.querySelector('i');
+    const sp = modalImgIcon.querySelector('span');
+    if (i) i.className = (area.icon || 'fa-solid fa-landmark') + ' text-5xl text-white/50';
+    if (sp) sp.textContent = areaName;
+  }
 
-    // Khu vực: slug khớp với categorySlug trong dữ liệu và 6 mục categories trong MongoDB
-    const AREAS = {
-      'tang-tret':  { icon: 'fa-door-open', name: { vi: 'Tầng trệt', en: 'Ground floor', ja: '1階', ko: '1층', zh: '一楼' } },
-      'lau-1':      { icon: 'fa-stairs',    name: { vi: 'Lầu 1', en: 'First floor', ja: '2階', ko: '2층', zh: '二楼' } },
-      'lau-2':      { icon: 'fa-stairs',    name: { vi: 'Lầu 2', en: 'Second floor', ja: '3階', ko: '3층', zh: '三楼' } },
-      'san-thuong': { icon: 'fa-sun',       name: { vi: 'Tầng sân thượng', en: 'Rooftop', ja: '屋上', ko: '옥상', zh: '屋顶' } },
-      'tang-ham':   { icon: 'fa-lock',      name: { vi: 'Tầng hầm', en: 'Basement', ja: '地下', ko: '지하', zh: '地下室' } },
-      'ngoai-troi': { icon: 'fa-tree',      name: { vi: 'Khuôn viên ngoài trời', en: 'Outdoor grounds', ja: '屋外（前庭）', ko: '야외 부지', zh: '室外场地' } },
-    };
+  document.getElementById('mAreaBadge').textContent = areaName;
+  document.getElementById('mCodeBadge').textContent = a.code ? `${s.modalCode}: ${a.code}` : '';
+  document.getElementById('modalName').textContent = a.name || '';
+  document.getElementById('modalDesc').textContent = a.description || '';
 
-    let lang = 'vi';
-    let languages = [{ code: 'vi', label: 'Tiếng Việt', speech: 'vi-VN' }];
-    let artifacts = [];
-    let areaFilter = 'all';
-    let current = null;
-    let playing = false;
+  // Detail grid
+  const det = document.getElementById('modalDetails');
+  det.replaceChildren();
+  const addDetail = (icon, label, val) => {
+    if (!val) return;
+    const d = document.createElement('div');
+    d.className = 'flex items-start gap-2 bg-white rounded-xl p-3 border border-heritage-gold/15';
+    d.innerHTML = `<i class="${icon} text-heritage-red/70 mt-0.5 text-xs flex-shrink-0"></i><div><p class="text-[10px] text-heritage-brown/50 uppercase tracking-wider font-medium mb-0.5">${label}</p><p class="text-xs text-heritage-ink font-semibold">${val}</p></div>`;
+    det.appendChild(d);
+  };
+  addDetail('fa-solid fa-map-pin', areaName ? (lang === 'vi' ? 'Vị trí' : 'Location') : '', areaName);
+  addDetail('fa-solid fa-hashtag', s.modalCode, a.code);
+  if (a.updatedAt) addDetail('fa-solid fa-calendar-days', s.modalUpdated, formatDate(a.updatedAt));
 
-    const S = () => STRINGS[lang] || STRINGS.vi;
-    const areaName = (slug) => (AREAS[slug] ? AREAS[slug].name[lang] || AREAS[slug].name.vi : S().all);
-    const speechOf = (code) => (languages.find((l) => l.code === code) || { speech: 'vi-VN' }).speech;
+  // Audio
+  const audioWrap = document.getElementById('modalAudioWrap');
+  const audioEl = document.getElementById('modalAudio');
+  if (a.audioUrl) {
+    audioEl.src = a.audioUrl; audioWrap.classList.remove('hidden');
+    document.getElementById('modalAudioLabel').textContent = s.modalAudioLabel;
+  } else { audioWrap.classList.add('hidden'); audioEl.src = ''; }
 
-    // ---------- Vẽ giao diện tĩnh theo ngôn ngữ ----------
-    function applyStatic() {
-      const s = S();
-      document.documentElement.lang = lang;
-      document.title = 'Dinh Độc Lập – ' + s.brandSub;
-      const set = (id, text) => { document.getElementById(id).textContent = text; };
-      set('brandSub', s.brandSub); set('heroKicker', s.kicker); set('heroTitle', s.heroTitle);
-      set('heroDesc', s.heroDesc); set('heroHint', s.heroHint); set('listTitle', s.listTitle);
-      document.getElementById('search').placeholder = s.search;
-      set('tabAudio', s.tabAudio); set('tabQr', s.tabQr); set('detailLink', s.detail);
-      set('playText', s.listen); set('stopText', s.stop); set('qrHint', s.qrHint);
-      set('qrBaseLabel', s.qrBase); set('qrWarn', s.qrWarn); set('footDesc', s.heroDesc);
-      set('footHowTitle', s.footHowTitle); set('footHow', s.footHow);
-      set('footProjTitle', s.footProjTitle); set('footProj', s.footProj); set('footCopy', s.copy);
-      document.getElementById('qrBase').placeholder = 'http://192.168.1.10:5000';
-      set('siteQrTitle', s.siteQrTitle); set('siteQrDesc', s.siteQrDesc); set('siteBaseLabel', s.siteBaseLabel);
-      set('siteWarn', s.siteWarn); set('siteDownload', s.siteDownload);
-      updateSiteQr();
-    }
+  document.getElementById('modalFooter').textContent = s.modalFooter;
+  const closeBtn2 = document.getElementById('modalCloseBtn2') || document.getElementById('modalClose2');
+  if (closeBtn2) closeBtn2.textContent = s.modalCloseBtn;
 
-    // ---------- Khu vực (chip lọc) ----------
-    function renderAreaChips() {
-      const box = document.getElementById('areaChips');
-      box.replaceChildren();
-      document.getElementById('areaTitle').textContent = S().areaTitle;
-      const used = [...new Set(artifacts.map((a) => a.categorySlug).filter((slug) => AREAS[slug]))];
-      const order = Object.keys(AREAS).filter((slug) => used.includes(slug));
-      const countOf = (slug) => (slug === 'all' ? artifacts.length : artifacts.filter((a) => a.categorySlug === slug).length);
-      const items = [['all', S().all], ...order.map((slug) => [slug, areaName(slug)])];
-      items.forEach(([slug, label]) => {
-        const active = areaFilter === slug;
-        const b = el('button', 'flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm transition lg:w-full ' +
-          (active ? 'chip-active' : 'border-heritage-brown/25 bg-white text-heritage-ink hover:border-heritage-red'));
-        b.type = 'button';
-        b.append(el('span', 'text-left', label), el('span', 'text-xs font-bold px-2 py-0.5 rounded-full ' +
-          (active ? 'bg-white/20' : 'bg-heritage-paper text-heritage-brown'), String(countOf(slug))));
-        b.addEventListener('click', () => { areaFilter = slug; renderAreaChips(); renderGrid(); });
-        box.append(b);
-      });
-    }
+  // Init QR tab + nghe thuyết minh
+  stopSpeech(); setTts(false);
+  document.getElementById('ttsNote').classList.add('hidden');
+  updateQrStrings();
+  showTab2('audio');
+  updateQr(a);
+  document.getElementById('detailLink').href = `detail.html?code=${encodeURIComponent(a.code)}&lang=${encodeURIComponent(lang)}`;
+  trackEvent(a.code, a.language || lang, 'view');
 
-    // ---------- Lưới công trình ----------
-    function visibleItems() {
-      const q = document.getElementById('search').value.trim().toLowerCase();
-      return artifacts.filter((a) =>
-        (areaFilter === 'all' || a.categorySlug === areaFilter) &&
-        (!q || (a.name || '').toLowerCase().includes(q) || (a.code || '').toLowerCase().includes(q)));
-    }
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modalName').focus();
+  document.body.style.overflow = 'hidden';
+}
 
-    function makeCard(a) {
-      const area = AREAS[a.categorySlug];
-      const card = el('article', 'card bg-white rounded-2xl overflow-hidden border border-heritage-gold/30 flex flex-col');
+function closeModal() {
+  stopSpeech(); setTts(false);
+  const audioEl = document.getElementById('modalAudio');
+  if (audioEl) audioEl.pause();
+  document.getElementById('modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
 
-      // Band: hiển thị ảnh thực nếu có imageUrl, fallback về icon gradient
-      const band = el('div', 'img-band relative h-44 overflow-hidden flex items-center justify-center');
-      if (a.imageUrl) {
-        const img = document.createElement('img');
-        img.src = a.imageUrl;
-        img.alt = a.name;
-        img.className = 'absolute inset-0 w-full h-full object-cover';
-        img.loading = 'lazy';
-        // Fallback về icon nếu ảnh lỗi
-        img.addEventListener('error', () => {
-          img.remove();
-          band.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'} text-5xl text-heritage-goldSoft/70`));
-        });
-        // Overlay tối nhẹ để badge đọc được
-        const overlay = el('div', 'absolute inset-0 bg-gradient-to-t from-heritage-redDeep/60 via-transparent to-transparent');
-        band.append(img, overlay);
-      } else {
-        band.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'} text-5xl text-heritage-goldSoft/80`));
-      }
-      band.append(el('span', 'absolute top-3 left-3 text-[11px] font-bold tracking-wider bg-white/90 text-heritage-red px-2.5 py-1 rounded-full z-10', a.code));
-      if (a.fallback) band.append(el('span', 'absolute top-3 right-3 text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full z-10', '!'));
+// ===== LOAD ARTIFACTS =====
+async function loadArtifacts() {
+  document.getElementById('skeleton').classList.remove('hidden');
+  document.getElementById('grid').replaceChildren();
+  document.getElementById('empty').classList.add('hidden');
+  const statusEl = document.getElementById('status');
+  statusEl.classList.add('hidden');
 
-      const body = el('div', 'p-6 flex-1 flex flex-col');
-      const title = el('h4', 'font-serif text-xl font-bold text-heritage-red mb-1', a.name);
-      const where = el('p', 'text-sm text-heritage-brown mb-3 flex items-center gap-2');
-      where.append(icon('fa-solid fa-location-dot text-heritage-gold'), document.createTextNode(a.location || ''));
-      const desc = el('p', 'text-sm leading-relaxed text-heritage-ink/80 line-clamp-3 mb-5', a.description || '');
-      const btn = el('button', 'mt-auto w-full bg-heritage-red hover:bg-heritage-redDeep text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2');
-      btn.type = 'button';
-      btn.append(icon('fa-solid fa-headphones'), document.createTextNode(S().listen));
-      btn.addEventListener('click', () => openModal(a));
+  try {
+    const body = await fetchJson('/api/artifacts?lang=' + lang);
+    artifacts = body.data || [];
+  } catch (err) {
+    artifacts = [];
+    statusEl.textContent = S().error + ': ' + err.message;
+    statusEl.classList.remove('hidden');
+  }
 
-      body.append(title, where, desc, btn);
-      card.append(band, body);
-      return card;
-    }
+  document.getElementById('skeleton').classList.add('hidden');
+  document.getElementById('statCount').textContent = artifacts.length;
+  renderAreaChips();
+  renderGrid();
+}
 
-    function renderGrid() {
-      const grid = document.getElementById('grid');
-      const items = visibleItems();
-      grid.replaceChildren();
-      document.getElementById('listCount').textContent = S().count(items.length);
-      document.getElementById('empty').classList.toggle('hidden', items.length > 0);
-      document.getElementById('emptyText').textContent = S().empty;
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Init UI
+  renderLangBar();
+  renderFloatLang();
+  updateTexts();
+  updateOpenBadge();
+  setInterval(updateOpenBadge, 60000);
+  initBackToTop();
+  initScrollFade();
 
-      // Nhóm theo khu vực theo đúng thứ tự tầng: trệt -> lầu 1 -> lầu 2 -> sân thượng -> hầm -> ngoài trời
-      const order = Object.keys(AREAS);
-      const groups = new Map();
-      items.forEach((a) => {
-        const key = AREAS[a.categorySlug] ? a.categorySlug : 'khac';
-        if (!groups.has(key)) groups.set(key, []);
-        groups.get(key).push(a);
-      });
-      const rank = (k) => (order.indexOf(k) < 0 ? 99 : order.indexOf(k));
-      [...groups.keys()].sort((x, y) => rank(x) - rank(y)).forEach((key) => {
-        const list = groups.get(key);
-        const area = AREAS[key];
-        const section = el('section', 'mb-12 scroll-mt-28');
-        section.id = 'area-' + key;
-        const head = el('div', 'flex items-center gap-3 mb-6 pb-3 border-b border-heritage-gold/50');
-        head.append(
-          el('div', 'w-10 h-10 rounded-full bg-heritage-red text-heritage-goldSoft flex items-center justify-center'),
-          el('h4', 'font-serif text-2xl font-bold text-heritage-red', area ? area.name[lang] || area.name.vi : S().other),
-          el('span', 'ml-auto text-sm text-heritage-brown', S().count(list.length)));
-        head.firstChild.append(icon(`fa-solid ${area ? area.icon : 'fa-landmark'}`));
-        const row = el('div', 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-7');
-        list.forEach((a) => row.append(makeCard(a)));
-        section.append(head, row);
-        grid.append(section);
-      });
-    }
+  // Modal close
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalClose2').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-    // ---------- Modal ----------
-    function openModal(a) {
-      current = a;
-      stopSpeech(); playing = false; setPlayIcon();
-      const s = S();
-      document.getElementById('mCode').textContent = a.code;
-      document.getElementById('mArea').replaceChildren(icon('fa-solid fa-layer-group'), document.createTextNode(' ' + areaName(a.categorySlug)));
-      document.getElementById('mTitle').textContent = a.name;
-      document.getElementById('mLocation').replaceChildren(icon('fa-solid fa-location-dot text-heritage-gold'), document.createTextNode(' ' + (a.location || '')));
-      document.getElementById('mDesc').textContent = a.description || '';
-      const fb = document.getElementById('mFallback');
-      fb.textContent = s.fallback; fb.classList.toggle('hidden', !a.fallback);
-      document.getElementById('detailLink').href = `detail.html?code=${encodeURIComponent(a.code)}&lang=${lang}`;
-      document.getElementById('speechNote').classList.add('hidden');
-      showTab('audio');
-      updateQr();
-      const m = document.getElementById('modal');
-      m.classList.remove('hidden'); m.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-    }
+  // Search
+  const searchEl = document.getElementById('search');
+  let searchTimer;
+  searchEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(renderGrid, 280);
+  });
 
-    function closeModal() {
-      stopSpeech();
-      const m = document.getElementById('modal');
-      m.classList.add('hidden'); m.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-
-    function showTab(which) {
-      const audio = which === 'audio';
-      document.getElementById('viewAudio').classList.toggle('hidden', !audio);
-      document.getElementById('viewQr').classList.toggle('hidden', audio);
-      const tA = document.getElementById('tabAudio'), tQ = document.getElementById('tabQr');
-      tA.className = 'pb-2 font-semibold text-sm border-b-2 ' + (audio ? 'border-heritage-red text-heritage-red' : 'border-transparent text-heritage-brown hover:text-heritage-red');
-      tQ.className = 'pb-2 font-semibold text-sm border-b-2 ' + (!audio ? 'border-heritage-red text-heritage-red' : 'border-transparent text-heritage-brown hover:text-heritage-red');
-    }
-
-    function qrBase() {
-      const raw = document.getElementById('qrBase').value.trim() || window.location.origin;
-      try { return new URL(raw).origin; } catch (e) { return window.location.origin; }
-    }
-
-    function updateQr() {
-      if (!current) return;
-      const base = qrBase();
-      document.getElementById('qrImg').src = `/api/artifacts/code/${encodeURIComponent(current.code)}/qr?base=${encodeURIComponent(base)}`;
-      document.getElementById('qrWarn').classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
-    }
-
-    // Mã QR của trang web: du khách quét để mở trang này trên điện thoại của họ
-    function updateSiteQr() {
-      const raw = document.getElementById('siteBase').value.trim() || window.location.origin;
-      let base; try { base = new URL(raw).origin; } catch (e) { base = window.location.origin; }
-      const src = `/api/site/qr?base=${encodeURIComponent(base)}`;
-      document.getElementById('siteQrImg').src = src;
-      document.getElementById('siteDownload').href = src;
-      document.getElementById('siteWarn').classList.toggle('hidden', !/localhost|127\.0\.0\.1/.test(base));
-    }
-
-    function setPlayIcon() {
-      const i = document.getElementById('playIcon');
-      i.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-    }
-
-    function togglePlay() {
-      if (!current) return;
-      if (playing) { stopSpeech(); playing = false; setPlayIcon(); return; }
-      const ok = speak(current.description || '', speechOf(current.language || lang));
-      if (!ok) { const n = document.getElementById('speechNote'); n.textContent = S().noSpeech; n.classList.remove('hidden'); return; }
-      playing = true; setPlayIcon();
-      // Ghi nhận lượt nghe (ẩn danh), lỗi bị bỏ qua
-      trackEvent(current.code, current.language || lang, 'play');
-      const u = window.speechSynthesis;
-      const check = setInterval(() => { if (!u.speaking && !u.pending) { playing = false; setPlayIcon(); clearInterval(check); } }, 400);
-    }
-
-    // ---------- Dữ liệu ----------
-    async function loadLanguages() {
-      try { languages = (await fetchJson('/api/languages')).data; } catch (e) { /* giữ mặc định */ }
-      renderLangBar();
-    }
-
-    function renderLangBar() {
-      renderLanguageButtons(document.getElementById('langBar'), languages, lang, changeLanguage, 'text-xs');
-    }
-
-    async function loadArtifacts() {
-      const status = document.getElementById('status');
-      status.textContent = S().loading; status.classList.remove('hidden');
-      try {
-        const body = await fetchJson(`/api/artifacts?lang=${lang}`);
-        artifacts = body.data || [];
-        status.classList.add('hidden');
-      } catch (err) {
-        artifacts = [];
-        status.textContent = S().error + ': ' + err.message;
-        status.classList.remove('hidden');
-      }
+  // Empty reset
+  const resetBtn = document.getElementById('emptyReset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      areaFilter = 'all';
+      if (searchEl) searchEl.value = '';
       renderAreaChips();
       renderGrid();
-    }
-
-    async function changeLanguage(code) {
-      lang = code;
-      storeLang(lang);
-      applyStatic();
-      renderLangBar();
-      renderAreaChips();
-      await loadArtifacts();
-      // Nếu đang mở khung chi tiết, làm mới bằng dữ liệu của ngôn ngữ mới
-      const modalOpen = !document.getElementById('modal').classList.contains('hidden');
-      if (modalOpen && current) {
-        const fresh = artifacts.find((a) => a.code === current.code);
-        if (fresh) openModal(fresh);
-      }
-    }
-
-    // ---------- Khởi động ----------
-    window.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('modalClose').addEventListener('click', closeModal);
-      document.getElementById('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-      document.getElementById('tabAudio').addEventListener('click', () => showTab('audio'));
-      document.getElementById('tabQr').addEventListener('click', () => { showTab('qr'); updateQr(); });
-      document.getElementById('playBtn').addEventListener('click', togglePlay);
-      document.getElementById('stopBtn').addEventListener('click', () => { stopSpeech(); playing = false; setPlayIcon(); });
-      document.getElementById('qrBase').addEventListener('input', updateQr);
-      document.getElementById('search').addEventListener('input', renderGrid);
-      document.getElementById('siteBase').addEventListener('input', updateSiteQr);
-      const qrImg = document.getElementById('siteQrImg');
-      qrImg.addEventListener('error', () => { const e = document.getElementById('siteQrError'); e.textContent = S().siteQrError; e.classList.remove('hidden'); });
-      qrImg.addEventListener('load', () => document.getElementById('siteQrError').classList.add('hidden'));
-
-      await loadLanguages();
-      lang = detectLanguage(languages.map((l) => l.code));
-      applyStatic();
-      renderLangBar();
-      // Ưu tiên PUBLIC_BASE_URL từ server (IP LAN), nếu không có thì dùng địa chỉ đang mở trang
-      let defaultBase = window.location.origin;
-      try {
-        const cfg = await (await fetch('/api/public-config')).json();
-        if (cfg.publicBaseUrl) defaultBase = new URL(cfg.publicBaseUrl).origin;
-      } catch (e) { /* giữ địa chỉ hiện tại */ }
-      document.getElementById('qrBase').value = defaultBase;
-      document.getElementById('siteBase').value = defaultBase;
-      updateSiteQr();
-      loadArtifacts();
     });
-  </script>
+  }
+
+  // QR tab buttons
+  const tb2 = document.getElementById('tabAudio2');
+  const tq2 = document.getElementById('tabQr2');
+  if (tb2) tb2.addEventListener('click', () => showTab2('audio'));
+  if (tq2) tq2.addEventListener('click', () => showTab2('qr'));
+
+  // QR base input
+  const qrBaseEl = document.getElementById('qrBase');
+  if (qrBaseEl) qrBaseEl.addEventListener('input', () => updateQr(currentArtifact));
+  const siteBaseEl = document.getElementById('siteBase');
+  if (siteBaseEl) siteBaseEl.addEventListener('input', updateSiteQr);
+
+  // Nghe / dừng thuyết minh
+  document.getElementById('ttsPlay').addEventListener('click', playTts);
+  document.getElementById('ttsStop').addEventListener('click', () => { stopSpeech(); setTts(false); });
+
+  // Init site QR: ưu tiên PUBLIC_BASE_URL từ server (IP LAN), không có thì dùng địa chỉ đang mở trang
+  updateQrStrings();
+  updateSiteQr();
+  fetch('/api/public-config').then((r) => r.json()).then((cfg) => {
+    if (!cfg || !cfg.publicBaseUrl) return;
+    const base = new URL(cfg.publicBaseUrl).origin;
+    if (qrBaseEl && !qrBaseEl.value) qrBaseEl.value = base;
+    if (siteBaseEl && !siteBaseEl.value) siteBaseEl.value = base;
+    updateSiteQr();
+  }).catch(() => { /* giữ địa chỉ hiện tại */ });
+
+  // Load data
+  loadArtifacts();
+});
+</script>
 </body>
 </html>

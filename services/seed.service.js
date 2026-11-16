@@ -1,8 +1,10 @@
 const artifactRepository = require('../repositories/artifact.repository');
+const languageRepository = require('../repositories/language.repository');
 const buildings = require('../data/buildings.seed');
+const { LANGUAGES } = require('../config/languages');
 
 // Đồng bộ dữ liệu mẫu (tắt bằng SEED_SAMPLE_DATA=false):
-// - Database trống: nạp cả 6 công trình kèm bản dịch.
+// - Database trống: nạp cả 16 công trình kèm bản dịch.
 // - Database đã có dữ liệu: chỉ BỔ SUNG bản dịch còn thiếu cho các công trình mẫu còn nguyên văn bản gốc.
 //   Không tạo lại công trình đã bị xóa, không ghi đè bản dịch đã có, không dịch cho văn bản đã bị sửa.
 async function syncSampleData() {
@@ -35,4 +37,12 @@ async function syncSampleData() {
     return { created: 0, updated };
 }
 
-module.exports = { syncSampleData };
+// Đồng bộ collection languages theo danh sách ngôn ngữ hỗ trợ trong config/languages.js (nguồn duy nhất)
+async function syncLanguages() {
+    for (const { code, label, speech } of LANGUAGES) {
+        await languageRepository.upsert({ code, name: label, speech });
+    }
+    return LANGUAGES.length;
+}
+
+module.exports = { syncSampleData, syncLanguages };

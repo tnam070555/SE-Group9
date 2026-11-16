@@ -21,7 +21,9 @@ function errorHandler(err, req, res, next) {
         return res.status(400).json({ success: false, message: detail || 'Dữ liệu không hợp lệ' });
     }
     if (err.code === 11000) {
-        return res.status(409).json({ success: false, message: 'Mã (code) đã tồn tại' });
+        const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
+        const messages = { slug: 'Mã khu vực (slug) đã tồn tại', username: 'Tên đăng nhập đã tồn tại' };
+        return res.status(409).json({ success: false, message: messages[field] || 'Mã (code) đã tồn tại' });
     }
     console.error(err);
     res.status(500).json({ success: false, message: 'Lỗi máy chủ' });

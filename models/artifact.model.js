@@ -23,6 +23,7 @@ const artifactSchema = new mongoose.Schema({
     location: { type: String },
     categorySlug: { type: String, index: true },                        // Khu vực (tầng, khu) trong Dinh
     audioUrl: { type: String },                                         // Đường dẫn audio đã lưu (chưa dùng)
+    imageUrl: { type: String },                                         // Đường dẫn ảnh đại diện
     translations: translationsShape,                                    // Bản dịch theo ngôn ngữ
 }, { timestamps: true });
 

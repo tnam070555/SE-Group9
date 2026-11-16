@@ -148,6 +148,8 @@ function getDeviceId() {
 }
 
 function startPresence() {
+  if (window.__presenceStarted) return; // chỉ chạy một lần mỗi trang
+  window.__presenceStarted = true;
   const deviceId = getDeviceId();
   const payload = JSON.stringify({ deviceId, page: window.location.pathname });
 
