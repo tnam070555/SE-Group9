@@ -198,4 +198,5 @@ function speak(text, lang = 'vi-VN', rate = 0.95) {
 
 function stopSpeech() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  
 }

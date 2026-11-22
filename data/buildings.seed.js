@@ -3,6 +3,7 @@
 module.exports = [
   {
     code: 'DDL-01',
+    imageUrl: '/img/rooms/ddl-01.jpg',
     name: 'Phòng Khánh Tiết',
     categorySlug: 'tang-tret',
     location: 'Tầng trệt – Dinh Độc Lập',
@@ -32,6 +33,7 @@ module.exports = [
   },
   {
     code: 'DDL-02',
+    imageUrl: '/img/rooms/ddl-02.jpg',
     name: 'Phòng Trình Quốc Thư',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
@@ -61,6 +63,7 @@ module.exports = [
   },
   {
     code: 'DDL-03',
+    imageUrl: '/img/rooms/ddl-03.jpg',
     name: 'Phòng Hợp Hội Đồng Bộ Trưởng',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
@@ -90,6 +93,7 @@ module.exports = [
   },
   {
     code: 'DDL-04',
+    imageUrl: '/img/rooms/ddl-04.jpg',
     name: 'Bến Đáp Trực Thăng & F5E',
     categorySlug: 'san-thuong',
     location: 'Tầng sân thượng – Dinh Độc Lập',
@@ -119,6 +123,7 @@ module.exports = [
   },
   {
     code: 'DDL-05',
+    imageUrl: '/img/rooms/ddl-05.jpg',
     name: 'Xe Tăng 390 & Cổng Chính',
     categorySlug: 'ngoai-troi',
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
@@ -148,6 +153,7 @@ module.exports = [
   },
   {
     code: 'DDL-06',
+    imageUrl: '/img/rooms/ddl-06.jpg',
     name: 'Khu Hầm Tác Chiến Lịch Sử',
     categorySlug: 'tang-ham',
     location: 'Tầng hầm – Dinh Độc Lập',
@@ -177,6 +183,7 @@ module.exports = [
   },
   {
     code: 'DDL-07',
+    imageUrl: '/img/rooms/ddl-07.jpg',
     name: 'Phòng Làm Việc Của Tổng Thống',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',
@@ -206,6 +213,7 @@ module.exports = [
   },
   {
     code: 'DDL-08',
+    imageUrl: '/img/rooms/ddl-08.jpg',
     name: 'Xe Tăng 843',
     categorySlug: 'ngoai-troi',
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
@@ -235,6 +243,7 @@ module.exports = [
   },
   {
     code: 'DDL-09',
+    imageUrl: '/img/rooms/ddl-09.jpg',
     name: 'Phòng Đại Yến',
     categorySlug: 'tang-tret',
     location: 'Tầng trệt – Dinh Độc Lập',
@@ -264,6 +273,7 @@ module.exports = [
   },
   {
     code: 'DDL-10',
+    imageUrl: '/img/rooms/ddl-10.jpg',
     name: 'Phòng Khách Của Phó Tổng Thống',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',
@@ -293,6 +303,7 @@ module.exports = [
   },
   {
     code: 'DDL-11',
+    imageUrl: '/img/rooms/ddl-11.jpg',
     name: 'Khu Sinh Hoạt Gia Đình Tổng Thống',
     categorySlug: 'lau-2',
     location: 'Lầu 2 – Dinh Độc Lập',
@@ -322,6 +333,7 @@ module.exports = [
   },
   {
     code: 'DDL-12',
+    imageUrl: '/img/rooms/ddl-12.jpg',
     name: 'Phòng Chiếu Phim & Giải Trí',
     categorySlug: 'san-thuong',
     location: 'Tầng sân thượng – Dinh Độc Lập',
@@ -351,6 +363,7 @@ module.exports = [
   },
   {
     code: 'DDL-13',
+    imageUrl: '/img/rooms/ddl-13.jpg',
     name: 'Đài Phát Thanh Dự Phòng',
     categorySlug: 'tang-ham',
     location: 'Tầng hầm – Dinh Độc Lập',
@@ -380,6 +393,7 @@ module.exports = [
   },
   {
     code: 'DDL-14',
+    imageUrl: '/img/rooms/ddl-14.jpg',
     name: 'Phòng Khách Của Phu Nhân',
     categorySlug: 'lau-1',
     location: 'Lầu 1 – Dinh Độc Lập',

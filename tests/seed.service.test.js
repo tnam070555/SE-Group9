@@ -61,7 +61,20 @@ test('đã có dữ liệu: bổ sung bản dịch còn thiếu, không tạo l�
 
     assert.deepStrictEqual(await seedService.syncSampleData(), { created: 0, updated: buildings.length });
     assert.strictEqual(insert.mock.callCount(), 0);
-    assert.strictEqual(Object.keys(updates[0][1].$set).length, 12); // 4 ngôn ngữ x 3 trường
+    assert.strictEqual(Object.keys(updates[0][1].$set).length, 13); // 4 ngôn ngữ x 3 trường + ảnh mẫu
+    assert.strictEqual(updates[0][1].$set.imageUrl, buildings[0].imageUrl);
+});
+
+test('đã có dữ liệu: không ghi đè ảnh admin đã đặt', async () => {
+    const updates = [];
+    test.mock.method(artifactRepository, 'count', async () => buildings.length);
+    test.mock.method(artifactRepository, 'findByCode', async (code) => {
+        const seed = buildings.find((b) => b.code === code);
+        return { _id: code, code, name: seed.name, description: seed.description, location: seed.location, imageUrl: 'https://example.com/mine.jpg' };
+    });
+    test.mock.method(artifactRepository, 'updateById', async (id, data) => { updates.push(data.$set); });
+    await seedService.syncSampleData();
+    assert.ok(updates.every((s) => !('imageUrl' in s)));
 });
 
 test('không ghi đè bản dịch đã có và không dịch cho văn bản đã bị sửa', async () => {

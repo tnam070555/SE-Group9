@@ -20,6 +20,8 @@ async function syncSampleData() {
         const plain = typeof existing.toObject === 'function' ? existing.toObject() : existing;
 
         const set = {};
+        // Bổ sung ảnh mẫu cho công trình chưa có ảnh (không ghi đè ảnh admin đã đặt)
+        if (seed.imageUrl && !plain.imageUrl) set.imageUrl = seed.imageUrl;
         for (const [lang, fields] of Object.entries(seed.translations || {})) {
             for (const [field, value] of Object.entries(fields)) {
                 const sourceUnchanged = plain[field] === seed[field];
