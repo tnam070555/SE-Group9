@@ -30,6 +30,33 @@
         linear-gradient(180deg, rgba(94,18,22,.92) 0%, rgba(139,30,36,.88) 60%, rgba(139,30,36,.95) 100%),
         repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 12px, transparent 12px 24px);
     }
+    /* Hero dùng ảnh thật của Dinh Độc Lập + lớp phủ đỏ di sản */
+    .hero-photo { min-height: 78vh; display: flex; align-items: center; }
+    .hero-photo > .max-w-7xl { width: 100%; }
+    .hero-photo-img {
+      position: absolute; inset: -20px;
+      background: url("img/images%20(1).jpg") center 40% / cover no-repeat;
+      filter: blur(1px) saturate(1.05);
+      animation: heroZoom 22s ease-in-out infinite alternate;
+    }
+    .hero-overlay {
+      background:
+        linear-gradient(180deg, rgba(42,35,32,.55) 0%, rgba(94,18,22,.55) 45%, rgba(94,18,22,.92) 100%),
+        radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.35) 100%);
+    }
+    @keyframes heroZoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+    .fade-up { animation: fadeUp .9s ease-out both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    .bounce-down { animation: bounceDown 2s ease-in-out infinite; }
+    @keyframes bounceDown { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 8px); } }
+    .feature { transition: transform .3s ease, box-shadow .3s ease; }
+    .feature:hover { transform: translateY(-4px); }
+    .photo img { transition: transform .6s ease; }
+    .photo:hover img { transform: scale(1.07); }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-photo-img, .fade-up, .bounce-down { animation: none; }
+    }
+    @media (max-width: 640px) { .hero-photo { min-height: 70vh; } }
     .card { transition: transform .35s ease, box-shadow .35s ease; }
     .card:hover { transform: translateY(-6px); box-shadow: 0 18px 30px -12px rgba(94,18,22,.35); }
     .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -73,6 +100,11 @@
       </div>
       <div class="flex items-center gap-2 sm:gap-3 min-w-0">
         <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0" id="langBar" aria-label="Chọn ngôn ngữ"></div>
+        <!-- Nút mua vé tham quan cho du khách (không cần đăng nhập) -->
+        <a href="tickets.html" id="buyTicketBtn" title="Mua vé tham quan" aria-label="Mua vé tham quan"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full bg-heritage-gold text-heritage-ink text-xs font-semibold shadow-sm hover:brightness-95 transition">
+          <i class="fa-solid fa-ticket"></i><span class="hidden sm:inline" id="buyTicketLabel">Mua vé</span>
+        </a>
         <!-- Nút vào trang quản trị (đã đăng nhập thì login.html tự chuyển sang trang admin) -->
         <a href="login.html" title="Đăng nhập quản trị" aria-label="Đăng nhập quản trị"
            class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full bg-heritage-red text-white text-xs font-semibold shadow-sm hover:bg-heritage-redDeep transition">
@@ -84,19 +116,85 @@
   </header>
 
   <!-- ===== HERO ===== -->
-  <section class="hero-bg text-heritage-paper relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-20 text-center relative">
-      <p class="uppercase tracking-[0.3em] text-xs text-heritage-goldSoft mb-4" id="heroKicker"></p>
-      <h2 class="font-serif text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 leading-tight" id="heroTitle"></h2>
-      <p class="max-w-2xl mx-auto text-heritage-paper/85 leading-relaxed" id="heroDesc"></p>
-      <div class="mt-8 inline-flex items-center gap-2 bg-black/20 border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
+  <section class="hero-photo text-heritage-paper relative overflow-hidden">
+    <div class="hero-photo-img" aria-hidden="true"></div>
+    <div class="absolute inset-0 hero-overlay" aria-hidden="true"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 text-center relative fade-up">
+      <div class="inline-flex items-center gap-3 mb-5">
+        <span class="h-px w-8 sm:w-12 bg-heritage-gold"></span>
+        <p class="uppercase tracking-[0.3em] text-xs text-heritage-goldSoft" id="heroKicker"></p>
+        <span class="h-px w-8 sm:w-12 bg-heritage-gold"></span>
+      </div>
+      <h2 class="font-serif text-3xl sm:text-5xl md:text-6xl font-bold mb-5 leading-tight drop-shadow-lg" id="heroTitle"></h2>
+      <p class="max-w-2xl mx-auto text-heritage-paper/90 leading-relaxed sm:text-lg drop-shadow" id="heroDesc"></p>
+      <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="tickets.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-heritage-gold hover:bg-[#d9b43a] text-heritage-ink font-semibold px-7 py-3 rounded-full shadow-lg shadow-black/30 transition">
+          <i class="fa-solid fa-ticket"></i><span id="heroCtaBuy">Mua vé tham quan</span>
+        </a>
+        <a href="#explore" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-heritage-goldSoft/70 bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold px-7 py-3 rounded-full transition">
+          <i class="fa-solid fa-headphones"></i><span id="heroCtaExplore">Nghe thuyết minh</span>
+        </a>
+      </div>
+      <div class="mt-8 inline-flex items-center gap-2 bg-black/30 backdrop-blur border border-heritage-gold/50 rounded-full px-5 py-2 text-sm">
         <i class="fa-solid fa-qrcode text-heritage-gold"></i>
         <span id="heroHint"></span>
       </div>
     </div>
+    <a href="#highlights" class="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 text-heritage-goldSoft/80 hover:text-white bounce-down" aria-label="Cuộn xuống">
+      <i class="fa-solid fa-chevron-down text-xl"></i>
+    </a>
   </section>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+  <!-- ===== ĐIỂM NỔI BẬT ===== -->
+  <section id="highlights" class="relative z-10 -mt-10 sm:-mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="feature bg-white rounded-2xl border border-heritage-gold/40 shadow-xl shadow-heritage-redDeep/10 p-5 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-heritage-red text-heritage-goldSoft flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-language"></i></div>
+        <div><p class="font-serif font-bold text-heritage-red text-lg" id="f1Title"></p><p class="text-sm text-heritage-brown leading-relaxed" id="f1Desc"></p></div>
+      </div>
+      <div class="feature bg-white rounded-2xl border border-heritage-gold/40 shadow-xl shadow-heritage-redDeep/10 p-5 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-heritage-red text-heritage-goldSoft flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-qrcode"></i></div>
+        <div><p class="font-serif font-bold text-heritage-red text-lg" id="f2Title"></p><p class="text-sm text-heritage-brown leading-relaxed" id="f2Desc"></p></div>
+      </div>
+      <div class="feature bg-white rounded-2xl border border-heritage-gold/40 shadow-xl shadow-heritage-redDeep/10 p-5 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-heritage-red text-heritage-goldSoft flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-ticket"></i></div>
+        <div><p class="font-serif font-bold text-heritage-red text-lg" id="f3Title"></p><p class="text-sm text-heritage-brown leading-relaxed" id="f3Desc"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GIỚI THIỆU + ẢNH ===== -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-4">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+      <div class="grid grid-cols-5 grid-rows-2 gap-3 h-72 sm:h-96">
+        <div class="photo col-span-3 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+          <img src="img/images%20(1).jpg" alt="Dinh Độc Lập nhìn từ bãi cỏ phía trước" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <div class="photo col-span-2 rounded-2xl overflow-hidden shadow-lg">
+          <img src="img/images%20(2).jpg" alt="Mặt tiền Dinh Độc Lập với hoa văn lá đề" class="w-full h-full object-cover object-top" loading="lazy">
+        </div>
+        <div class="photo col-span-2 rounded-2xl overflow-hidden shadow-lg relative">
+          <img src="img/images.jpg" alt="Toàn cảnh Dinh Độc Lập và đài phun nước" class="w-full h-full object-cover" loading="lazy">
+          <div class="absolute inset-0 bg-gradient-to-t from-heritage-redDeep/80 to-transparent flex items-end p-3">
+            <p class="text-heritage-goldSoft font-serif font-bold text-2xl leading-none">1966<span class="block text-[11px] font-sans font-medium text-white/80 mt-1" id="aboutYear"></span></p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-heritage-gold mb-3" id="aboutKicker"></p>
+        <h3 class="font-serif text-3xl sm:text-4xl font-bold text-heritage-red mb-4 leading-tight" id="aboutTitle"></h3>
+        <div class="gold-rule w-24 mb-5"></div>
+        <p class="text-heritage-ink/85 leading-relaxed mb-6" id="aboutDesc"></p>
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="rounded-xl bg-white border border-heritage-gold/40 py-3"><p class="font-serif text-2xl font-bold text-heritage-red">5</p><p class="text-xs text-heritage-brown" id="statLang"></p></div>
+          <div class="rounded-xl bg-white border border-heritage-gold/40 py-3"><p class="font-serif text-2xl font-bold text-heritage-red">QR</p><p class="text-xs text-heritage-brown" id="statQr"></p></div>
+          <div class="rounded-xl bg-white border border-heritage-gold/40 py-3"><p class="font-serif text-2xl font-bold text-heritage-red">24/7</p><p class="text-xs text-heritage-brown" id="statOnline"></p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main id="explore" class="max-w-7xl mx-auto px-4 sm:px-6 py-10 scroll-mt-20">
     <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 items-start">
 
       <!-- Cột khu vực (bên trái): Tất cả khu vực + từng khu vực -->
@@ -285,6 +383,45 @@
     let current = null;
     let playing = false;
 
+    // Chữ cho phần hero mới, dải điểm nổi bật và phần giới thiệu (id phần tử -> nội dung)
+    const HOME_EXTRA = {
+      vi: { heroCtaBuy: 'Mua vé tham quan', heroCtaExplore: 'Nghe thuyết minh',
+        f1Title: '5 ngôn ngữ', f1Desc: 'Thuyết minh bằng tiếng Việt, Anh, Nhật, Hàn và Trung.',
+        f2Title: 'Quét QR là nghe', f2Desc: 'Mỗi công trình có mã QR riêng, mở ngay trên điện thoại.',
+        f3Title: 'Vé điện tử', f3Desc: 'Chọn ngày, khung giờ và thanh toán nhanh bằng mã QR.',
+        aboutKicker: 'Di tích quốc gia đặc biệt', aboutTitle: 'Nơi lưu dấu những trang sử hào hùng',
+        aboutDesc: 'Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế, khánh thành năm 1966. Công trình kết hợp kiến trúc hiện đại với triết lý phương Đông, gắn liền với thời khắc lịch sử ngày 30/4/1975. Hãy khám phá từng căn phòng qua phần thuyết minh bên dưới.',
+        aboutYear: 'Năm khánh thành', statLang: 'Ngôn ngữ', statQr: 'Nghe tại chỗ', statOnline: 'Đặt vé online' },
+      en: { heroCtaBuy: 'Buy tickets', heroCtaExplore: 'Audio guide',
+        f1Title: '5 languages', f1Desc: 'Guides in Vietnamese, English, Japanese, Korean and Chinese.',
+        f2Title: 'Scan & listen', f2Desc: 'Every exhibit has its own QR code that opens on your phone.',
+        f3Title: 'E-tickets', f3Desc: 'Pick a date and time slot, then pay quickly by QR code.',
+        aboutKicker: 'Special national monument', aboutTitle: 'Where history was written',
+        aboutDesc: 'Designed by architect Ngô Viết Thụ and inaugurated in 1966, the Independence Palace blends modern architecture with Eastern philosophy and is tied to the historic moment of 30 April 1975. Explore each room with the audio guide below.',
+        aboutYear: 'Inaugurated', statLang: 'Languages', statQr: 'On-site audio', statOnline: 'Online booking' },
+      ja: { heroCtaBuy: 'チケット購入', heroCtaExplore: '音声ガイド',
+        f1Title: '5つの言語', f1Desc: 'ベトナム語・英語・日本語・韓国語・中国語で解説。',
+        f2Title: 'QRで聞く', f2Desc: '各展示のQRコードをスマホで読み取るだけ。',
+        f3Title: '電子チケット', f3Desc: '日付と時間帯を選び、QRコードで簡単決済。',
+        aboutKicker: '特別国家史跡', aboutTitle: '歴史が刻まれた場所',
+        aboutDesc: '建築家ゴー・ヴィエット・トゥーが設計し、1966年に完成した統一会堂。近代建築と東洋思想が融合し、1975年4月30日の歴史的瞬間の舞台となりました。下の音声ガイドで各部屋をご覧ください。',
+        aboutYear: '完成年', statLang: '言語', statQr: '現地ガイド', statOnline: 'オンライン予約' },
+      ko: { heroCtaBuy: '티켓 구매', heroCtaExplore: '음성 안내',
+        f1Title: '5개 언어', f1Desc: '베트남어, 영어, 일본어, 한국어, 중국어 안내.',
+        f2Title: 'QR 스캔으로 듣기', f2Desc: '전시물마다 QR 코드가 있어 휴대폰으로 바로 열립니다.',
+        f3Title: '전자 티켓', f3Desc: '날짜와 시간대를 고르고 QR 코드로 빠르게 결제하세요.',
+        aboutKicker: '특별 국가 사적지', aboutTitle: '역사가 새겨진 곳',
+        aboutDesc: '건축가 응오 비엣 투가 설계하여 1966년에 준공된 독립궁은 현대 건축과 동양 철학이 어우러진 건물로, 1975년 4월 30일의 역사적 순간과 함께합니다. 아래 음성 안내로 각 방을 둘러보세요.',
+        aboutYear: '준공', statLang: '언어', statQr: '현장 안내', statOnline: '온라인 예매' },
+      zh: { heroCtaBuy: '购票', heroCtaExplore: '语音导览',
+        f1Title: '5种语言', f1Desc: '提供越南语、英语、日语、韩语和中文讲解。',
+        f2Title: '扫码即听', f2Desc: '每件展品都有专属二维码，手机即可打开。',
+        f3Title: '电子门票', f3Desc: '选择日期和时段，扫码快速支付。',
+        aboutKicker: '特别国家级遗迹', aboutTitle: '镌刻历史的地方',
+        aboutDesc: '独立宫由建筑师吴越树设计，于1966年落成，融合现代建筑与东方哲学，见证了1975年4月30日的历史时刻。请通过下方语音导览探索每个房间。',
+        aboutYear: '落成年份', statLang: '语言', statQr: '现场讲解', statOnline: '在线订票' }
+    };
+
     const S = () => STRINGS[lang] || STRINGS.vi;
     const areaName = (slug) => (AREAS[slug] ? AREAS[slug].name[lang] || AREAS[slug].name.vi : S().all);
     const speechOf = (code) => (languages.find((l) => l.code === code) || { speech: 'vi-VN' }).speech;
@@ -295,6 +432,12 @@
       document.documentElement.lang = lang;
       document.title = 'Dinh Độc Lập – ' + s.brandSub;
       const set = (id, text) => { document.getElementById(id).textContent = text; };
+      const buyLabel = ({ vi: 'Mua vé', en: 'Buy tickets', ja: 'チケット購入', ko: '티켓 구매', zh: '购票' })[lang] || 'Mua vé';
+      set('buyTicketLabel', buyLabel);
+      const x = HOME_EXTRA[lang] || HOME_EXTRA.vi;
+      Object.keys(x).forEach((id) => set(id, x[id]));
+      document.getElementById('buyTicketBtn').title = buyLabel;
+      document.getElementById('buyTicketBtn').setAttribute('aria-label', buyLabel);
       set('brandSub', s.brandSub); set('heroKicker', s.kicker); set('heroTitle', s.heroTitle);
       set('heroDesc', s.heroDesc); set('heroHint', s.heroHint); set('listTitle', s.listTitle);
       document.getElementById('search').placeholder = s.search;
