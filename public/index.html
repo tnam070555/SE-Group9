@@ -235,6 +235,25 @@
     </div>
   </main>
 
+  <!-- ===== BẢN ĐỒ KHUÔN VIÊN (nhúng map.html ở chế độ embed) ===== -->
+  <section id="campus-map" class="max-w-7xl mx-auto px-4 sm:px-6 pb-14 scroll-mt-20">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-heritage-gold mb-2" id="mapKicker"></p>
+        <h3 class="font-serif text-2xl sm:text-3xl font-bold text-heritage-red" id="mapTitle"></h3>
+        <p class="text-sm text-heritage-brown mt-1 max-w-2xl" id="mapDesc"></p>
+      </div>
+      <a id="mapFullLink" href="map.html" class="self-start sm:self-auto inline-flex items-center gap-2 text-sm font-semibold text-heritage-red border border-heritage-red rounded-full px-4 py-2 hover:bg-heritage-red hover:text-white transition">
+        <i class="fa-solid fa-up-right-and-down-left-from-center"></i><span id="mapFull"></span>
+      </a>
+    </div>
+    <div class="rounded-2xl overflow-hidden border border-heritage-gold/40 shadow-lg bg-white">
+      <!-- allow="geolocation": cho phép nút "Vị trí của tôi" hoạt động bên trong khung -->
+      <iframe id="mapFrame" title="Bản đồ khuôn viên Dinh Độc Lập" loading="lazy" allow="geolocation"
+              class="block w-full h-[640px] sm:h-[600px] border-0"></iframe>
+    </div>
+  </section>
+
   <!-- ===== MÃ QR CỦA TRANG WEB ===== -->
   <section class="bg-white border-y border-heritage-gold/40">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid md:grid-cols-[auto,1fr] gap-6 sm:gap-8 items-center">
@@ -397,6 +416,7 @@
         f1Title: '5 ngôn ngữ', f1Desc: 'Thuyết minh bằng tiếng Việt, Anh, Nhật, Hàn và Trung.',
         f2Title: 'Quét QR là nghe', f2Desc: 'Mỗi công trình có mã QR riêng, mở ngay trên điện thoại.',
         f3Title: 'Vé điện tử', f3Desc: 'Chọn ngày, khung giờ và thanh toán nhanh bằng mã QR.',
+        mapKicker: 'Bản đồ', mapTitle: 'Khám phá khuôn viên Dinh', mapDesc: 'Xem vị trí các công trình, bật vị trí để biết bạn đang ở đâu và công trình nào gần nhất.', mapFull: 'Mở toàn màn hình',
         aboutKicker: 'Di tích quốc gia đặc biệt', aboutTitle: 'Nơi lưu dấu những trang sử hào hùng',
         aboutDesc: 'Dinh Độc Lập do kiến trúc sư Ngô Viết Thụ thiết kế, khánh thành năm 1966. Công trình kết hợp kiến trúc hiện đại với triết lý phương Đông, gắn liền với thời khắc lịch sử ngày 30/4/1975. Hãy khám phá từng căn phòng qua phần thuyết minh bên dưới.',
         aboutYear: 'Năm khánh thành', statLang: 'Ngôn ngữ', statQr: 'Nghe tại chỗ', statOnline: 'Đặt vé online' },
@@ -404,6 +424,7 @@
         f1Title: '5 languages', f1Desc: 'Guides in Vietnamese, English, Japanese, Korean and Chinese.',
         f2Title: 'Scan & listen', f2Desc: 'Every exhibit has its own QR code that opens on your phone.',
         f3Title: 'E-tickets', f3Desc: 'Pick a date and time slot, then pay quickly by QR code.',
+        mapKicker: 'Map', mapTitle: 'Explore the Palace grounds', mapDesc: 'See where each exhibit is, and turn on location to find where you are and what is nearest.', mapFull: 'Full screen',
         aboutKicker: 'Special national monument', aboutTitle: 'Where history was written',
         aboutDesc: 'Designed by architect Ngô Viết Thụ and inaugurated in 1966, the Independence Palace blends modern architecture with Eastern philosophy and is tied to the historic moment of 30 April 1975. Explore each room with the audio guide below.',
         aboutYear: 'Inaugurated', statLang: 'Languages', statQr: 'On-site audio', statOnline: 'Online booking' },
@@ -411,6 +432,7 @@
         f1Title: '5つの言語', f1Desc: 'ベトナム語・英語・日本語・韓国語・中国語で解説。',
         f2Title: 'QRで聞く', f2Desc: '各展示のQRコードをスマホで読み取るだけ。',
         f3Title: '電子チケット', f3Desc: '日付と時間帯を選び、QRコードで簡単決済。',
+        mapKicker: 'マップ', mapTitle: '宮殿の敷地を探索', mapDesc: '各展示の場所を確認し、位置情報をオンにすると現在地と最寄りの展示がわかります。', mapFull: '全画面で開く',
         aboutKicker: '特別国家史跡', aboutTitle: '歴史が刻まれた場所',
         aboutDesc: '建築家ゴー・ヴィエット・トゥーが設計し、1966年に完成した統一会堂。近代建築と東洋思想が融合し、1975年4月30日の歴史的瞬間の舞台となりました。下の音声ガイドで各部屋をご覧ください。',
         aboutYear: '完成年', statLang: '言語', statQr: '現地ガイド', statOnline: 'オンライン予約' },
@@ -418,6 +440,7 @@
         f1Title: '5개 언어', f1Desc: '베트남어, 영어, 일본어, 한국어, 중국어 안내.',
         f2Title: 'QR 스캔으로 듣기', f2Desc: '전시물마다 QR 코드가 있어 휴대폰으로 바로 열립니다.',
         f3Title: '전자 티켓', f3Desc: '날짜와 시간대를 고르고 QR 코드로 빠르게 결제하세요.',
+        mapKicker: '지도', mapTitle: '독립궁 부지 둘러보기', mapDesc: '각 전시물의 위치를 확인하고, 위치를 켜면 현재 위치와 가장 가까운 전시물을 알 수 있습니다.', mapFull: '전체 화면',
         aboutKicker: '특별 국가 사적지', aboutTitle: '역사가 새겨진 곳',
         aboutDesc: '건축가 응오 비엣 투가 설계하여 1966년에 준공된 독립궁은 현대 건축과 동양 철학이 어우러진 건물로, 1975년 4월 30일의 역사적 순간과 함께합니다. 아래 음성 안내로 각 방을 둘러보세요.',
         aboutYear: '준공', statLang: '언어', statQr: '현장 안내', statOnline: '온라인 예매' },
@@ -425,6 +448,7 @@
         f1Title: '5种语言', f1Desc: '提供越南语、英语、日语、韩语和中文讲解。',
         f2Title: '扫码即听', f2Desc: '每件展品都有专属二维码，手机即可打开。',
         f3Title: '电子门票', f3Desc: '选择日期和时段，扫码快速支付。',
+        mapKicker: '地图', mapTitle: '探索独立宫园区', mapDesc: '查看各展品的位置，开启定位即可知道您在哪里以及最近的展品。', mapFull: '全屏打开',
         aboutKicker: '特别国家级遗迹', aboutTitle: '镌刻历史的地方',
         aboutDesc: '独立宫由建筑师吴越树设计，于1966年落成，融合现代建筑与东方哲学，见证了1975年4月30日的历史时刻。请通过下方语音导览探索每个房间。',
         aboutYear: '落成年份', statLang: '语言', statQr: '现场讲解', statOnline: '在线订票' }
@@ -449,8 +473,10 @@
       set('heroCtaMap', ({ vi: 'Xem bản đồ', en: 'View map', ja: 'マップを見る', ko: '지도 보기', zh: '查看地图' })[lang] || 'Xem bản đồ');
       document.getElementById('mapBtn').title = mapLabel;
       document.getElementById('mapBtn').setAttribute('aria-label', mapLabel);
-      document.getElementById('mapBtn').href = 'map.html?lang=' + encodeURIComponent(lang);
-      document.getElementById('heroMapLink').href = 'map.html?lang=' + encodeURIComponent(lang);
+      document.getElementById('mapBtn').href = '#campus-map';
+      document.getElementById('heroMapLink').href = '#campus-map';
+      document.getElementById('mapFullLink').href = 'map.html?lang=' + encodeURIComponent(lang);
+      updateMapFrame();
       document.getElementById('buyTicketBtn').title = buyLabel;
       document.getElementById('buyTicketBtn').setAttribute('aria-label', buyLabel);
       set('brandSub', s.brandSub); set('heroKicker', s.kicker); set('heroTitle', s.heroTitle);
@@ -613,6 +639,21 @@
       const raw = document.getElementById('qrBase').value.trim() || window.location.origin;
       try { return new URL(raw).origin; } catch (e) { return window.location.origin; }
     }
+
+    // Khung bản đồ: tải map.html ở chế độ embed theo ngôn ngữ đang chọn (đổi ngôn ngữ thì tải lại)
+    function updateMapFrame() {
+      const frame = document.getElementById('mapFrame');
+      const src = `map.html?embed=1&lang=${encodeURIComponent(lang)}`;
+      if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+    }
+
+    // Bấm "Nghe thuyết minh" trong bản đồ -> mở khung chi tiết ngay trên trang chủ
+    window.addEventListener('message', (e) => {
+      if (e.origin !== window.location.origin || !e.data || e.data.type !== 'open-artifact') return;
+      const a = artifacts.find((x) => x.code === e.data.code);
+      if (a) openModal(a);
+      else window.location.href = `detail.html?code=${encodeURIComponent(e.data.code)}&lang=${encodeURIComponent(lang)}`;
+    });
 
     function updateQr() {
       if (!current) return;

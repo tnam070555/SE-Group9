@@ -40,6 +40,13 @@
       #layout { height: auto; }
       #map { position: relative; height: 62vh; height: 62dvh; }
     }
+    /* Chế độ nhúng vào trang chủ (map.html?embed=1): bỏ thanh điều hướng, vừa khít khung */
+    body.embed header { display: none; }
+    body.embed #layout { height: 100vh; }
+    @media (max-width: 1023px) {
+      body.embed #map { height: 55vh; }
+      body.embed aside { flex: 1 1 auto; min-height: 0; }
+    }
   </style>
 </head>
 <body class="font-sans text-heritage-ink antialiased">
@@ -187,6 +194,9 @@
     let activeCode = new URLSearchParams(location.search).get('code');
     let map, markerLayer, meMarker, meCircle;
     const markers = new Map();   // code -> marker
+    // Nhúng trong trang chủ (iframe) thì báo cho trang chủ mở khung thuyết minh thay vì chuyển trang
+    const EMBED = new URLSearchParams(location.search).get('embed') === '1' && window.parent !== window;
+    if (EMBED) document.body.classList.add('embed');
 
     const S = () => STRINGS[lang] || STRINGS.vi;
     const areaName = (slug) => (AREAS[slug] ? AREAS[slug].name[lang] || AREAS[slug].name.vi : S().other);
@@ -211,7 +221,8 @@
 
     // ---------- Bản đồ ----------
     function initMap() {
-      map = L.map('map', { zoomControl: true, maxZoom: 20 }).setView([PALACE.lat, PALACE.lng], 18);
+      // Nhúng trong trang chủ: tắt zoom bằng con lăn chuột để cuộn trang không bị bản đồ "bắt"
+      map = L.map('map', { zoomControl: true, maxZoom: 20, scrollWheelZoom: !EMBED }).setView([PALACE.lat, PALACE.lng], 18);
       let tileErrors = 0;
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 20, maxNativeZoom: 19,
@@ -254,6 +265,13 @@
       const link = el('a', 'mt-2 flex items-center justify-center gap-2 w-full bg-heritage-red hover:bg-heritage-redDeep !text-white text-sm font-semibold py-2 rounded-lg');
       link.href = `detail.html?code=${encodeURIComponent(a.code)}&lang=${encodeURIComponent(lang)}`;
       link.append(icon('fa-solid fa-headphones'), el('span', '', S().listen));
+      if (EMBED) {
+        link.target = '_top';
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.parent.postMessage({ type: 'open-artifact', code: a.code }, window.location.origin);
+        });
+      }
       body.append(link);
       box.append(body);
       return box;
@@ -284,7 +302,7 @@
       m.openPopup();
       highlightList();
       // Điện thoại: danh sách nằm dưới bản đồ, cuộn lên để thấy marker
-      if (window.innerWidth < 1024) document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.innerWidth < 1024 && !EMBED) document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // ---------- Danh sách ----------
