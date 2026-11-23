@@ -11,8 +11,14 @@ const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'categorySlug
 // Các trường có bản dịch
 const TRANSLATABLE_FIELDS = ['name', 'description', 'location'];
 
-// Tọa độ GPS: nhận { lat, lng } (số hoặc chuỗi số). null hoặc chuỗi rỗng = xóa tọa độ.
-// Trả về undefined nếu client không gửi trường geo, null nếu muốn xóa, hoặc { lat, lng } đã kiểm tra.
+// Bán kính geofence mặc định (mét) và giới hạn cho phép
+const DEFAULT_RADIUS = 20;
+const MIN_RADIUS = 5;
+const MAX_RADIUS = 200;
+
+// Tọa độ GPS: nhận { lat, lng, radius? } (số hoặc chuỗi số). null hoặc chuỗi rỗng = xóa tọa độ.
+// Trả về undefined nếu client không gửi trường geo, null nếu muốn xóa, hoặc { lat, lng, radius } đã kiểm tra.
+// Không gửi radius thì dùng mặc định 20 m.
 function parseGeo(raw) {
     if (raw === undefined) return undefined;
     if (raw === null || raw === '') return null;
@@ -25,9 +31,17 @@ function parseGeo(raw) {
     const lng = toNumber(raw.lng);
     if (!Number.isFinite(lat) || lat < -90 || lat > 90) throw new AppError(400, 'Vĩ độ (lat) phải là số từ -90 đến 90');
     if (!Number.isFinite(lng) || lng < -180 || lng > 180) throw new AppError(400, 'Kinh độ (lng) phải là số từ -180 đến 180');
+    let radius = DEFAULT_RADIUS;
+    if (!blank(raw.radius)) {
+        radius = toNumber(raw.radius);
+        if (!Number.isFinite(radius) || radius < MIN_RADIUS || radius > MAX_RADIUS) {
+            throw new AppError(400, `Bán kính (radius) phải là số từ ${MIN_RADIUS} đến ${MAX_RADIUS} mét`);
+        }
+        radius = Math.round(radius);
+    }
     // Làm tròn 6 chữ số thập phân (~0,1 m), đủ chính xác cho bản đồ
     const round = (v) => Math.round(v * 1e6) / 1e6;
-    return { lat: round(lat), lng: round(lng) };
+    return { lat: round(lat), lng: round(lng), radius };
 }
 
 // Đường dẫn trang thuyết minh của một công trình (nội dung của mã QR)
@@ -113,7 +127,9 @@ function localize(doc, lang) {
         location: t.location || a.location,
         imageUrl: a.imageUrl,
         audioUrl: a.audioUrl,
-        geo: a.geo && Number.isFinite(a.geo.lat) && Number.isFinite(a.geo.lng) ? { lat: a.geo.lat, lng: a.geo.lng } : null,
+        geo: a.geo && Number.isFinite(a.geo.lat) && Number.isFinite(a.geo.lng)
+            ? { lat: a.geo.lat, lng: a.geo.lng, radius: Number.isFinite(a.geo.radius) ? a.geo.radius : DEFAULT_RADIUS }
+            : null,
         language: served,
         fallback: served !== lang,
         availableLanguages: available,
@@ -276,3 +292,4 @@ class ArtifactService {
 module.exports = new ArtifactService();
 module.exports.localize = localize;
 module.exports.parseGeo = parseGeo;
+module.exports.DEFAULT_RADIUS = DEFAULT_RADIUS;

@@ -32,6 +32,14 @@
     .me-dot { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(37,99,235,.35), 0 1px 4px rgba(0,0,0,.4); }
     .leaflet-popup-content { margin: 0; width: 240px !important; }
     .leaflet-popup-content-wrapper { border-radius: 14px; overflow: hidden; padding: 0; }
+    /* Công tắc bật/tắt */
+    .sw { position: relative; width: 42px; height: 24px; border-radius: 999px; background: #cbd5e1; transition: background .2s; flex-shrink: 0; }
+    .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .sw[aria-checked="true"] { background: #8B1E24; }
+    .sw[aria-checked="true"]::after { transform: translateX(18px); }
+    .gf-in { animation: gfIn .35s ease-out; }
+    @keyframes gfIn { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @media (prefers-reduced-motion: reduce) { .gf-in { animation: none; } }
     .chip-active { background: #8B1E24; color: #fff; border-color: #8B1E24; }
     .lang-btn[aria-pressed="true"] { background: #C9A227; color: #2A2320; border-color: #C9A227; }
     #areaChips { scrollbar-width: none; }
@@ -94,6 +102,14 @@
                   <i class="fa-solid fa-diamond-turn-right"></i><span id="directionsLabel"></span>
                 </a>
               </div>
+              <!-- Bật/tắt gợi ý khi đến gần công trình (geofence) -->
+              <div class="flex items-center justify-between gap-3 mt-3 pt-2.5 border-t border-heritage-brown/15">
+                <label for="gfToggle" class="min-w-0 cursor-pointer">
+                  <span id="gfLabel" class="block text-xs font-semibold text-heritage-ink"></span>
+                  <span id="gfHint" class="block text-[11px] text-heritage-brown leading-snug"></span>
+                </label>
+                <button id="gfToggle" type="button" role="switch" aria-checked="true" class="sw"></button>
+              </div>
             </div>
           </div>
         </div>
@@ -105,11 +121,26 @@
     <!-- ===== BẢN ĐỒ ===== -->
     <section class="relative flex-1 min-h-0">
       <div id="map" class="absolute inset-0 lg:absolute"></div>
+      <!-- Thông báo gợi ý khi du khách vào vùng của một công trình -->
+      <div id="gfBanner" role="status" aria-live="polite" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[1050] w-[min(92%,420px)] bg-white border-2 border-heritage-gold rounded-2xl shadow-2xl p-4">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-full bg-heritage-red text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-location-dot"></i></span>
+          <div class="min-w-0 flex-1">
+            <p id="gfTitle" class="font-serif font-bold text-heritage-red leading-snug"></p>
+            <p id="gfAsk" class="text-sm text-heritage-brown mt-0.5"></p>
+            <div class="flex gap-2 mt-3">
+              <button id="gfListen" type="button" class="flex-1 inline-flex items-center justify-center gap-2 bg-heritage-red hover:bg-heritage-redDeep text-white text-sm font-semibold py-2 rounded-lg"><i class="fa-solid fa-headphones"></i><span id="gfListenLabel"></span></button>
+              <button id="gfDismiss" type="button" class="px-4 py-2 rounded-lg border border-heritage-brown/30 text-sm text-heritage-brown hover:border-heritage-red hover:text-heritage-red"></button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="mapNotice" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-[500] max-w-[90%] bg-amber-100 border border-amber-300 text-amber-900 text-xs px-3 py-2 rounded-lg shadow"></div>
     </section>
   </div>
 
   <script src="/js/common.js"></script>
+  <script src="/js/geofence.js"></script>
   <script>
     // ---------- Cấu hình ----------
     // Tâm khối nhà chính Dinh Độc Lập (gần đúng). Dùng để căn bản đồ và nút "Chỉ đường".
@@ -130,7 +161,8 @@
         listen: 'Nghe thuyết minh', away: (d) => `cách bạn ${d}`, noGeo: 'Chưa có công trình nào được gắn vị trí trên bản đồ.',
         indoor: 'Trong nhà GPS kém chính xác, hãy quét mã QR tại phòng.',
         privacy: 'Vị trí của bạn chỉ dùng trên thiết bị để tính khoảng cách, không gửi lên máy chủ. Nền bản đồ © OpenStreetMap.',
-        tiles: 'Không tải được nền bản đồ (cần kết nối Internet). Vị trí công trình vẫn hiển thị.', me: 'Bạn đang ở đây', error: 'Không tải được dữ liệu' },
+        tiles: 'Không tải được nền bản đồ (cần kết nối Internet). Vị trí công trình vẫn hiển thị.', me: 'Bạn đang ở đây', error: 'Không tải được dữ liệu',
+        gfLabel: 'Gợi ý khi đến gần', gfHint: 'Báo khi bạn vào gần một công trình (cần bật vị trí)', gfNear: (n) => `Bạn đang ở gần ${n}`, gfAsk: 'Nghe thuyết minh về nơi này?', gfDismiss: 'Để sau' },
       en: { sub: 'Grounds map', title: 'Exhibits on the map', count: (n) => `${n} exhibits`, all: 'All', other: 'Other',
         buy: 'Tickets', locate: 'My location', locating: 'Finding your location...', directions: 'Directions to the Palace',
         geoIdle: 'Turn on location to see where you are and which exhibit is nearest.',
@@ -142,7 +174,8 @@
         listen: 'Audio guide', away: (d) => `${d} away`, noGeo: 'No exhibit has a map position yet.',
         indoor: 'GPS is inaccurate indoors; scan the QR code in each room.',
         privacy: 'Your location stays on this device and is only used to measure distance. Map data © OpenStreetMap.',
-        tiles: 'Map tiles could not be loaded (Internet required). Exhibit positions are still shown.', me: 'You are here', error: 'Could not load data' },
+        tiles: 'Map tiles could not be loaded (Internet required). Exhibit positions are still shown.', me: 'You are here', error: 'Could not load data',
+        gfLabel: 'Nearby alerts', gfHint: 'Tells you when you get close to an exhibit (location must be on)', gfNear: (n) => `You are near ${n}`, gfAsk: 'Listen to the audio guide for this spot?', gfDismiss: 'Not now' },
       ja: { sub: '敷地マップ', title: 'マップ上の展示', count: (n) => `${n} 件の展示`, all: 'すべて', other: 'その他',
         buy: 'チケット', locate: '現在地', locating: '現在地を取得中...', directions: '宮殿への道順',
         geoIdle: '位置情報をオンにすると、現在地と最寄りの展示がわかります。',
@@ -154,7 +187,8 @@
         listen: '音声ガイド', away: (d) => `ここから${d}`, noGeo: 'マップ上の位置が設定された展示はまだありません。',
         indoor: '屋内ではGPSの精度が低いため、各部屋のQRコードを読み取ってください。',
         privacy: '位置情報は端末内で距離の計算にのみ使用され、サーバーには送信されません。地図データ © OpenStreetMap。',
-        tiles: '地図を読み込めませんでした（インターネット接続が必要）。展示の位置は表示されます。', me: '現在地', error: 'データを読み込めません' },
+        tiles: '地図を読み込めませんでした（インターネット接続が必要）。展示の位置は表示されます。', me: '現在地', error: 'データを読み込めません',
+        gfLabel: '近くのお知らせ', gfHint: '展示に近づくとお知らせします（位置情報をオンにしてください）', gfNear: (n) => `${n}の近くにいます`, gfAsk: 'この場所の音声ガイドを聞きますか？', gfDismiss: 'あとで' },
       ko: { sub: '부지 지도', title: '지도 위의 전시물', count: (n) => `전시물 ${n}개`, all: '전체', other: '기타',
         buy: '티켓', locate: '내 위치', locating: '위치를 찾는 중...', directions: '독립궁 가는 길',
         geoIdle: '위치를 켜면 현재 위치와 가장 가까운 전시물을 볼 수 있습니다.',
@@ -166,7 +200,8 @@
         listen: '음성 안내', away: (d) => `${d} 거리`, noGeo: '아직 지도 위치가 지정된 전시물이 없습니다.',
         indoor: '실내에서는 GPS가 부정확하니 각 방의 QR 코드를 스캔하세요.',
         privacy: '위치 정보는 기기 안에서 거리 계산에만 사용되며 서버로 전송되지 않습니다. 지도 데이터 © OpenStreetMap.',
-        tiles: '지도를 불러오지 못했습니다(인터넷 필요). 전시물 위치는 계속 표시됩니다.', me: '현재 위치', error: '데이터를 불러올 수 없습니다' },
+        tiles: '지도를 불러오지 못했습니다(인터넷 필요). 전시물 위치는 계속 표시됩니다.', me: '현재 위치', error: '데이터를 불러올 수 없습니다',
+        gfLabel: '근처 알림', gfHint: '전시물에 가까워지면 알려 줍니다 (위치를 켜야 합니다)', gfNear: (n) => `${n} 근처에 있습니다`, gfAsk: '이곳의 음성 안내를 들으시겠어요?', gfDismiss: '나중에' },
       zh: { sub: '园区地图', title: '地图上的展品', count: (n) => `${n} 个展品`, all: '全部', other: '其他',
         buy: '购票', locate: '我的位置', locating: '正在定位...', directions: '前往独立宫的路线',
         geoIdle: '开启定位即可查看您的位置和最近的展品。',
@@ -178,7 +213,8 @@
         listen: '语音讲解', away: (d) => `距您 ${d}`, noGeo: '尚无展品设置地图位置。',
         indoor: '室内 GPS 不准确，请扫描各房间的二维码。',
         privacy: '您的位置仅在本设备上用于计算距离，不会发送到服务器。地图数据 © OpenStreetMap。',
-        tiles: '无法加载地图（需要联网）。展品位置仍会显示。', me: '您在这里', error: '无法加载数据' },
+        tiles: '无法加载地图（需要联网）。展品位置仍会显示。', me: '您在这里', error: '无法加载数据',
+        gfLabel: '靠近提醒', gfHint: '靠近展品时提醒您（需开启定位）', gfNear: (n) => `您在${n}附近`, gfAsk: '要收听此处的语音讲解吗？', gfDismiss: '稍后' },
     };
 
     // ---------- Trạng thái ----------
@@ -194,6 +230,23 @@
     let activeCode = new URLSearchParams(location.search).get('code');
     let map, markerLayer, meMarker, meCircle;
     const markers = new Map();   // code -> marker
+    let fenceLayer;              // vòng tròn bán kính geofence quanh mỗi công trình
+    const tracker = Geofence.createTracker();   // nhớ công trình nào đã gợi ý, để không lặp lại
+    let geofenceOn = readGeofencePref();
+    let gfTimer = null;
+    let firstFix = true;
+    // Chế độ giả lập vị trí để demo/kiểm thử không cần GPS (chạy được cả khi mở bằng http://IP):
+    //   map.html?sim=10.7779,106.69615  đặt vị trí xuất phát; map.html?sim=1  bấm lên bản đồ để "đi bộ" tới đó
+    const SIM = (() => {
+      const v = new URLSearchParams(location.search).get('sim');
+      if (v === null) return null;
+      const m = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/.exec(v);
+      return m ? { lat: Number(m[1]), lng: Number(m[2]) } : {};
+    })();
+
+    function readGeofencePref() {
+      try { return localStorage.getItem('geofence') !== 'off'; } catch (e) { return true; } // mặc định bật
+    }
     // Nhúng trong trang chủ (iframe) thì báo cho trang chủ mở khung thuyết minh thay vì chuyển trang
     const EMBED = new URLSearchParams(location.search).get('embed') === '1' && window.parent !== window;
     if (EMBED) document.body.classList.add('embed');
@@ -204,15 +257,8 @@
     const areaColor = (slug) => (AREAS[slug] && AREAS[slug].color) || '#4B5563';
     const isOutdoor = (slug) => slug === 'ngoai-troi';
 
-    // Khoảng cách giữa 2 tọa độ (mét), công thức Haversine
-    function distanceM(a, b) {
-      const R = 6371000;
-      const rad = (d) => (d * Math.PI) / 180;
-      const dLat = rad(b.lat - a.lat);
-      const dLng = rad(b.lng - a.lng);
-      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-      return 2 * R * Math.asin(Math.sqrt(h));
-    }
+    // Khoảng cách giữa 2 tọa độ (mét): dùng chung với logic geofence (js/geofence.js)
+    const distanceM = (a, b) => Geofence.distanceM(a, b);
 
     function formatDistance(m) {
       if (m < 1000) return `${Math.max(1, Math.round(m / 5) * 5)} m`;
@@ -231,7 +277,9 @@
         tileErrors += 1;
         if (tileErrors === 3) showNotice(S().tiles);
       }).on('tileload', () => { tileErrors = 0; hideNotice(); }).addTo(map);
+      fenceLayer = L.layerGroup();
       markerLayer = L.layerGroup().addTo(map);
+      if (SIM) map.on('click', (e) => handlePosition({ lat: e.latlng.lat, lng: e.latlng.lng, accuracy: 8 }));
       L.control.scale({ metric: true, imperial: false }).addTo(map);
     }
 
@@ -283,8 +331,12 @@
 
     function renderMarkers() {
       markerLayer.clearLayers();
+      fenceLayer.clearLayers();
       markers.clear();
       visibleArtifacts().forEach((a) => {
+        const color = areaColor(a.categorySlug);
+        L.circle([a.geo.lat, a.geo.lng], { radius: Geofence.radiusOf(a), color, weight: 1, opacity: 0.55, fillColor: color, fillOpacity: 0.09, interactive: false })
+          .addTo(fenceLayer);
         const m = L.marker([a.geo.lat, a.geo.lng], { icon: pinIcon(a), title: a.name, riseOnHover: true })
           .bindPopup(() => popupContent(a), { maxWidth: 260, minWidth: 240 });
         m.on('popupopen', () => { activeCode = a.code; highlightList(); });
@@ -400,7 +452,21 @@
       meMarker.bindTooltip(S().me);
     }
 
+    // Nhận một vị trí mới (từ GPS hoặc từ chế độ giả lập): vẽ chấm xanh, cập nhật danh sách, kiểm tra geofence
+    function handlePosition(c) {
+      me = { lat: c.lat, lng: c.lng, accuracy: Math.round(c.accuracy) };
+      geoState = 'ok';
+      drawMe(); renderGeoBox(); renderList();
+      checkGeofence();
+      if (firstFix) {
+        firstFix = false;
+        if (distanceM(me, PALACE) < NEAR_PALACE_M) map.flyTo([me.lat, me.lng], 19);
+        else map.fitBounds([[me.lat, me.lng], [PALACE.lat, PALACE.lng]], { padding: [50, 50], maxZoom: 17 });
+      }
+    }
+
     function startLocating() {
+      if (SIM) { if (me) map.flyTo([me.lat, me.lng], Math.max(map.getZoom(), 18)); return; }
       if (!window.isSecureContext) { geoState = 'insecure'; renderGeoBox(); return; }
       if (!('geolocation' in navigator)) { geoState = 'unsupported'; renderGeoBox(); return; }
       if (watchId !== null) { // đang theo dõi: chỉ đưa bản đồ về vị trí hiện tại
@@ -408,23 +474,63 @@
         return;
       }
       geoState = 'locating'; renderGeoBox();
-      let first = true;
       // watchPosition: cập nhật liên tục khi du khách đi lại trong khuôn viên
       watchId = navigator.geolocation.watchPosition((pos) => {
-        me = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
-        geoState = 'ok';
-        drawMe(); renderGeoBox(); renderList();
-        if (first) {
-          first = false;
-          if (distanceM(me, PALACE) < NEAR_PALACE_M) map.flyTo([me.lat, me.lng], 19);
-          else map.fitBounds([[me.lat, me.lng], [PALACE.lat, PALACE.lng]], { padding: [50, 50], maxZoom: 17 });
-        }
+        handlePosition({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy });
       }, (err) => {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         geoState = err.code === err.PERMISSION_DENIED ? 'denied' : 'fail';
         renderGeoBox();
       }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+    }
+
+    // ---------- Geofence: gợi ý nghe thuyết minh khi đến gần ----------
+    function openDetail(a) {
+      if (EMBED) window.parent.postMessage({ type: 'open-artifact', code: a.code }, window.location.origin);
+      else window.location.href = `detail.html?code=${encodeURIComponent(a.code)}&lang=${encodeURIComponent(lang)}`;
+    }
+
+    function hideGeofenceBanner() {
+      clearTimeout(gfTimer);
+      document.getElementById('gfBanner').classList.add('hidden');
+    }
+
+    function showGeofenceBanner(a, distance) {
+      const s = S();
+      document.getElementById('gfTitle').textContent = s.gfNear(a.name);
+      document.getElementById('gfAsk').textContent = `${s.gfAsk} (${formatDistance(distance)})`;
+      const banner = document.getElementById('gfBanner');
+      banner.classList.remove('hidden', 'gf-in');
+      void banner.offsetWidth; // chạy lại hiệu ứng khi có thông báo mới
+      banner.classList.add('gf-in');
+      document.getElementById('gfListen').onclick = () => { hideGeofenceBanner(); openDetail(a); };
+      activeCode = a.code; highlightList();
+      try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) { /* không hỗ trợ rung */ }
+      // Tự ẩn sau 20 giây. Công trình đã được tính là "đã gợi ý" nên sẽ không hiện lại cho đến khi du khách đi ra rồi quay lại.
+      clearTimeout(gfTimer);
+      gfTimer = setTimeout(hideGeofenceBanner, 20000);
+    }
+
+    function checkGeofence() {
+      if (!geofenceOn || !me) return;
+      const hit = tracker.update(me, artifacts);
+      if (hit) showGeofenceBanner(hit.poi, hit.distance);
+    }
+
+    function applyFenceVisibility() {
+      if (!map || !fenceLayer) return;
+      if (geofenceOn) map.addLayer(fenceLayer); else map.removeLayer(fenceLayer);
+    }
+
+    function setGeofence(on, initial) {
+      geofenceOn = on;
+      if (!initial) { try { localStorage.setItem('geofence', on ? 'on' : 'off'); } catch (e) { /* trình duyệt chặn lưu trữ */ } }
+      document.getElementById('gfToggle').setAttribute('aria-checked', String(on));
+      applyFenceVisibility();
+      if (initial) return;
+      if (on) { tracker.reset(); checkGeofence(); } // đang đứng trong vùng thì gợi ý ngay
+      else hideGeofenceBanner();
     }
 
     // ---------- Dữ liệu ----------
@@ -459,6 +565,7 @@
       const set = (id, text) => { document.getElementById(id).textContent = text; };
       set('pageSub', s.sub); set('listTitle', s.title); set('buyLabel', s.buy);
       set('locateLabel', s.locate); set('directionsLabel', s.directions); set('privacyNote', s.privacy);
+      set('gfLabel', s.gfLabel); set('gfHint', s.gfHint); set('gfListenLabel', s.listen); set('gfDismiss', s.gfDismiss);
       document.getElementById('backLink').href = 'index.html?lang=' + encodeURIComponent(lang);
       // Chỉ gửi điểm đến cho Google Maps; vị trí xuất phát do ứng dụng bản đồ tự lấy trên máy du khách
       document.getElementById('directionsBtn').href =
@@ -472,6 +579,7 @@
     function renderAll() {
       renderAreaChips();
       renderMarkers();
+      applyFenceVisibility();
       renderList();
       renderGeoBox();
     }
@@ -491,6 +599,9 @@
       if (!window.L) { document.getElementById('map').textContent = STRINGS.vi.tiles; return; }
       initMap();
       document.getElementById('locateBtn').addEventListener('click', startLocating);
+      document.getElementById('gfToggle').addEventListener('click', () => setGeofence(!geofenceOn));
+      document.getElementById('gfDismiss').addEventListener('click', hideGeofenceBanner);
+      document.getElementById('gfToggle').setAttribute('aria-checked', String(geofenceOn));
       await loadLanguages();
       lang = detectLanguage(languages.map((l) => l.code));
       applyStatic();
@@ -500,9 +611,10 @@
       renderAll();
       if (activeCode && markers.has(activeCode)) focusArtifact(activeCode, false);
       else fitToVisible();
+      if (SIM && Number.isFinite(SIM.lat)) handlePosition({ lat: SIM.lat, lng: SIM.lng, accuracy: 8 });
       // Nếu trước đó du khách đã cho phép vị trí thì tự bật, không hỏi lại
       try {
-        if (navigator.permissions && window.isSecureContext) {
+        if (navigator.permissions && window.isSecureContext && !SIM) {
           const p = await navigator.permissions.query({ name: 'geolocation' });
           if (p.state === 'granted') startLocating();
         }

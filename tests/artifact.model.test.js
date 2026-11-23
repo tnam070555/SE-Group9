@@ -26,8 +26,16 @@ test('model: tọa độ không bắt buộc, có thì phải đúng phạm vi',
 
     const ok = new Artifact({ name: 'A', code: 'A2', geo: { lat: 10.777, lng: 106.6953 } });
     await ok.validate();
-    assert.deepStrictEqual(ok.toObject().geo, { lat: 10.777, lng: 106.6953 });
+    assert.deepStrictEqual(ok.toObject().geo, { lat: 10.777, lng: 106.6953, radius: 20 });
 
     await assert.rejects(() => new Artifact({ name: 'A', code: 'A3', geo: { lat: 100, lng: 106 } }).validate());
     await assert.rejects(() => new Artifact({ name: 'A', code: 'A4', geo: { lat: 10 } }).validate());
+});
+
+test('model: bán kính geofence mặc định 20 m, ngoài 5–200 m thì bị từ chối', async () => {
+    await assert.rejects(() => new Artifact({ name: 'A', code: 'R1', geo: { lat: 10.777, lng: 106.695, radius: 3 } }).validate());
+    await assert.rejects(() => new Artifact({ name: 'A', code: 'R2', geo: { lat: 10.777, lng: 106.695, radius: 500 } }).validate());
+    const ok = new Artifact({ name: 'A', code: 'R3', geo: { lat: 10.777, lng: 106.695, radius: 50 } });
+    await ok.validate();
+    assert.strictEqual(ok.geo.radius, 50);
 });

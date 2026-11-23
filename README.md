@@ -37,7 +37,11 @@ QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP 
 - Nút **Vị trí của tôi** dùng Geolocation API của trình duyệt: hiện chấm xanh, vòng sai số, khoảng cách tới từng công trình và xếp danh sách theo khoảng cách. Vị trí **chỉ dùng trên máy du khách, không gửi lên server**.
 - Trình duyệt chỉ cho lấy vị trí trên **HTTPS hoặc `localhost`**. Điện thoại mở bằng `http://192.168.x.x:5000` sẽ không lấy được vị trí (bản đồ và ghim vẫn hiện). Muốn demo GPS trên điện thoại thì deploy có HTTPS hoặc dùng đường hầm HTTPS (ngrok, Cloudflare Tunnel).
 - Trong nhà GPS sai lệch nhiều, nên vẫn dùng mã QR ở từng phòng; GPS hữu ích nhất ở khu ngoài trời.
-- Tọa độ lưu ở trường `geo: { lat, lng }` của công trình (không bắt buộc). Admin đặt vị trí trong form sửa công trình bằng cách bấm vào bản đồ hoặc kéo ghim. 16 công trình mẫu có **tọa độ gần đúng** (các phòng trong nhà được rải trong khối nhà chính), nên chỉnh lại khi khảo sát thực tế. Database đã có dữ liệu sẽ được bổ sung tọa độ mẫu cho công trình chưa có, không ghi đè tọa độ admin đã chỉnh.
+- **Gợi ý khi đến gần (geofence):** mỗi công trình có một vùng tròn quanh ghim (mặc định **20 m**, admin chỉnh 5–200 m trong form sửa công trình). Du khách vào vùng thì hiện thông báo "Bạn đang ở gần … Nghe thuyết minh về nơi này?" với nút nghe hoặc "Để sau". Công tắc **Gợi ý khi đến gần** trên trang bản đồ bật/tắt tính năng (nhớ lựa chọn trên máy, mặc định bật).
+  - Không lặp lại: mỗi công trình chỉ báo một lần cho tới khi du khách đi ra xa hơn 1,5 lần bán kính rồi quay lại; vùng chồng nhau thì chỉ báo công trình gần nhất; thông báo tự ẩn sau 20 giây.
+  - GPS sai số lớn hơn 50 m thì bỏ qua để không gợi ý nhầm phòng. Logic nằm ở `public/js/geofence.js`, có test ở `tests/geofence.test.js`.
+  - **Chế độ giả lập vị trí để demo/kiểm thử không cần GPS** (chạy được cả khi mở bằng `http://IP`): `map.html?sim=10.7779,106.69615` đặt sẵn vị trí; `map.html?sim=1` thì bấm lên bản đồ để "đi bộ" tới đó.
+- Tọa độ lưu ở trường `geo: { lat, lng, radius }` của công trình (không bắt buộc). Admin đặt vị trí trong form sửa công trình bằng cách bấm vào bản đồ hoặc kéo ghim. 16 công trình mẫu có **tọa độ gần đúng** (các phòng trong nhà được rải trong khối nhà chính), nên chỉnh lại khi khảo sát thực tế. Database đã có dữ liệu sẽ được bổ sung tọa độ mẫu cho công trình chưa có, không ghi đè tọa độ admin đã chỉnh.
 
 ## Đa ngôn ngữ (vi, en, ja, ko, zh)
 - Nội dung gốc nhập bằng **tiếng Việt**; mỗi công trình có thể có bản dịch `en`, `ja`, `ko`, `zh` (trường `translations`).

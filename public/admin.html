@@ -573,7 +573,7 @@
                             <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-3">
                                 <div class="flex-1">
                                     <p class="form-label mb-1"><i class="fa-solid fa-map-location-dot mr-1" style="color:#8B1E24"></i> Vị trí trên bản đồ</p>
-                                    <p class="text-xs text-slate-500">Bấm vào bản đồ hoặc kéo ghim để đặt vị trí. Có thể nhập tay vĩ độ, kinh độ. Để trống thì công trình không hiện trên bản đồ.</p>
+                                    <p class="text-xs text-slate-500">Bấm vào bản đồ hoặc kéo ghim để đặt vị trí. Có thể nhập tay vĩ độ, kinh độ. Vòng tròn là vùng gợi ý: du khách đi vào vùng này (mặc định 20 m) thì được gợi ý nghe thuyết minh. Để trống tọa độ thì công trình không hiện trên bản đồ.</p>
                                 </div>
                                 <div class="flex gap-2 items-end">
                                     <div>
@@ -583,6 +583,10 @@
                                     <div>
                                         <label for="art-lng" class="text-xs font-semibold text-slate-500">Kinh độ (lng)</label>
                                         <input type="number" id="art-lng" step="0.000001" min="-180" max="180" placeholder="106.695300" oninput="artifactManager.geoFromInputs()" class="form-input font-mono text-sm" style="width:9.5rem">
+                                    </div>
+                                    <div>
+                                        <label for="art-radius" class="text-xs font-semibold text-slate-500" title="Du khách vào vùng này thì trang bản đồ gợi ý nghe thuyết minh">Bán kính gợi ý (m)</label>
+                                        <input type="number" id="art-radius" step="1" min="5" max="200" value="20" placeholder="20" oninput="artifactManager.updateCircle()" class="form-input font-mono text-sm" style="width:7.5rem">
                                     </div>
                                     <button type="button" onclick="artifactManager.clearGeo()" class="btn-secondary !px-3" title="Xóa vị trí"><i class="fa-solid fa-eraser"></i></button>
                                 </div>
@@ -1705,6 +1709,7 @@
             geoMap: null,
             geoPin: null,
             geoOthers: null,
+            geoCircle: null,
 
             initGeoMap: function() {
                 if (this.geoMap || !window.L) return;
@@ -1731,6 +1736,22 @@
                 } else {
                     this.geoPin.setLatLng([lat, lng]);
                 }
+                // Vòng tròn = vùng gợi ý (geofence), bán kính lấy từ ô nhập
+                if (!this.geoCircle) {
+                    this.geoCircle = L.circle([lat, lng], { radius: this.radiusValue(), color: '#8B1E24', weight: 1.5, fillColor: '#8B1E24', fillOpacity: 0.12, interactive: false }).addTo(this.geoMap);
+                } else {
+                    this.geoCircle.setLatLng([lat, lng]);
+                }
+            },
+
+            // Bán kính trong ô nhập; chưa hợp lệ thì dùng 20 m để vẽ vòng tròn
+            radiusValue: function() {
+                const r = parseFloat(document.getElementById('art-radius').value);
+                return Number.isFinite(r) && r >= 5 && r <= 200 ? r : 20;
+            },
+
+            updateCircle: function() {
+                if (this.geoCircle) this.geoCircle.setRadius(this.radiusValue());
             },
 
             geoFromInputs: function() {
@@ -1745,7 +1766,9 @@
             clearGeo: function() {
                 document.getElementById('art-lat').value = '';
                 document.getElementById('art-lng').value = '';
+                document.getElementById('art-radius').value = 20;
                 if (this.geoPin) { this.geoPin.remove(); this.geoPin = null; }
+                if (this.geoCircle) { this.geoCircle.remove(); this.geoCircle = null; }
             },
 
             // Đọc tọa độ trong form: null = để trống (xóa), ném lỗi nếu chỉ nhập 1 ô
@@ -1754,13 +1777,17 @@
                 const lngRaw = document.getElementById('art-lng').value.trim();
                 if (!latRaw && !lngRaw) return null;
                 if (!latRaw || !lngRaw) throw new Error('Cần nhập cả vĩ độ và kinh độ, hoặc để trống cả hai');
-                return { lat: Number(latRaw), lng: Number(lngRaw) };
+                const radiusRaw = document.getElementById('art-radius').value.trim();
+                const radius = radiusRaw ? Number(radiusRaw) : 20;
+                if (!Number.isFinite(radius) || radius < 5 || radius > 200) throw new Error('Bán kính gợi ý phải từ 5 đến 200 mét');
+                return { lat: Number(latRaw), lng: Number(lngRaw), radius };
             },
 
             // Mở form: vẽ lại bản đồ (form vừa hiện nên phải tính lại kích thước), đặt ghim và chấm tham khảo
             showGeo: function(a) {
                 this.initGeoMap();
                 this.clearGeo();
+                if (a && a.geo) document.getElementById('art-radius').value = a.geo.radius || 20;
                 if (!this.geoMap) return;
                 this.geoOthers.clearLayers();
                 this.data.filter((x) => x.geo && (!a || x.code !== a.code)).forEach((x) => {
@@ -1896,7 +1923,7 @@
                     if (a.location) text.append(dom.el('p', 'text-xs text-slate-500', a.location));
                     // Có/chưa có tọa độ trên bản đồ du khách
                     const geoTag = dom.el('p', 'text-[11px] mt-0.5 ' + (a.geo ? 'text-emerald-700' : 'text-slate-400'));
-                    geoTag.append(dom.icon('fa-solid fa-map-pin mr-1'), document.createTextNode(a.geo ? 'Đã gắn trên bản đồ' : 'Chưa có vị trí bản đồ'));
+                    geoTag.append(dom.icon('fa-solid fa-map-pin mr-1'), document.createTextNode(a.geo ? 'Đã gắn trên bản đồ · vùng gợi ý ' + (a.geo.radius || 20) + ' m' : 'Chưa có vị trí bản đồ'));
                     text.append(geoTag);
                     info.append(thumb, text);
                     tr.append(dom.td('', info));

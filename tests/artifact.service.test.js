@@ -259,7 +259,7 @@ test('tạo có tọa độ: nhận cả chuỗi số, làm tròn 6 chữ số',
     let saved;
     test.mock.method(artifactRepository, 'create', async (data) => { saved = data; return data; });
     await artifactService.create({ name: 'Xe tăng 390', code: 'DDL-05', geo: { lat: '10.7779001234', lng: 106.69615 } });
-    assert.deepStrictEqual(saved.geo, { lat: 10.7779, lng: 106.69615 });
+    assert.deepStrictEqual(saved.geo, { lat: 10.7779, lng: 106.69615, radius: 20 }); // không gửi radius -> mặc định 20 m
 });
 
 test('tạo không gửi tọa độ thì không lưu geo', async () => {
@@ -288,7 +288,7 @@ test('cập nhật chỉ tọa độ: lưu geo, không xóa bản dịch', async
     test.mock.method(artifactRepository, 'findById', async () => ({ _id: '1', code: 'A1', name: 'A' }));
     test.mock.method(artifactRepository, 'updateById', async (id, data) => { update = data; return { _id: id }; });
     await artifactService.update('1', { geo: { lat: 10.777, lng: 106.6953 } });
-    assert.deepStrictEqual(update, { geo: { lat: 10.777, lng: 106.6953 } });
+    assert.deepStrictEqual(update, { geo: { lat: 10.777, lng: 106.6953, radius: 20 } });
 });
 
 test('cập nhật geo = null thì xóa tọa độ', async () => {
@@ -305,6 +305,28 @@ test('danh sách công trình trả kèm tọa độ (null nếu chưa có)', as
         { code: 'B', name: 'B' },
     ]);
     const [a, b] = await artifactService.getAll('en');
-    assert.deepStrictEqual(a.geo, { lat: 10.777, lng: 106.695 });
+    assert.deepStrictEqual(a.geo, { lat: 10.777, lng: 106.695, radius: 20 });
     assert.strictEqual(b.geo, null);
+});
+
+test('bán kính geofence: nhận số hoặc chuỗi, làm tròn, mặc định 20 m', async () => {
+    assert.strictEqual(artifactService.parseGeo({ lat: 10.777, lng: 106.695 }).radius, 20);
+    assert.strictEqual(artifactService.parseGeo({ lat: 10.777, lng: 106.695, radius: '35.4' }).radius, 35);
+    assert.strictEqual(artifactService.parseGeo({ lat: 10.777, lng: 106.695, radius: '' }).radius, 20);
+    assert.strictEqual(artifactService.parseGeo({ lat: 10.777, lng: 106.695, radius: 200 }).radius, 200);
+});
+
+test('bán kính geofence ngoài 5–200 m hoặc không phải số thì lỗi 400', async () => {
+    for (const radius of [4, 201, -10, 0, 'abc']) {
+        await assert.rejects(
+            () => artifactService.create({ name: 'A', code: 'A1', geo: { lat: 10.777, lng: 106.695, radius } }),
+            (err) => err.status === 400, String(radius));
+    }
+});
+
+test('danh sách công trình: geo thiếu radius (dữ liệu cũ) thì trả 20 m', async () => {
+    test.mock.method(artifactRepository, 'findAll', async () => [{ code: 'A', name: 'A', geo: { lat: 10.777, lng: 106.695, radius: 45 } }, { code: 'B', name: 'B', geo: { lat: 10.7, lng: 106.6 } }]);
+    const [a, b] = await artifactService.getAll();
+    assert.strictEqual(a.geo.radius, 45);
+    assert.strictEqual(b.geo.radius, 20);
 });

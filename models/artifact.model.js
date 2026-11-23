@@ -34,6 +34,8 @@ const artifactSchema = new mongoose.Schema({
         type: new mongoose.Schema({
             lat: { type: Number, required: true, min: -90, max: 90 },      // Vĩ độ
             lng: { type: Number, required: true, min: -180, max: 180 },    // Kinh độ
+            // Bán kính vùng gợi ý (geofence, mét): du khách vào vùng này thì map.html gợi ý nghe thuyết minh
+            radius: { type: Number, min: 5, max: 200, default: 20 },
         }, { _id: false }),
         default: undefined,
     },
