@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Dinh Độc Lập – Bản đồ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet: thư viện bản đồ mã nguồn mở, nền bản đồ lấy từ OpenStreetMap (miễn phí, không cần API key) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['"Be Vietnam Pro"', 'sans-serif'] },
+        colors: { heritage: { red: '#8B1E24', redDeep: '#5E1216', gold: '#C9A227', goldSoft: '#E8D9A6', paper: '#F7F3EA', ink: '#2A2320', brown: '#6B5443' } }
+      } }
+    };
+  </script>
+  <style>
+    html, body { height: 100%; }
+    body { background: #F7F3EA; }
+    .gold-rule { background: linear-gradient(90deg, transparent, #C9A227, transparent); height: 2px; }
+    /* Bố cục: máy tính = danh sách bên trái + bản đồ bên phải; điện thoại = bản đồ trên, danh sách dưới */
+    #layout { height: calc(100vh - 62px); height: calc(100dvh - 62px); }
+    #map { background: #e8e2d4; }
+    .art-pin { width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+      display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+    .art-pin i { transform: rotate(45deg); color: #fff; font-size: 14px; }
+    .art-pin.active { outline: 3px solid #C9A227; outline-offset: 1px; }
+    .me-dot { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(37,99,235,.35), 0 1px 4px rgba(0,0,0,.4); }
+    .leaflet-popup-content { margin: 0; width: 240px !important; }
+    .leaflet-popup-content-wrapper { border-radius: 14px; overflow: hidden; padding: 0; }
+    .chip-active { background: #8B1E24; color: #fff; border-color: #8B1E24; }
+    .lang-btn[aria-pressed="true"] { background: #C9A227; color: #2A2320; border-color: #C9A227; }
+    #areaChips { scrollbar-width: none; }
+    #areaChips::-webkit-scrollbar { display: none; }
+    @media (max-width: 1023px) {
+      #layout { height: auto; }
+      #map { position: relative; height: 62vh; height: 62dvh; }
+    }
+  </style>
+</head>
+<body class="font-sans text-heritage-ink antialiased">
+
+  <!-- ===== THANH ĐIỀU HƯỚNG ===== -->
+  <header class="sticky top-0 z-[1100] bg-heritage-paper/95 backdrop-blur border-b border-heritage-gold/40">
+    <div class="max-w-full mx-auto px-3 sm:px-5 h-[60px] flex items-center justify-between gap-2">
+      <a href="index.html" id="backLink" class="flex items-center gap-2 min-w-0 text-heritage-red">
+        <span class="w-9 h-9 rounded-full border-2 border-heritage-red bg-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-arrow-left"></i></span>
+        <span class="min-w-0">
+          <span class="block font-serif font-bold leading-tight uppercase tracking-wide whitespace-nowrap">Dinh Độc Lập</span>
+          <span class="block text-xs text-heritage-brown truncate" id="pageSub"></span>
+        </span>
+      </a>
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="flex flex-wrap items-center justify-end gap-1.5 min-w-0" id="langBar"></div>
+        <a href="tickets.html" class="hidden sm:inline-flex flex-shrink-0 items-center gap-1.5 h-9 px-3 rounded-full bg-heritage-gold text-heritage-ink text-xs font-semibold shadow-sm hover:brightness-95">
+          <i class="fa-solid fa-ticket"></i><span id="buyLabel"></span>
+        </a>
+      </div>
+    </div>
+    <div class="gold-rule"></div>
+  </header>
+
+  <div id="layout" class="flex flex-col-reverse lg:flex-row">
+    <!-- ===== DANH SÁCH CÔNG TRÌNH ===== -->
+    <aside class="lg:w-[380px] lg:flex-shrink-0 bg-white lg:border-r border-heritage-gold/40 flex flex-col min-h-0">
+      <div class="p-4 border-b border-heritage-gold/30 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <h1 class="font-serif text-xl font-bold text-heritage-red" id="listTitle"></h1>
+          <span class="text-xs text-heritage-brown" id="listCount"></span>
+        </div>
+        <div id="areaChips" class="flex gap-2 overflow-x-auto pb-1"></div>
+        <!-- Trạng thái vị trí của du khách -->
+        <div id="geoBox" class="rounded-xl border border-heritage-brown/20 bg-heritage-paper/60 p-3 text-sm">
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-location-crosshairs text-heritage-red mt-0.5"></i>
+            <div class="min-w-0 flex-1">
+              <p id="geoText" class="text-heritage-ink/90 leading-snug"></p>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <button id="locateBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-heritage-red hover:bg-heritage-redDeep text-white text-xs font-semibold">
+                  <i class="fa-solid fa-location-arrow"></i><span id="locateLabel"></span>
+                </button>
+                <a id="directionsBtn" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-heritage-red text-heritage-red text-xs font-semibold hover:bg-heritage-red hover:text-white">
+                  <i class="fa-solid fa-diamond-turn-right"></i><span id="directionsLabel"></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul id="list" class="flex-1 overflow-y-auto divide-y divide-heritage-gold/20"></ul>
+      <p id="privacyNote" class="px-4 py-3 text-[11px] text-heritage-brown border-t border-heritage-gold/30"></p>
+    </aside>
+
+    <!-- ===== BẢN ĐỒ ===== -->
+    <section class="relative flex-1 min-h-0">
+      <div id="map" class="absolute inset-0 lg:absolute"></div>
+      <div id="mapNotice" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-[500] max-w-[90%] bg-amber-100 border border-amber-300 text-amber-900 text-xs px-3 py-2 rounded-lg shadow"></div>
+    </section>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    // ---------- Cấu hình ----------
+    // Tâm khối nhà chính Dinh Độc Lập (gần đúng). Dùng để căn bản đồ và nút "Chỉ đường".
+    const PALACE = { lat: 10.777, lng: 106.6953 };
+    const NEAR_PALACE_M = 400; // trong bán kính này coi như du khách đang ở trong khuôn viên
+    // Màu marker theo khu vực (khu vực mới do admin thêm sẽ lấy màu tiếp theo trong bảng)
+    const PALETTE = ['#8B1E24', '#B45309', '#1D4ED8', '#047857', '#6D28D9', '#0F766E', '#BE185D', '#4B5563'];
+
+    const STRINGS = {
+      vi: { sub: 'Bản đồ khuôn viên', title: 'Công trình trên bản đồ', count: (n) => `${n} công trình`, all: 'Tất cả', other: 'Khác',
+        buy: 'Mua vé', locate: 'Vị trí của tôi', locating: 'Đang tìm vị trí...', directions: 'Chỉ đường đến Dinh',
+        geoIdle: 'Bật vị trí để xem bạn đang ở đâu và công trình nào gần nhất.',
+        geoNear: (acc) => `Bạn đang ở trong khuôn viên Dinh (sai số khoảng ${acc}). Danh sách đã xếp theo khoảng cách.`,
+        geoFar: (d) => `Bạn đang cách Dinh Độc Lập khoảng ${d}.`,
+        geoDenied: 'Bạn đã chặn quyền vị trí. Hãy cho phép trong cài đặt trình duyệt rồi thử lại.',
+        geoInsecure: 'Trình duyệt chỉ cho lấy vị trí khi trang mở bằng HTTPS (hoặc localhost).',
+        geoUnsupported: 'Thiết bị này không hỗ trợ lấy vị trí.', geoFail: 'Không lấy được vị trí. Hãy ra chỗ thoáng hoặc thử lại.',
+        listen: 'Nghe thuyết minh', away: (d) => `cách bạn ${d}`, noGeo: 'Chưa có công trình nào được gắn vị trí trên bản đồ.',
+        indoor: 'Trong nhà GPS kém chính xác, hãy quét mã QR tại phòng.',
+        privacy: 'Vị trí của bạn chỉ dùng trên thiết bị để tính khoảng cách, không gửi lên máy chủ. Nền bản đồ © OpenStreetMap.',
+        tiles: 'Không tải được nền bản đồ (cần kết nối Internet). Vị trí công trình vẫn hiển thị.', me: 'Bạn đang ở đây', error: 'Không tải được dữ liệu' },
+      en: { sub: 'Grounds map', title: 'Exhibits on the map', count: (n) => `${n} exhibits`, all: 'All', other: 'Other',
+        buy: 'Tickets', locate: 'My location', locating: 'Finding your location...', directions: 'Directions to the Palace',
+        geoIdle: 'Turn on location to see where you are and which exhibit is nearest.',
+        geoNear: (acc) => `You are inside the Palace grounds (accuracy about ${acc}). The list is sorted by distance.`,
+        geoFar: (d) => `You are about ${d} from Independence Palace.`,
+        geoDenied: 'Location permission is blocked. Allow it in your browser settings and try again.',
+        geoInsecure: 'Browsers only share your location on HTTPS pages (or localhost).',
+        geoUnsupported: 'This device cannot share its location.', geoFail: 'Could not get your location. Move to an open area or try again.',
+        listen: 'Audio guide', away: (d) => `${d} away`, noGeo: 'No exhibit has a map position yet.',
+        indoor: 'GPS is inaccurate indoors; scan the QR code in each room.',
+        privacy: 'Your location stays on this device and is only used to measure distance. Map data © OpenStreetMap.',
+        tiles: 'Map tiles could not be loaded (Internet required). Exhibit positions are still shown.', me: 'You are here', error: 'Could not load data' },
+      ja: { sub: '敷地マップ', title: 'マップ上の展示', count: (n) => `${n} 件の展示`, all: 'すべて', other: 'その他',
+        buy: 'チケット', locate: '現在地', locating: '現在地を取得中...', directions: '宮殿への道順',
+        geoIdle: '位置情報をオンにすると、現在地と最寄りの展示がわかります。',
+        geoNear: (acc) => `宮殿の敷地内にいます（誤差 約${acc}）。一覧は距離順です。`,
+        geoFar: (d) => `独立宮殿まで約${d}です。`,
+        geoDenied: '位置情報がブロックされています。ブラウザの設定で許可してから再度お試しください。',
+        geoInsecure: 'ブラウザはHTTPS（またはlocalhost）のページでのみ位置情報を提供します。',
+        geoUnsupported: 'この端末は位置情報に対応していません。', geoFail: '位置情報を取得できませんでした。開けた場所で再度お試しください。',
+        listen: '音声ガイド', away: (d) => `ここから${d}`, noGeo: 'マップ上の位置が設定された展示はまだありません。',
+        indoor: '屋内ではGPSの精度が低いため、各部屋のQRコードを読み取ってください。',
+        privacy: '位置情報は端末内で距離の計算にのみ使用され、サーバーには送信されません。地図データ © OpenStreetMap。',
+        tiles: '地図を読み込めませんでした（インターネット接続が必要）。展示の位置は表示されます。', me: '現在地', error: 'データを読み込めません' },
+      ko: { sub: '부지 지도', title: '지도 위의 전시물', count: (n) => `전시물 ${n}개`, all: '전체', other: '기타',
+        buy: '티켓', locate: '내 위치', locating: '위치를 찾는 중...', directions: '독립궁 가는 길',
+        geoIdle: '위치를 켜면 현재 위치와 가장 가까운 전시물을 볼 수 있습니다.',
+        geoNear: (acc) => `독립궁 부지 안에 있습니다 (오차 약 ${acc}). 목록은 거리순입니다.`,
+        geoFar: (d) => `독립궁까지 약 ${d} 떨어져 있습니다.`,
+        geoDenied: '위치 권한이 차단되었습니다. 브라우저 설정에서 허용한 뒤 다시 시도하세요.',
+        geoInsecure: '브라우저는 HTTPS(또는 localhost) 페이지에서만 위치를 제공합니다.',
+        geoUnsupported: '이 기기는 위치 기능을 지원하지 않습니다.', geoFail: '위치를 가져오지 못했습니다. 트인 곳에서 다시 시도하세요.',
+        listen: '음성 안내', away: (d) => `${d} 거리`, noGeo: '아직 지도 위치가 지정된 전시물이 없습니다.',
+        indoor: '실내에서는 GPS가 부정확하니 각 방의 QR 코드를 스캔하세요.',
+        privacy: '위치 정보는 기기 안에서 거리 계산에만 사용되며 서버로 전송되지 않습니다. 지도 데이터 © OpenStreetMap.',
+        tiles: '지도를 불러오지 못했습니다(인터넷 필요). 전시물 위치는 계속 표시됩니다.', me: '현재 위치', error: '데이터를 불러올 수 없습니다' },
+      zh: { sub: '园区地图', title: '地图上的展品', count: (n) => `${n} 个展品`, all: '全部', other: '其他',
+        buy: '购票', locate: '我的位置', locating: '正在定位...', directions: '前往独立宫的路线',
+        geoIdle: '开启定位即可查看您的位置和最近的展品。',
+        geoNear: (acc) => `您在独立宫园区内（误差约 ${acc}）。列表已按距离排序。`,
+        geoFar: (d) => `您距离独立宫约 ${d}。`,
+        geoDenied: '定位权限已被阻止。请在浏览器设置中允许后重试。',
+        geoInsecure: '浏览器仅在 HTTPS（或 localhost）页面提供定位。',
+        geoUnsupported: '此设备不支持定位。', geoFail: '无法获取位置。请到开阔处后重试。',
+        listen: '语音讲解', away: (d) => `距您 ${d}`, noGeo: '尚无展品设置地图位置。',
+        indoor: '室内 GPS 不准确，请扫描各房间的二维码。',
+        privacy: '您的位置仅在本设备上用于计算距离，不会发送到服务器。地图数据 © OpenStreetMap。',
+        tiles: '无法加载地图（需要联网）。展品位置仍会显示。', me: '您在这里', error: '无法加载数据' },
+    };
+
+    // ---------- Trạng thái ----------
+    let lang = 'vi';
+    let languages = [{ code: 'vi', label: 'Tiếng Việt', speech: 'vi-VN' }];
+    let AREAS = {};              // slug -> { icon, name: {vi,en,...}, color }
+    let hiddenAreas = new Set(); // khu vực admin đang ẩn
+    let artifacts = [];          // chỉ các công trình có tọa độ
+    let areaFilter = 'all';
+    let me = null;               // { lat, lng, accuracy } – chỉ giữ trong bộ nhớ
+    let watchId = null;
+    let geoState = 'idle';       // idle | locating | ok | denied | insecure | unsupported | fail
+    let activeCode = new URLSearchParams(location.search).get('code');
+    let map, markerLayer, meMarker, meCircle;
+    const markers = new Map();   // code -> marker
+
+    const S = () => STRINGS[lang] || STRINGS.vi;
+    const areaName = (slug) => (AREAS[slug] ? AREAS[slug].name[lang] || AREAS[slug].name.vi : S().other);
+    const areaIcon = (slug) => (AREAS[slug] && AREAS[slug].icon) || 'fa-location-dot';
+    const areaColor = (slug) => (AREAS[slug] && AREAS[slug].color) || '#4B5563';
+    const isOutdoor = (slug) => slug === 'ngoai-troi';
+
+    // Khoảng cách giữa 2 tọa độ (mét), công thức Haversine
+    function distanceM(a, b) {
+      const R = 6371000;
+      const rad = (d) => (d * Math.PI) / 180;
+      const dLat = rad(b.lat - a.lat);
+      const dLng = rad(b.lng - a.lng);
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    function formatDistance(m) {
+      if (m < 1000) return `${Math.max(1, Math.round(m / 5) * 5)} m`;
+      return `${(m / 1000).toLocaleString(lang, { maximumFractionDigits: m < 10000 ? 1 : 0 })} km`;
+    }
+
+    // ---------- Bản đồ ----------
+    function initMap() {
+      map = L.map('map', { zoomControl: true, maxZoom: 20 }).setView([PALACE.lat, PALACE.lng], 18);
+      let tileErrors = 0;
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 20, maxNativeZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).on('tileerror', () => {
+        tileErrors += 1;
+        if (tileErrors === 3) showNotice(S().tiles);
+      }).on('tileload', () => { tileErrors = 0; hideNotice(); }).addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+      L.control.scale({ metric: true, imperial: false }).addTo(map);
+    }
+
+    function showNotice(text) { const n = document.getElementById('mapNotice'); n.textContent = text; n.classList.remove('hidden'); }
+    function hideNotice() { document.getElementById('mapNotice').classList.add('hidden'); }
+
+    function pinIcon(a) {
+      const pin = el('div', 'art-pin' + (a.code === activeCode ? ' active' : ''));
+      pin.style.background = areaColor(a.categorySlug);
+      pin.append(icon('fa-solid ' + areaIcon(a.categorySlug)));
+      return L.divIcon({ html: pin, className: '', iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -32] });
+    }
+
+    // Nội dung popup dựng bằng DOM (textContent) để dữ liệu từ server không chèn được mã độc
+    function popupContent(a) {
+      const box = el('div', 'font-sans');
+      if (a.imageUrl) {
+        const img = document.createElement('img');
+        img.src = a.imageUrl; img.alt = a.name; img.loading = 'lazy';
+        img.className = 'w-full h-28 object-cover bg-heritage-paper';
+        img.onerror = () => img.remove();
+        box.append(img);
+      }
+      const body = el('div', 'p-3');
+      const tag = el('span', 'inline-block text-[10px] font-bold tracking-wider text-white px-2 py-0.5 rounded-full mb-1', a.code);
+      tag.style.background = areaColor(a.categorySlug);
+      body.append(tag, el('p', 'font-serif font-bold text-heritage-red text-base leading-snug', a.name));
+      body.append(el('p', 'text-xs text-heritage-brown mt-0.5', a.location || areaName(a.categorySlug)));
+      if (me) body.append(el('p', 'text-xs text-blue-700 mt-1 font-semibold', S().away(formatDistance(distanceM(me, a.geo)))));
+      if (!isOutdoor(a.categorySlug)) body.append(el('p', 'text-[11px] text-amber-800 mt-1', S().indoor));
+      const link = el('a', 'mt-2 flex items-center justify-center gap-2 w-full bg-heritage-red hover:bg-heritage-redDeep !text-white text-sm font-semibold py-2 rounded-lg');
+      link.href = `detail.html?code=${encodeURIComponent(a.code)}&lang=${encodeURIComponent(lang)}`;
+      link.append(icon('fa-solid fa-headphones'), el('span', '', S().listen));
+      body.append(link);
+      box.append(body);
+      return box;
+    }
+
+    function visibleArtifacts() {
+      return artifacts.filter((a) => areaFilter === 'all' || (a.categorySlug || '') === areaFilter);
+    }
+
+    function renderMarkers() {
+      markerLayer.clearLayers();
+      markers.clear();
+      visibleArtifacts().forEach((a) => {
+        const m = L.marker([a.geo.lat, a.geo.lng], { icon: pinIcon(a), title: a.name, riseOnHover: true })
+          .bindPopup(() => popupContent(a), { maxWidth: 260, minWidth: 240 });
+        m.on('popupopen', () => { activeCode = a.code; highlightList(); });
+        m.addTo(markerLayer);
+        markers.set(a.code, m);
+      });
+    }
+
+    function focusArtifact(code, fly = true) {
+      const a = artifacts.find((x) => x.code === code);
+      const m = markers.get(code);
+      if (!a || !m) return;
+      activeCode = code;
+      if (fly) map.flyTo([a.geo.lat, a.geo.lng], Math.max(map.getZoom(), 19), { duration: 0.6 });
+      m.openPopup();
+      highlightList();
+      // Điện thoại: danh sách nằm dưới bản đồ, cuộn lên để thấy marker
+      if (window.innerWidth < 1024) document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---------- Danh sách ----------
+    function renderAreaChips() {
+      const box = document.getElementById('areaChips');
+      box.replaceChildren();
+      const used = new Set(artifacts.map((a) => a.categorySlug || ''));
+      const order = Object.keys(AREAS).filter((slug) => used.has(slug));
+      if (used.has('') || [...used].some((s) => s && !AREAS[s])) order.push('');
+      const items = [['all', S().all, null], ...order.map((slug) => [slug, slug ? areaName(slug) : S().other, slug])];
+      items.forEach(([slug, label, colorSlug]) => {
+        const b = el('button', 'flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition ' +
+          (areaFilter === slug ? 'chip-active' : 'bg-white border-heritage-brown/25 text-heritage-ink hover:border-heritage-red'));
+        b.type = 'button';
+        if (colorSlug !== null) {
+          const dot = el('span', 'w-2.5 h-2.5 rounded-full'); dot.style.background = areaColor(colorSlug); b.append(dot);
+        }
+        b.append(el('span', '', label));
+        b.addEventListener('click', () => { areaFilter = slug; renderAll(); fitToVisible(); });
+        box.append(b);
+      });
+    }
+
+    function renderList() {
+      const list = document.getElementById('list');
+      list.replaceChildren();
+      let items = visibleArtifacts();
+      if (me) items = [...items].sort((x, y) => distanceM(me, x.geo) - distanceM(me, y.geo));
+      document.getElementById('listCount').textContent = S().count(items.length);
+      if (!items.length) {
+        list.append(el('li', 'p-6 text-center text-sm text-heritage-brown', S().noGeo));
+        return;
+      }
+      items.forEach((a) => {
+        const li = el('li');
+        const b = el('button', 'w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-heritage-paper transition');
+        b.type = 'button';
+        b.dataset.code = a.code;
+        const badge = el('span', 'w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0');
+        badge.style.background = areaColor(a.categorySlug);
+        badge.append(icon('fa-solid ' + areaIcon(a.categorySlug)));
+        const text = el('span', 'min-w-0 flex-1');
+        text.append(el('span', 'block font-semibold text-sm text-heritage-ink truncate', a.name));
+        text.append(el('span', 'block text-xs text-heritage-brown truncate', `${a.code} · ${areaName(a.categorySlug)}`));
+        b.append(badge, text);
+        if (me) b.append(el('span', 'text-xs font-semibold text-blue-700 whitespace-nowrap', formatDistance(distanceM(me, a.geo))));
+        b.addEventListener('click', () => focusArtifact(a.code));
+        li.append(b);
+        list.append(li);
+      });
+      highlightList();
+    }
+
+    function highlightList() {
+      document.querySelectorAll('#list button[data-code]').forEach((b) => {
+        b.classList.toggle('bg-heritage-goldSoft/40', b.dataset.code === activeCode);
+      });
+    }
+
+    function fitToVisible() {
+      const pts = visibleArtifacts().map((a) => [a.geo.lat, a.geo.lng]);
+      if (me && distanceM(me, PALACE) < NEAR_PALACE_M) pts.push([me.lat, me.lng]);
+      if (pts.length > 1) map.fitBounds(pts, { padding: [40, 40], maxZoom: 19 });
+      else if (pts.length === 1) map.setView(pts[0], 19);
+    }
+
+    // ---------- Vị trí du khách ----------
+    function renderGeoBox() {
+      const s = S();
+      let text = s.geoIdle;
+      if (geoState === 'locating') text = s.locating;
+      else if (geoState === 'ok' && me) {
+        const d = distanceM(me, PALACE);
+        text = d < NEAR_PALACE_M ? s.geoNear(formatDistance(me.accuracy)) : s.geoFar(formatDistance(d));
+      } else if (geoState === 'denied') text = s.geoDenied;
+      else if (geoState === 'insecure') text = s.geoInsecure;
+      else if (geoState === 'unsupported') text = s.geoUnsupported;
+      else if (geoState === 'fail') text = s.geoFail;
+      document.getElementById('geoText').textContent = text;
+      const btn = document.getElementById('locateBtn');
+      btn.disabled = geoState === 'locating';
+      btn.classList.toggle('opacity-60', btn.disabled);
+    }
+
+    function drawMe() {
+      if (!me) return;
+      const ll = [me.lat, me.lng];
+      if (!meMarker) {
+        meMarker = L.marker(ll, { icon: L.divIcon({ html: el('div', 'me-dot'), className: '', iconSize: [18, 18], iconAnchor: [9, 9] }), zIndexOffset: 1000, keyboard: false });
+        meCircle = L.circle(ll, { radius: me.accuracy, color: '#2563eb', weight: 1, fillColor: '#3b82f6', fillOpacity: 0.12, interactive: false });
+        meCircle.addTo(map); meMarker.addTo(map);
+      } else {
+        meMarker.setLatLng(ll); meCircle.setLatLng(ll); meCircle.setRadius(me.accuracy);
+      }
+      meMarker.bindTooltip(S().me);
+    }
+
+    function startLocating() {
+      if (!window.isSecureContext) { geoState = 'insecure'; renderGeoBox(); return; }
+      if (!('geolocation' in navigator)) { geoState = 'unsupported'; renderGeoBox(); return; }
+      if (watchId !== null) { // đang theo dõi: chỉ đưa bản đồ về vị trí hiện tại
+        if (me) map.flyTo([me.lat, me.lng], Math.max(map.getZoom(), 18));
+        return;
+      }
+      geoState = 'locating'; renderGeoBox();
+      let first = true;
+      // watchPosition: cập nhật liên tục khi du khách đi lại trong khuôn viên
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        me = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
+        geoState = 'ok';
+        drawMe(); renderGeoBox(); renderList();
+        if (first) {
+          first = false;
+          if (distanceM(me, PALACE) < NEAR_PALACE_M) map.flyTo([me.lat, me.lng], 19);
+          else map.fitBounds([[me.lat, me.lng], [PALACE.lat, PALACE.lng]], { padding: [50, 50], maxZoom: 17 });
+        }
+      }, (err) => {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        geoState = err.code === err.PERMISSION_DENIED ? 'denied' : 'fail';
+        renderGeoBox();
+      }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+    }
+
+    // ---------- Dữ liệu ----------
+    async function loadLanguages() {
+      try { languages = (await fetchJson('/api/languages')).data; } catch (e) { /* giữ mặc định */ }
+    }
+
+    async function loadAreas() {
+      try {
+        const list = (await fetchJson('/api/categories')).data || [];
+        const areas = {};
+        list.filter((c) => c.isActive).forEach((c, i) => { areas[c.slug] = { icon: c.icon, name: c.names, color: PALETTE[i % PALETTE.length] }; });
+        AREAS = areas;
+        hiddenAreas = new Set(list.filter((c) => !c.isActive).map((c) => c.slug));
+      } catch (e) { /* không có khu vực: marker dùng màu xám */ }
+    }
+
+    async function loadArtifacts() {
+      try {
+        const body = await fetchJson(`/api/artifacts?lang=${encodeURIComponent(lang)}`);
+        artifacts = (body.data || []).filter((a) => a.geo && !hiddenAreas.has(a.categorySlug));
+      } catch (err) {
+        artifacts = [];
+        showNotice(S().error + ': ' + err.message);
+      }
+    }
+
+    function applyStatic() {
+      const s = S();
+      document.documentElement.lang = lang;
+      document.title = 'Dinh Độc Lập – ' + s.sub;
+      const set = (id, text) => { document.getElementById(id).textContent = text; };
+      set('pageSub', s.sub); set('listTitle', s.title); set('buyLabel', s.buy);
+      set('locateLabel', s.locate); set('directionsLabel', s.directions); set('privacyNote', s.privacy);
+      document.getElementById('backLink').href = 'index.html?lang=' + encodeURIComponent(lang);
+      // Chỉ gửi điểm đến cho Google Maps; vị trí xuất phát do ứng dụng bản đồ tự lấy trên máy du khách
+      document.getElementById('directionsBtn').href =
+        `https://www.google.com/maps/dir/?api=1&destination=${PALACE.lat},${PALACE.lng}&travelmode=walking`;
+    }
+
+    function renderLangBar() {
+      renderLanguageButtons(document.getElementById('langBar'), languages, lang, changeLanguage, 'text-xs');
+    }
+
+    function renderAll() {
+      renderAreaChips();
+      renderMarkers();
+      renderList();
+      renderGeoBox();
+    }
+
+    async function changeLanguage(code) {
+      lang = code;
+      storeLang(lang);
+      applyStatic();
+      renderLangBar();
+      await loadArtifacts();
+      renderAll();
+      if (meMarker) meMarker.bindTooltip(S().me);
+      if (activeCode && markers.has(activeCode)) markers.get(activeCode).openPopup();
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (!window.L) { document.getElementById('map').textContent = STRINGS.vi.tiles; return; }
+      initMap();
+      document.getElementById('locateBtn').addEventListener('click', startLocating);
+      await loadLanguages();
+      lang = detectLanguage(languages.map((l) => l.code));
+      applyStatic();
+      renderLangBar();
+      await loadAreas();
+      await loadArtifacts();
+      renderAll();
+      if (activeCode && markers.has(activeCode)) focusArtifact(activeCode, false);
+      else fitToVisible();
+      // Nếu trước đó du khách đã cho phép vị trí thì tự bật, không hỏi lại
+      try {
+        if (navigator.permissions && window.isSecureContext) {
+          const p = await navigator.permissions.query({ name: 'geolocation' });
+          if (p.state === 'granted') startLocating();
+        }
+      } catch (e) { /* trình duyệt không hỗ trợ Permissions API */ }
+      // Đổi kích thước cửa sổ (xoay điện thoại) thì vẽ lại bản đồ cho đúng khung
+      window.addEventListener('resize', () => map.invalidateSize());
+    });
+  </script>
+</body>
+</html>

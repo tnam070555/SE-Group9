@@ -31,6 +31,14 @@ Giao diện web nằm trong `public/` (server chỉ phục vụ thư mục này,
 
 QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP hay tên miền thì QR vẫn đúng.
 
+## Bản đồ khuôn viên và GPS (`map.html`)
+- Trang `map.html` (nút **Bản đồ** ở trang chủ, link **Xem trên bản đồ** ở trang thuyết minh) hiện bản đồ quanh Dinh Độc Lập và ghim từng công trình, màu theo khu vực. Bấm ghim hoặc tên trong danh sách để xem ảnh và mở thuyết minh. `map.html?code=DDL-05` mở sẵn đúng công trình.
+- Bản đồ dùng **Leaflet** + nền **OpenStreetMap** (miễn phí, không cần API key, nhưng cần Internet để tải nền bản đồ).
+- Nút **Vị trí của tôi** dùng Geolocation API của trình duyệt: hiện chấm xanh, vòng sai số, khoảng cách tới từng công trình và xếp danh sách theo khoảng cách. Vị trí **chỉ dùng trên máy du khách, không gửi lên server**.
+- Trình duyệt chỉ cho lấy vị trí trên **HTTPS hoặc `localhost`**. Điện thoại mở bằng `http://192.168.x.x:5000` sẽ không lấy được vị trí (bản đồ và ghim vẫn hiện). Muốn demo GPS trên điện thoại thì deploy có HTTPS hoặc dùng đường hầm HTTPS (ngrok, Cloudflare Tunnel).
+- Trong nhà GPS sai lệch nhiều, nên vẫn dùng mã QR ở từng phòng; GPS hữu ích nhất ở khu ngoài trời.
+- Tọa độ lưu ở trường `geo: { lat, lng }` của công trình (không bắt buộc). Admin đặt vị trí trong form sửa công trình bằng cách bấm vào bản đồ hoặc kéo ghim. 16 công trình mẫu có **tọa độ gần đúng** (các phòng trong nhà được rải trong khối nhà chính), nên chỉnh lại khi khảo sát thực tế. Database đã có dữ liệu sẽ được bổ sung tọa độ mẫu cho công trình chưa có, không ghi đè tọa độ admin đã chỉnh.
+
 ## Đa ngôn ngữ (vi, en, ja, ko, zh)
 - Nội dung gốc nhập bằng **tiếng Việt**; mỗi công trình có thể có bản dịch `en`, `ja`, `ko`, `zh` (trường `translations`).
 - 6 công trình mẫu đã có sẵn đủ bản dịch (soạn tay), nên demo chạy được mà không cần dịch vụ bên ngoài. **Bản dịch mẫu nên được người thành thạo ngôn ngữ kiểm tra lại.**
@@ -58,7 +66,7 @@ QR không được lưu trong database mà sinh theo yêu cầu, nên đổi IP 
 | GET | `/api/artifacts/code/:code?lang=ja` | Công khai (dùng cho trang quét QR) |
 | GET | `/api/artifacts/code/:code/qr?base=<địa chỉ server>` | Công khai (trả ảnh PNG) |
 | GET | `/api/artifacts/:id` | Công khai |
-| POST, PUT, DELETE | `/api/artifacts`, `/api/artifacts/:id` | Admin (header `Authorization: Bearer <token>`) |
+| POST, PUT, DELETE | `/api/artifacts`, `/api/artifacts/:id` | Admin (header `Authorization: Bearer <token>`). Body có thể gửi `geo: {"lat":10.777,"lng":106.6953}`; `geo: null` để xóa tọa độ |
 | PUT | `/api/artifacts/:id/translations/:lang` | Admin |
 | POST | `/api/artifacts/:id/translate` | Admin |
 | GET, POST | `/api/admin/languages` | Admin (danh sách kèm tiến độ dịch; thêm ngôn ngữ) |

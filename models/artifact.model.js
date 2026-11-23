@@ -28,7 +28,15 @@ const artifactSchema = new mongoose.Schema({
         match: [/^[A-Z0-9_-]+$/, 'Mã (code) chỉ gồm chữ, số, dấu - và _'],
     },
     description: { type: String },                                      // Nội dung thuyết minh gốc (tiếng Việt)
-    location: { type: String },
+    location: { type: String },                                         // Mô tả vị trí bằng chữ (VD: Tầng trệt), có bản dịch
+    // Tọa độ GPS để hiện trên bản đồ (map.html). Không bắt buộc: công trình chưa có tọa độ thì không hiện marker.
+    geo: {
+        type: new mongoose.Schema({
+            lat: { type: Number, required: true, min: -90, max: 90 },      // Vĩ độ
+            lng: { type: Number, required: true, min: -180, max: 180 },    // Kinh độ
+        }, { _id: false }),
+        default: undefined,
+    },
     categorySlug: { type: String, index: true },                        // Khu vực (tầng, khu) trong Dinh
     imageUrl: { type: String, trim: true },                             // Ảnh minh họa (link http/https hoặc /img/...)
     audioUrl: { type: String },                                         // Đường dẫn audio đã lưu (chưa dùng)

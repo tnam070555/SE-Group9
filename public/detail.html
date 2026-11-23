@@ -74,6 +74,7 @@
       <p id="subtitle" class="text-xs text-heritage-gold font-semibold tracking-widest uppercase mb-1"></p>
       <h1 id="detail-title" class="font-serif text-3xl font-bold text-heritage-red leading-tight"></h1>
       <p id="detail-location" class="text-sm text-heritage-brown mt-2 flex items-center justify-center gap-1.5"></p>
+      <a id="map-link" class="hidden mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-heritage-red underline underline-offset-4"><i class="fa-solid fa-map-location-dot"></i><span id="map-link-text"></span></a>
     </div>
 
     <!-- Fallback notice -->
@@ -215,6 +216,7 @@
       document.getElementById('detail-code').classList.add('hidden');
       document.getElementById('detail-title').textContent = ds('errTitle');
       document.getElementById('detail-location').replaceChildren();
+      document.getElementById('map-link').classList.add('hidden');
       document.getElementById('detail-desc').textContent = message;
       document.getElementById('fallback-note').classList.add('hidden');
       document.getElementById('play-btn').disabled = true;
@@ -253,6 +255,12 @@
       fb.classList.toggle('hidden', !current.fallback);
       document.title = current.name + ' – Dinh Độc Lập';
       renderAvailableLanguages(current.availableLanguages || []);
+      // Công trình có tọa độ: hiện link mở bản đồ, tự chọn đúng công trình này
+      const mapLink = document.getElementById('map-link');
+      mapLink.classList.toggle('hidden', !current.geo);
+      mapLink.href = `map.html?code=${encodeURIComponent(current.code)}&lang=${encodeURIComponent(lang)}`;
+      document.getElementById('map-link-text').textContent =
+        ({ vi: 'Xem trên bản đồ', en: 'View on map', ja: 'マップで見る', ko: '지도에서 보기', zh: '在地图上查看' })[lang] || 'Xem trên bản đồ';
     }
 
     async function loadContent() {

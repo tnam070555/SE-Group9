@@ -100,6 +100,11 @@
       </div>
       <div class="flex items-center gap-2 sm:gap-3 min-w-0">
         <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 min-w-0" id="langBar" aria-label="Chọn ngôn ngữ"></div>
+        <!-- Bản đồ khuôn viên: vị trí các công trình và vị trí của du khách (GPS) -->
+        <a href="map.html" id="mapBtn" title="Bản đồ" aria-label="Bản đồ"
+           class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full border border-heritage-red text-heritage-red bg-white text-xs font-semibold shadow-sm hover:bg-heritage-red hover:text-white transition">
+          <i class="fa-solid fa-map-location-dot"></i><span class="hidden sm:inline" id="mapLabel">Bản đồ</span>
+        </a>
         <!-- Nút mua vé tham quan cho du khách (không cần đăng nhập) -->
         <a href="tickets.html" id="buyTicketBtn" title="Mua vé tham quan" aria-label="Mua vé tham quan"
            class="flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full bg-heritage-gold text-heritage-ink text-xs font-semibold shadow-sm hover:brightness-95 transition">
@@ -130,6 +135,9 @@
       <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
         <a href="tickets.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-heritage-gold hover:bg-[#d9b43a] text-heritage-ink font-semibold px-7 py-3 rounded-full shadow-lg shadow-black/30 transition">
           <i class="fa-solid fa-ticket"></i><span id="heroCtaBuy">Mua vé tham quan</span>
+        </a>
+        <a href="map.html" id="heroMapLink" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-heritage-goldSoft/70 bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold px-7 py-3 rounded-full transition">
+          <i class="fa-solid fa-map-location-dot"></i><span id="heroCtaMap">Xem bản đồ</span>
         </a>
         <a href="#explore" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-heritage-goldSoft/70 bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold px-7 py-3 rounded-full transition">
           <i class="fa-solid fa-headphones"></i><span id="heroCtaExplore">Nghe thuyết minh</span>
@@ -436,6 +444,13 @@
       set('buyTicketLabel', buyLabel);
       const x = HOME_EXTRA[lang] || HOME_EXTRA.vi;
       Object.keys(x).forEach((id) => set(id, x[id]));
+      const mapLabel = ({ vi: 'Bản đồ', en: 'Map', ja: 'マップ', ko: '지도', zh: '地图' })[lang] || 'Bản đồ';
+      set('mapLabel', mapLabel);
+      set('heroCtaMap', ({ vi: 'Xem bản đồ', en: 'View map', ja: 'マップを見る', ko: '지도 보기', zh: '查看地图' })[lang] || 'Xem bản đồ');
+      document.getElementById('mapBtn').title = mapLabel;
+      document.getElementById('mapBtn').setAttribute('aria-label', mapLabel);
+      document.getElementById('mapBtn').href = 'map.html?lang=' + encodeURIComponent(lang);
+      document.getElementById('heroMapLink').href = 'map.html?lang=' + encodeURIComponent(lang);
       document.getElementById('buyTicketBtn').title = buyLabel;
       document.getElementById('buyTicketBtn').setAttribute('aria-label', buyLabel);
       set('brandSub', s.brandSub); set('heroKicker', s.kicker); set('heroTitle', s.heroTitle);

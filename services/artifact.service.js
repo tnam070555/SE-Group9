@@ -11,6 +11,25 @@ const ALLOWED_FIELDS = ['name', 'code', 'description', 'location', 'categorySlug
 // Các trường có bản dịch
 const TRANSLATABLE_FIELDS = ['name', 'description', 'location'];
 
+// Tọa độ GPS: nhận { lat, lng } (số hoặc chuỗi số). null hoặc chuỗi rỗng = xóa tọa độ.
+// Trả về undefined nếu client không gửi trường geo, null nếu muốn xóa, hoặc { lat, lng } đã kiểm tra.
+function parseGeo(raw) {
+    if (raw === undefined) return undefined;
+    if (raw === null || raw === '') return null;
+    if (typeof raw !== 'object' || Array.isArray(raw)) throw new AppError(400, 'Tọa độ (geo) phải có dạng { lat, lng }');
+    const blank = (v) => v === undefined || v === null || (typeof v === 'string' && !v.trim());
+    if (blank(raw.lat) && blank(raw.lng)) return null;
+    if (blank(raw.lat) || blank(raw.lng)) throw new AppError(400, 'Cần nhập cả vĩ độ (lat) và kinh độ (lng)');
+    const toNumber = (v) => (typeof v === 'number' ? v : (typeof v === 'string' ? Number(v.trim()) : NaN));
+    const lat = toNumber(raw.lat);
+    const lng = toNumber(raw.lng);
+    if (!Number.isFinite(lat) || lat < -90 || lat > 90) throw new AppError(400, 'Vĩ độ (lat) phải là số từ -90 đến 90');
+    if (!Number.isFinite(lng) || lng < -180 || lng > 180) throw new AppError(400, 'Kinh độ (lng) phải là số từ -180 đến 180');
+    // Làm tròn 6 chữ số thập phân (~0,1 m), đủ chính xác cho bản đồ
+    const round = (v) => Math.round(v * 1e6) / 1e6;
+    return { lat: round(lat), lng: round(lng) };
+}
+
 // Đường dẫn trang thuyết minh của một công trình (nội dung của mã QR)
 function qrLinkFor(code, base) {
     return `${base}/detail.html?code=${encodeURIComponent(code)}`;
@@ -94,6 +113,7 @@ function localize(doc, lang) {
         location: t.location || a.location,
         imageUrl: a.imageUrl,
         audioUrl: a.audioUrl,
+        geo: a.geo && Number.isFinite(a.geo.lat) && Number.isFinite(a.geo.lng) ? { lat: a.geo.lat, lng: a.geo.lng } : null,
         language: served,
         fallback: served !== lang,
         availableLanguages: available,
@@ -105,6 +125,8 @@ class ArtifactService {
         const picked = cleanStrings(pickFields(data));
         if (!picked.name) throw new AppError(400, 'Tên là bắt buộc');
         if (!picked.code) throw new AppError(400, 'Mã (code) là bắt buộc');
+        const geo = parseGeo(data && data.geo);
+        if (geo) picked.geo = geo;
         await checkCategory(picked);
         Object.assign(picked, await buildQrFields(picked.code));
         return artifactRepository.create(picked);
@@ -155,7 +177,8 @@ class ArtifactService {
 
     async update(id, data) {
         const picked = cleanStrings(pickFields(data));
-        if (Object.keys(picked).length === 0) throw new AppError(400, 'Không có dữ liệu để cập nhật');
+        const geo = parseGeo(data && data.geo);
+        if (Object.keys(picked).length === 0 && geo === undefined) throw new AppError(400, 'Không có dữ liệu để cập nhật');
         if ('name' in picked && !picked.name) throw new AppError(400, 'Tên không được để trống');
         if ('code' in picked && !picked.code) throw new AppError(400, 'Mã (code) không được để trống');
         await checkCategory(picked);
@@ -164,6 +187,8 @@ class ArtifactService {
         const existing = toPlain(await artifactRepository.findById(id));
         if (!existing) throw new AppError(404, 'Không tìm thấy công trình');
         const unset = {};
+        if (geo) picked.geo = geo;
+        else if (geo === null) unset.geo = 1;
         for (const field of TRANSLATABLE_FIELDS) {
             if (field in picked && picked[field] !== existing[field]) {
                 for (const lang of TARGET_CODES) unset[`translations.${lang}.${field}`] = 1;
@@ -250,3 +275,4 @@ class ArtifactService {
 
 module.exports = new ArtifactService();
 module.exports.localize = localize;
+module.exports.parseGeo = parseGeo;

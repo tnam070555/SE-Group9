@@ -61,8 +61,33 @@ test('đã có dữ liệu: bổ sung bản dịch còn thiếu, không tạo l�
 
     assert.deepStrictEqual(await seedService.syncSampleData(), { created: 0, updated: buildings.length });
     assert.strictEqual(insert.mock.callCount(), 0);
-    assert.strictEqual(Object.keys(updates[0][1].$set).length, 13); // 4 ngôn ngữ x 3 trường + ảnh mẫu
+    assert.strictEqual(Object.keys(updates[0][1].$set).length, 14); // 4 ngôn ngữ x 3 trường + ảnh mẫu + tọa độ
     assert.strictEqual(updates[0][1].$set.imageUrl, buildings[0].imageUrl);
+    assert.deepStrictEqual(updates[0][1].$set.geo, buildings[0].geo);
+});
+
+test('dữ liệu mẫu: mỗi công trình có tọa độ nằm trong khuôn viên Dinh Độc Lập', () => {
+    for (const b of buildings) {
+        assert.ok(b.geo, `${b.code} thiếu tọa độ geo`);
+        // Khuôn viên Dinh (gần đúng): vĩ độ 10.7755–10.7795, kinh độ 106.6935–106.6975
+        assert.ok(b.geo.lat > 10.7755 && b.geo.lat < 10.7795, `${b.code} vĩ độ ngoài khuôn viên`);
+        assert.ok(b.geo.lng > 106.6935 && b.geo.lng < 106.6975, `${b.code} kinh độ ngoài khuôn viên`);
+    }
+    const keys = buildings.map((b) => `${b.geo.lat},${b.geo.lng}`);
+    assert.strictEqual(new Set(keys).size, keys.length, 'có 2 công trình trùng tọa độ (marker chồng nhau)');
+});
+
+test('đã có dữ liệu: không ghi đè tọa độ admin đã chỉnh', async () => {
+    const updates = [];
+    test.mock.method(artifactRepository, 'count', async () => buildings.length);
+    test.mock.method(artifactRepository, 'findByCode', async (code) => {
+        const seed = buildings.find((b) => b.code === code);
+        return { _id: code, code, name: seed.name, description: seed.description, location: seed.location, geo: { lat: 10.7771, lng: 106.6954 } };
+    });
+    test.mock.method(artifactRepository, 'updateById', async (id, data) => { updates.push(data.$set); });
+    await seedService.syncSampleData();
+    assert.ok(updates.length > 0);
+    assert.ok(updates.every((s) => !('geo' in s)));
 });
 
 test('đã có dữ liệu: không ghi đè ảnh admin đã đặt', async () => {

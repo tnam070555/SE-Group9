@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet: bản đồ chọn tọa độ công trình (nền OpenStreetMap) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -564,6 +567,28 @@
                                     <span id="art-image-empty"><i class="fa-regular fa-image mr-1"></i> Chưa có ảnh</span>
                                 </div>
                             </div>
+                        </div>
+                        <!-- Tọa độ GPS để hiện công trình trên bản đồ du khách (map.html) -->
+                        <div class="mt-6 pt-5 border-t border-slate-100">
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-3">
+                                <div class="flex-1">
+                                    <p class="form-label mb-1"><i class="fa-solid fa-map-location-dot mr-1" style="color:#8B1E24"></i> Vị trí trên bản đồ</p>
+                                    <p class="text-xs text-slate-500">Bấm vào bản đồ hoặc kéo ghim để đặt vị trí. Có thể nhập tay vĩ độ, kinh độ. Để trống thì công trình không hiện trên bản đồ.</p>
+                                </div>
+                                <div class="flex gap-2 items-end">
+                                    <div>
+                                        <label for="art-lat" class="text-xs font-semibold text-slate-500">Vĩ độ (lat)</label>
+                                        <input type="number" id="art-lat" step="0.000001" min="-90" max="90" placeholder="10.777000" oninput="artifactManager.geoFromInputs()" class="form-input font-mono text-sm" style="width:9.5rem">
+                                    </div>
+                                    <div>
+                                        <label for="art-lng" class="text-xs font-semibold text-slate-500">Kinh độ (lng)</label>
+                                        <input type="number" id="art-lng" step="0.000001" min="-180" max="180" placeholder="106.695300" oninput="artifactManager.geoFromInputs()" class="form-input font-mono text-sm" style="width:9.5rem">
+                                    </div>
+                                    <button type="button" onclick="artifactManager.clearGeo()" class="btn-secondary !px-3" title="Xóa vị trí"><i class="fa-solid fa-eraser"></i></button>
+                                </div>
+                            </div>
+                            <div id="art-map" class="h-72 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden"></div>
+                            <p class="text-xs text-slate-400 mt-1">Chấm xám là vị trí các công trình khác, dùng để tham khảo. Nền bản đồ © OpenStreetMap.</p>
                         </div>
                         <div class="flex justify-end gap-3 pt-4 mt-6 border-t border-slate-100">
                             <button type="button" onclick="artifactManager.closeForm()" class="btn-secondary">Hủy bỏ</button>
@@ -1665,6 +1690,7 @@
                 document.getElementById('art-translation-note').classList.toggle('hidden', !a || a.availableLanguages.length <= 1);
                 this.previewImage();
                 document.getElementById('artifact-form-container').classList.remove('hidden');
+                this.showGeo(a);
                 document.getElementById('main-scroll-area').scrollTop = 0;
                 document.getElementById(a ? 'art-name' : 'art-code').focus();
             },
@@ -1672,6 +1698,80 @@
             closeForm: function() {
                 this.editing = null;
                 document.getElementById('artifact-form-container').classList.add('hidden');
+            },
+
+            // ---------- Chọn tọa độ trên bản đồ ----------
+            PALACE: [10.777, 106.6953], // tâm khối nhà chính Dinh Độc Lập
+            geoMap: null,
+            geoPin: null,
+            geoOthers: null,
+
+            initGeoMap: function() {
+                if (this.geoMap || !window.L) return;
+                this.geoMap = L.map('art-map', { maxZoom: 20 }).setView(this.PALACE, 18);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 20, maxNativeZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                }).addTo(this.geoMap);
+                this.geoOthers = L.layerGroup().addTo(this.geoMap);
+                this.geoMap.on('click', (e) => this.setGeo(e.latlng.lat, e.latlng.lng, false));
+            },
+
+            // Hiện ghim tại (lat, lng) và ghi vào 2 ô nhập. fromInputs = true khi admin đang gõ tay.
+            setGeo: function(lat, lng, fromInputs) {
+                const round = (v) => Math.round(v * 1e6) / 1e6;
+                if (!fromInputs) {
+                    document.getElementById('art-lat').value = round(lat).toFixed(6);
+                    document.getElementById('art-lng').value = round(lng).toFixed(6);
+                }
+                if (!this.geoMap) return;
+                if (!this.geoPin) {
+                    this.geoPin = L.marker([lat, lng], { draggable: true, autoPan: true }).addTo(this.geoMap);
+                    this.geoPin.on('dragend', () => { const p = this.geoPin.getLatLng(); this.setGeo(p.lat, p.lng, false); });
+                } else {
+                    this.geoPin.setLatLng([lat, lng]);
+                }
+            },
+
+            geoFromInputs: function() {
+                const lat = parseFloat(document.getElementById('art-lat').value);
+                const lng = parseFloat(document.getElementById('art-lng').value);
+                if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+                    this.setGeo(lat, lng, true);
+                    if (this.geoMap) this.geoMap.panTo([lat, lng]);
+                }
+            },
+
+            clearGeo: function() {
+                document.getElementById('art-lat').value = '';
+                document.getElementById('art-lng').value = '';
+                if (this.geoPin) { this.geoPin.remove(); this.geoPin = null; }
+            },
+
+            // Đọc tọa độ trong form: null = để trống (xóa), ném lỗi nếu chỉ nhập 1 ô
+            readGeo: function() {
+                const latRaw = document.getElementById('art-lat').value.trim();
+                const lngRaw = document.getElementById('art-lng').value.trim();
+                if (!latRaw && !lngRaw) return null;
+                if (!latRaw || !lngRaw) throw new Error('Cần nhập cả vĩ độ và kinh độ, hoặc để trống cả hai');
+                return { lat: Number(latRaw), lng: Number(lngRaw) };
+            },
+
+            // Mở form: vẽ lại bản đồ (form vừa hiện nên phải tính lại kích thước), đặt ghim và chấm tham khảo
+            showGeo: function(a) {
+                this.initGeoMap();
+                this.clearGeo();
+                if (!this.geoMap) return;
+                this.geoOthers.clearLayers();
+                this.data.filter((x) => x.geo && (!a || x.code !== a.code)).forEach((x) => {
+                    L.circleMarker([x.geo.lat, x.geo.lng], { radius: 5, color: '#64748b', weight: 1, fillColor: '#94a3b8', fillOpacity: 0.8 })
+                        .bindTooltip(x.code + ' – ' + x.name).addTo(this.geoOthers);
+                });
+                setTimeout(() => {
+                    this.geoMap.invalidateSize();
+                    if (a && a.geo) { this.setGeo(a.geo.lat, a.geo.lng, false); this.geoMap.setView([a.geo.lat, a.geo.lng], 19); }
+                    else this.geoMap.setView(this.PALACE, 18);
+                }, 50);
             },
 
             previewImage: function() {
@@ -1687,7 +1787,10 @@
 
             submit: async function(e) {
                 e.preventDefault();
+                let geo;
+                try { geo = this.readGeo(); } catch (error) { ui.showToast(error.message, 'error'); return; }
                 const body = {
+                    geo,
                     code: document.getElementById('art-code').value.trim().toUpperCase(),
                     name: document.getElementById('art-name').value.trim(),
                     categorySlug: document.getElementById('art-category').value,
@@ -1791,6 +1894,10 @@
                     const text = dom.el('div');
                     text.append(dom.el('p', 'text-xs font-mono font-bold text-slate-400', a.code), dom.el('p', 'font-semibold text-slate-800', a.name));
                     if (a.location) text.append(dom.el('p', 'text-xs text-slate-500', a.location));
+                    // Có/chưa có tọa độ trên bản đồ du khách
+                    const geoTag = dom.el('p', 'text-[11px] mt-0.5 ' + (a.geo ? 'text-emerald-700' : 'text-slate-400'));
+                    geoTag.append(dom.icon('fa-solid fa-map-pin mr-1'), document.createTextNode(a.geo ? 'Đã gắn trên bản đồ' : 'Chưa có vị trí bản đồ'));
+                    text.append(geoTag);
                     info.append(thumb, text);
                     tr.append(dom.td('', info));
 

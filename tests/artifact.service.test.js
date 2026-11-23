@@ -252,3 +252,59 @@ test('translate: công trình không tồn tại thì lỗi 404', async () => {
     test.mock.method(artifactRepository, 'findById', async () => null);
     await assert.rejects(() => artifactService.translate('1', {}), (err) => err.status === 404);
 });
+
+// ---------- Tọa độ bản đồ (geo) ----------
+
+test('tạo có tọa độ: nhận cả chuỗi số, làm tròn 6 chữ số', async () => {
+    let saved;
+    test.mock.method(artifactRepository, 'create', async (data) => { saved = data; return data; });
+    await artifactService.create({ name: 'Xe tăng 390', code: 'DDL-05', geo: { lat: '10.7779001234', lng: 106.69615 } });
+    assert.deepStrictEqual(saved.geo, { lat: 10.7779, lng: 106.69615 });
+});
+
+test('tạo không gửi tọa độ thì không lưu geo', async () => {
+    let saved;
+    test.mock.method(artifactRepository, 'create', async (data) => { saved = data; return data; });
+    await artifactService.create({ name: 'A', code: 'A1', geo: { lat: '', lng: '' } });
+    assert.strictEqual(saved.geo, undefined);
+});
+
+test('tọa độ sai thì lỗi 400', async () => {
+    const bad = [
+        { lat: 91, lng: 106 },          // vĩ độ quá 90
+        { lat: 10, lng: -181 },         // kinh độ nhỏ hơn -180
+        { lat: 'abc', lng: 106 },       // không phải số
+        { lat: 10.77 },                 // thiếu kinh độ
+        [10.77, 106.69],                // sai dạng
+        'gần cổng chính',               // chuỗi chữ
+    ];
+    for (const geo of bad) {
+        await assert.rejects(() => artifactService.create({ name: 'A', code: 'A1', geo }), (err) => err.status === 400, JSON.stringify(geo));
+    }
+});
+
+test('cập nhật chỉ tọa độ: lưu geo, không xóa bản dịch', async () => {
+    let update;
+    test.mock.method(artifactRepository, 'findById', async () => ({ _id: '1', code: 'A1', name: 'A' }));
+    test.mock.method(artifactRepository, 'updateById', async (id, data) => { update = data; return { _id: id }; });
+    await artifactService.update('1', { geo: { lat: 10.777, lng: 106.6953 } });
+    assert.deepStrictEqual(update, { geo: { lat: 10.777, lng: 106.6953 } });
+});
+
+test('cập nhật geo = null thì xóa tọa độ', async () => {
+    let update;
+    test.mock.method(artifactRepository, 'findById', async () => ({ _id: '1', code: 'A1', name: 'A', geo: { lat: 1, lng: 2 } }));
+    test.mock.method(artifactRepository, 'updateById', async (id, data) => { update = data; return { _id: id }; });
+    await artifactService.update('1', { geo: null });
+    assert.deepStrictEqual(update, { $unset: { geo: 1 } });
+});
+
+test('danh sách công trình trả kèm tọa độ (null nếu chưa có)', async () => {
+    test.mock.method(artifactRepository, 'findAll', async () => [
+        { code: 'A', name: 'A', geo: { lat: 10.777, lng: 106.695 } },
+        { code: 'B', name: 'B' },
+    ]);
+    const [a, b] = await artifactService.getAll('en');
+    assert.deepStrictEqual(a.geo, { lat: 10.777, lng: 106.695 });
+    assert.strictEqual(b.geo, null);
+});

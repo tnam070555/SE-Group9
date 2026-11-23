@@ -24,6 +24,8 @@ async function syncSampleData() {
         const set = {};
         // Bổ sung ảnh mẫu cho công trình chưa có ảnh (không ghi đè ảnh admin đã đặt)
         if (seed.imageUrl && !plain.imageUrl) set.imageUrl = seed.imageUrl;
+        // Bổ sung tọa độ bản đồ cho công trình chưa có (không ghi đè tọa độ admin đã chỉnh)
+        if (seed.geo && !(plain.geo && Number.isFinite(plain.geo.lat))) set.geo = seed.geo;
         for (const [lang, fields] of Object.entries(seed.translations || {})) {
             for (const [field, value] of Object.entries(fields)) {
                 const sourceUnchanged = plain[field] === seed[field];
