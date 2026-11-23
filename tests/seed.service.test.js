@@ -131,3 +131,27 @@ test('SEED_SAMPLE_DATA=false thì không làm gì', async () => {
     assert.deepStrictEqual(await seedService.syncSampleData(), { created: 0, updated: 0 });
     assert.strictEqual(insert.mock.callCount(), 0);
 });
+test('dữ liệu mẫu: ảnh trỏ tới file có thật trong public/img/rooms, không dùng ảnh mặt tiền chung', () => {
+    const fs = require('fs');
+    const path = require('path');
+    for (const b of buildings.filter((x) => x.imageUrl)) {
+        assert.match(b.imageUrl, /^\/img\/rooms\/ddl-\d+\.jpg$/, `${b.code} dùng ảnh không đúng phòng`);
+        assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', b.imageUrl)), `${b.code} thiếu file ${b.imageUrl}`);
+    }
+});
+
+test('đã có dữ liệu: ảnh mặt tiền chung được thay bằng ảnh đúng phòng, chưa có ảnh đúng thì bỏ ảnh chung', async () => {
+    const updates = new Map();
+    test.mock.method(artifactRepository, 'count', async () => buildings.length);
+    test.mock.method(artifactRepository, 'findByCode', async (code) => {
+        const seed = buildings.find((b) => b.code === code);
+        return { _id: code, code, name: seed.name, description: seed.description, location: seed.location, geo: seed.geo, imageUrl: '/img/palace-front.jpg' };
+    });
+    test.mock.method(artifactRepository, 'updateById', async (id, data) => { updates.set(id, data); });
+    await seedService.syncSampleData();
+    for (const b of buildings) {
+        const u = updates.get(b.code);
+        if (b.imageUrl) assert.strictEqual(u.$set.imageUrl, b.imageUrl, b.code);
+        else assert.deepStrictEqual(u.$unset, { imageUrl: 1 }, b.code);
+    }
+});

@@ -10,7 +10,6 @@ module.exports = [
     categorySlug: 'tang-tret',
     geo: { lat: 10.777120, lng: 106.695400 },
     location: 'Tầng trệt – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Phòng Khánh Tiết là không gian lớn nhất tại Dinh Độc Lập với sức chứa lên đến 500 người. Đây là nơi diễn ra các lễ ra mắt nội các, hội nghị quốc tế và các buổi dạ yến lịch sử.',
     translations: {
       en: {
@@ -42,7 +41,6 @@ module.exports = [
     categorySlug: 'lau-2',
     geo: { lat: 10.777180, lng: 106.695480 },
     location: 'Lầu 2 – Dinh Độc Lập',
-    imageUrl: '/img/palace-facade.jpg',
     description: "Phòng Trình Quốc Thư là nơi Tổng thống nhận quốc thư của đại sứ các nước. Bức tranh sơn mài 'Bình Ngô Đại Cáo' trang trí trên tường mang đậm nét nghệ thuật truyền thống.",
     translations: {
       en: {
@@ -74,7 +72,6 @@ module.exports = [
     categorySlug: 'lau-2',
     geo: { lat: 10.776960, lng: 106.695220 },
     location: 'Lầu 2 – Dinh Độc Lập',
-    imageUrl: '/img/palace-side.jpg',
     description: 'Nơi diễn ra các phiên họp kín của Nội các chính quyền Sài Gòn cũ với hệ thống tai nghe phiên dịch đa ngôn ngữ hiện đại thời bấy giờ.',
     translations: {
       en: {
@@ -106,7 +103,6 @@ module.exports = [
     categorySlug: 'san-thuong',
     geo: { lat: 10.776900, lng: 106.695150 },
     location: 'Tầng sân thượng – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Nơi đỗ chiếc trực thăng UH-1. Ghi dấu sự kiện phi công Nguyễn Thành Trung lái máy bay F5E ném bom vào sáng ngày 8 tháng 4 năm 1975.',
     translations: {
       en: {
@@ -138,7 +134,6 @@ module.exports = [
     categorySlug: 'ngoai-troi',
     geo: { lat: 10.777900, lng: 106.696150 },
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
-    imageUrl: '/img/palace-side.jpg',
     description: 'Chiếc xe tăng 390 huyền thoại đã húc văng cổng phụ Dinh Độc Lập vào lúc 10 giờ 45 phút ngày 30/4/1975, đánh dấu thời khắc hoàn toàn giải phóng miền Nam.',
     translations: {
       en: {
@@ -170,7 +165,6 @@ module.exports = [
     categorySlug: 'tang-ham',
     geo: { lat: 10.776820, lng: 106.695450 },
     location: 'Tầng hầm – Dinh Độc Lập',
-    imageUrl: '/img/palace-facade.jpg',
     description: 'Hệ thống hầm kiên cố chịu được bom đạn hạng nặng, chứa đài vô tuyến, bản đồ tác chiến và phòng làm việc của Tổng thống.',
     translations: {
       en: {
@@ -202,7 +196,6 @@ module.exports = [
     categorySlug: 'lau-1',
     geo: { lat: 10.777050, lng: 106.695480 },
     location: 'Lầu 1 – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Không gian làm việc chính thức của Tổng thống, được bài trí trang trọng với các bản đồ quân sự và sa bàn chiến lược.',
     translations: {
       en: {
@@ -234,7 +227,6 @@ module.exports = [
     categorySlug: 'ngoai-troi',
     geo: { lat: 10.777600, lng: 106.695750 },
     location: 'Khuôn viên ngoài trời – Dinh Độc Lập',
-    imageUrl: '/img/palace-side.jpg',
     description: 'Cùng với xe tăng 390, xe tăng 843 do đồng chí Bùi Quang Thận chỉ huy đã húc tung cổng chính của Dinh Độc Lập vào trưa ngày 30/4/1975.',
     translations: {
       en: {
@@ -266,7 +258,6 @@ module.exports = [
     categorySlug: 'tang-tret',
     geo: { lat: 10.777000, lng: 106.695150 },
     location: 'Tầng trệt – Dinh Độc Lập',
-    imageUrl: '/img/palace-facade.jpg',
     description: 'Nơi tổ chức các buổi tiệc chiêu đãi quốc gia với sức chứa hơn 100 khách. Bàn ăn được bố trí theo hình chữ U với các trang thiết bị bàn tiệc sang trọng.',
     translations: {
       en: {
@@ -298,7 +289,6 @@ module.exports = [
     categorySlug: 'lau-1',
     geo: { lat: 10.777160, lng: 106.695250 },
     location: 'Lầu 1 – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Không gian tiếp khách riêng của Phó Tổng thống, được trang trí bằng các tác phẩm nghệ thuật truyền thống như tranh sơn mài và đồ gốm sứ.',
     translations: {
       en: {
@@ -330,7 +320,6 @@ module.exports = [
     categorySlug: 'lau-2',
     geo: { lat: 10.776860, lng: 106.695300 },
     location: 'Lầu 2 – Dinh Độc Lập',
-    imageUrl: '/img/palace-side.jpg',
     description: 'Khu vực riêng tư phía sau lầu 2 bao gồm phòng ngủ, phòng ăn gia đình và sân trong, nơi gia đình Tổng thống sinh sống thường ngày.',
     translations: {
       en: {
@@ -362,7 +351,6 @@ module.exports = [
     categorySlug: 'san-thuong',
     geo: { lat: 10.777020, lng: 106.695050 },
     location: 'Tầng sân thượng – Dinh Độc Lập',
-    imageUrl: '/img/palace-facade.jpg',
     description: 'Nằm ở lầu cao nhất, phòng được trang bị máy chiếu phim màn ảnh rộng, bàn bi-da và quầy bar để phục vụ nhu cầu giải trí.',
     translations: {
       en: {
@@ -394,7 +382,6 @@ module.exports = [
     categorySlug: 'tang-ham',
     geo: { lat: 10.776880, lng: 106.695560 },
     location: 'Tầng hầm – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Hệ thống thiết bị vô tuyến điện và máy phát sóng dự phòng, đảm bảo thông tin liên lạc không bị gián đoạn trong tình trạng khẩn cấp.',
     translations: {
       en: {
@@ -426,7 +413,6 @@ module.exports = [
     categorySlug: 'lau-1',
     geo: { lat: 10.776920, lng: 106.695400 },
     location: 'Lầu 1 – Dinh Độc Lập',
-    imageUrl: '/img/palace-side.jpg',
     description: 'Nơi Phu nhân Tổng thống tiếp đón các phu nhân đại sứ và khách quý. Căn phòng được trang trí thanh lịch, nữ tính với màu sắc tươi sáng và nhiều bức tranh nghệ thuật.',
     translations: {
       en: {
@@ -457,7 +443,6 @@ module.exports = [
     categorySlug: 'lau-2',
     geo: { lat: 10.777080, lng: 106.695300 },
     location: 'Lầu 2 – Dinh Độc Lập',
-    imageUrl: '/img/palace-facade.jpg',
     description: 'Không gian tĩnh lặng lưu trữ hàng ngàn cuốn sách quý, tài liệu lịch sử và sách luật, nơi Tổng thống thường xuyên đến đọc sách và nghiên cứu tài liệu.',
     translations: {
       en: {
@@ -488,7 +473,6 @@ module.exports = [
     categorySlug: 'tang-ham',
     geo: { lat: 10.776780, lng: 106.695200 },
     location: 'Tầng hầm – Dinh Độc Lập',
-    imageUrl: '/img/palace-front.jpg',
     description: 'Khu vực bếp rộng lớn được trang bị các thiết bị nấu nướng hiện đại bằng thép không gỉ vào thời bấy giờ, chịu trách nhiệm phục vụ hàng trăm suất ăn cho các buổi dạ tiệc lớn.',
     translations: {
       en: {
