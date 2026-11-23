@@ -214,7 +214,8 @@
                 var result = await Auth.login(username, password);
 
                 if (!result.ok) {
-                    showError(result.message);
+                    // result.locked: tài khoản đang bị khóa 15 phút do sai mật khẩu 2 lần liên tiếp
+                    showError((result.locked ? '🔒 ' : '') + result.message);
                     passwordInput.value = '';
                     passwordInput.focus();
                     return;
@@ -225,6 +226,12 @@
                 var next = params.get('next');
                 // Chỉ chấp nhận đường dẫn nội bộ, tránh bị chuyển sang web khác
                 var safeNext = (next && next.charAt(0) === '/' && next.charAt(1) !== '/') ? next : '/admin';
+
+                // Mật khẩu đã quá 24 giờ chưa đổi: phải đổi mật khẩu trước khi vào admin
+                if (result.mustChangePassword) {
+                    location.replace('/change-password.html?expired=1&next=' + encodeURIComponent(safeNext));
+                    return;
+                }
                 location.replace(safeNext);
             } catch (err) {
                 // Bắt mọi lỗi ngoài dự kiến để nút không bị kẹt ở "Đang kiểm tra..."

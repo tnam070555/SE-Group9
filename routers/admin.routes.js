@@ -1,4 +1,5 @@
-const { verifyToken, requireAdmin } = require('../middlewares/auth.middleware');
+const { verifyToken, requireAdmin, requireAdminAllowExpiredPassword } = require('../middlewares/auth.middleware');
+const rateLimit = require('../middlewares/rateLimit.middleware');
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
@@ -8,6 +9,9 @@ const languageController = require('../controllers/language.controller');
 
 // Không có API đăng ký: tài khoản admin được tạo từ ADMIN_USERNAME / ADMIN_PASSWORD khi server khởi động
 router.post('/login', adminController.login);
+// Đổi mật khẩu: vẫn gọi được khi mật khẩu đã hết hạn 24 giờ. Giới hạn số lần để không dò mật khẩu hiện tại.
+router.post('/change-password', rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }),
+    verifyToken, requireAdminAllowExpiredPassword, adminController.changePassword);
 
 router.get('/stats', verifyToken, requireAdmin, statsController.getStats);
 // Danh sách thiết bị đang truy cập (deviceId, IP, loại thiết bị...) lấy từ collection device_sessions

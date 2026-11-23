@@ -180,7 +180,47 @@ test('đăng nhập đúng -> 200 có token', async () => {
 test('đăng nhập sai mật khẩu -> 401', async () => {
     const admin = { _id: 'i1', username: 'admin', role: 'admin', password: bcrypt.hashSync('MatKhau123', 4) };
     test.mock.method(adminRepository, 'findByUsername', async () => admin);
+    test.mock.method(adminRepository, 'incrementFailedLogin', async () => ({ failedLoginAttempts: 1 }));
     const res = await call('POST', '/api/admin/login', { body: { username: 'admin', password: 'sai' } });
+    assert.strictEqual(res.status, 401);
+});
+
+test('đăng nhập sai lần thứ 2 -> 423 kèm mã ACCOUNT_LOCKED', async () => {
+    const admin = { _id: 'i1', username: 'admin', role: 'admin', password: bcrypt.hashSync('MatKhau123', 4) };
+    test.mock.method(adminRepository, 'findByUsername', async () => admin);
+    test.mock.method(adminRepository, 'incrementFailedLogin', async () => ({ failedLoginAttempts: 2 }));
+    test.mock.method(adminRepository, 'lock', async () => {});
+    const res = await call('POST', '/api/admin/login', { body: { username: 'admin', password: 'sai' } });
+    assert.strictEqual(res.status, 423);
+    assert.strictEqual((await res.json()).code, 'ACCOUNT_LOCKED');
+});
+
+// ---------- Mật khẩu hết hạn 24 giờ ----------
+const expiredToken = () => jwt.sign(
+    { id: '1', username: 'admin', role: 'admin', pwdExp: Math.floor(Date.now() / 1000) - 60 }, 'test-secret', { expiresIn: '1h' });
+
+test('mật khẩu hết hạn -> API admin trả 403 PASSWORD_EXPIRED', async () => {
+    const res = await call('POST', '/api/artifacts', { token: expiredToken(), body: { name: 'A', code: 'C' } });
+    assert.strictEqual(res.status, 403);
+    assert.strictEqual((await res.json()).code, 'PASSWORD_EXPIRED');
+});
+
+test('mật khẩu hết hạn -> vẫn gọi được API đổi mật khẩu', async () => {
+    const admin = { _id: '1', username: 'admin', role: 'admin', password: bcrypt.hashSync('MatKhau123', 4) };
+    test.mock.method(adminRepository, 'findById', async () => admin);
+    test.mock.method(adminRepository, 'updatePassword', async () => {});
+    const res = await call('POST', '/api/admin/change-password', {
+        token: expiredToken(), body: { currentPassword: 'MatKhau123', newPassword: 'MatKhauMoi456' },
+    });
+    assert.strictEqual(res.status, 200);
+    const { token } = await res.json();
+    // Token mới cho vào admin bình thường
+    test.mock.method(artifactRepository, 'create', async (d) => d);
+    assert.strictEqual((await call('POST', '/api/artifacts', { token, body: { name: 'A', code: 'C' } })).status, 201);
+});
+
+test('đổi mật khẩu cần đăng nhập -> 401', async () => {
+    const res = await call('POST', '/api/admin/change-password', { body: { currentPassword: 'a', newPassword: 'b' } });
     assert.strictEqual(res.status, 401);
 });
 

@@ -21,6 +21,7 @@
     var TOKEN_KEY = 'ddl_admin_token';
     var LOGIN_PAGE = '/login.html';
     var ADMIN_PAGE = '/admin';
+    var CHANGE_PASSWORD_PAGE = '/change-password.html';
 
     // ---------------------------------------------------------
     // Đọc / ghi token
@@ -102,6 +103,18 @@
         return readPayload(getToken());
     }
 
+    // Mật khẩu đã quá 24 giờ chưa đổi (server ghi mốc hết hạn vào token, trường pwdExp tính bằng giây)
+    function isPasswordExpired() {
+        var payload = getAdmin();
+        return Boolean(payload && payload.pwdExp && payload.pwdExp * 1000 <= Date.now());
+    }
+
+    // Thời điểm mật khẩu hết hạn (Date) hoặc null
+    function passwordExpiresAt() {
+        var payload = getAdmin();
+        return payload && payload.pwdExp ? new Date(payload.pwdExp * 1000) : null;
+    }
+
     // ---------------------------------------------------------
     // Điều hướng
     // ---------------------------------------------------------
@@ -111,7 +124,14 @@
      * Trả về true nếu hợp lệ.
      */
     function requireLogin() {
-        if (isLoggedIn()) return true;
+        if (isLoggedIn()) {
+            // Đăng nhập rồi nhưng mật khẩu hết hạn: chỉ được vào trang đổi mật khẩu
+            if (isPasswordExpired()) {
+                location.replace(CHANGE_PASSWORD_PAGE + '?expired=1');
+                return false;
+            }
+            return true;
+        }
         clearToken();
         // replace thay vì href: bấm Back không quay lại được trang admin
         location.replace(LOGIN_PAGE + '?next=' + encodeURIComponent(location.pathname));
@@ -123,7 +143,7 @@
      */
     function redirectIfLoggedIn() {
         if (!isLoggedIn()) return false;
-        location.replace(ADMIN_PAGE);
+        location.replace(isPasswordExpired() ? CHANGE_PASSWORD_PAGE + '?expired=1' : ADMIN_PAGE);
         return true;
     }
 
@@ -138,8 +158,10 @@
 
     /**
      * Gửi username/password lên server.
-     * Thành công: lưu token, trả về { ok: true }
-     * Thất bại:   trả về { ok: false, message: 'lý do' }
+     * Thành công: lưu token, trả về { ok: true, mustChangePassword }
+     *   mustChangePassword = true: mật khẩu đã quá 24 giờ, phải sang trang đổi mật khẩu
+     * Thất bại:   trả về { ok: false, message: 'lý do', locked }
+     *   locked = true: tài khoản đang bị khóa do sai mật khẩu nhiều lần
      */
     async function login(username, password) {
         var res;
@@ -161,9 +183,43 @@
         }
 
         if (!res.ok || !data.token) {
-            return { ok: false, message: data.message || 'Đăng nhập thất bại' };
+            return {
+                ok: false,
+                message: data.message || 'Đăng nhập thất bại',
+                locked: data.code === 'ACCOUNT_LOCKED',
+            };
         }
 
+        saveToken(data.token);
+        return { ok: true, mustChangePassword: Boolean(data.mustChangePassword) };
+    }
+
+    /**
+     * Đổi mật khẩu. Thành công: lưu token mới (mốc hết hạn mới), trả về { ok: true }
+     */
+    async function changePassword(currentPassword, newPassword) {
+        var res;
+        try {
+            res = await fetch('/api/admin/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+                body: JSON.stringify({ currentPassword: currentPassword, newPassword: newPassword }),
+            });
+        } catch (err) {
+            return { ok: false, message: 'Không kết nối được tới server.' };
+        }
+
+        var data = {};
+        try { data = await res.json(); } catch (err) { /* không phải JSON */ }
+
+        if (res.status === 401) {
+            clearToken();
+            location.replace(LOGIN_PAGE + '?expired=1');
+            return { ok: false, message: 'Phiên đăng nhập đã hết hạn' };
+        }
+        if (!res.ok || !data.token) {
+            return { ok: false, message: data.message || 'Đổi mật khẩu thất bại' };
+        }
         saveToken(data.token);
         return { ok: true };
     }
@@ -196,6 +252,16 @@
             location.replace(LOGIN_PAGE + '?expired=1');
             throw new Error('Phiên đăng nhập đã hết hạn');
         }
+
+        // Mật khẩu vừa hết hạn trong lúc đang dùng trang admin -> chuyển sang trang đổi mật khẩu
+        if (res.status === 403) {
+            var body = null;
+            try { body = await res.clone().json(); } catch (err) { /* không phải JSON */ }
+            if (body && body.code === 'PASSWORD_EXPIRED') {
+                location.replace(CHANGE_PASSWORD_PAGE + '?expired=1');
+                throw new Error('Mật khẩu đã hết hạn');
+            }
+        }
         return res;
     }
 
@@ -226,6 +292,9 @@
     global.Auth = {
         login: login,
         logout: logout,
+        changePassword: changePassword,
+        isPasswordExpired: isPasswordExpired,
+        passwordExpiresAt: passwordExpiresAt,
         isLoggedIn: isLoggedIn,
         getAdmin: getAdmin,
         getToken: getToken,

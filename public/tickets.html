@@ -138,9 +138,18 @@
         <i class="fa-solid fa-circle-check text-3xl text-green-700 mb-2"></i>
         <h2 class="font-serif text-2xl font-bold text-heritage-red" id="resultTitle"></h2>
         <p class="text-sm text-heritage-brown mt-2" id="resultNote"></p>
+        <!-- Vé chỉ hiện trong 60 giây sau khi thanh toán -->
+        <p id="viewTimer" class="hidden no-print mt-4 inline-flex items-center gap-2 rounded-full bg-heritage-red text-white text-sm font-semibold px-4 py-2" role="timer" aria-live="polite"></p>
+        <br>
         <button id="printBtn" class="no-print mt-4 border border-heritage-brown/30 hover:border-heritage-red text-heritage-brown px-5 py-2 rounded-lg text-sm"><i class="fa-solid fa-print"></i> <span id="printText"></span></button>
       </div>
       <div id="tickets" class="grid sm:grid-cols-2 gap-6"></div>
+      <!-- Hết thời gian xem vé -->
+      <div id="viewExpired" class="hidden bg-white border border-heritage-gold/50 rounded-2xl p-6 text-center">
+        <i class="fa-solid fa-eye-slash text-3xl text-heritage-brown mb-2"></i>
+        <h2 class="font-serif text-xl font-bold text-heritage-red" id="viewExpiredTitle"></h2>
+        <p class="text-sm text-heritage-brown mt-2 max-w-lg mx-auto" id="viewExpiredNote"></p>
+      </div>
       <button id="newBtn" class="no-print mt-8 text-sm font-semibold text-heritage-red underline underline-offset-4"></button>
     </section>
 
@@ -174,6 +183,8 @@
         waiting: 'Đang chờ nhân viên xác nhận thanh toán...', expired: 'Đơn đã quá hạn thanh toán và bị hủy. Chỗ đã được trả lại, vui lòng đặt lại.',
         cancelled: 'Đơn đã bị hủy. Nếu bạn đã chuyển khoản, vui lòng liên hệ quầy vé.', payNew: 'Đặt đơn khác',
         ok: 'Thanh toán thành công – vé của bạn đây', okNote: 'Xuất trình mã QR tại cổng. Mỗi vé chỉ dùng được một lần, đúng khung giờ đã chọn. Nên chụp màn hình hoặc in vé.', print: 'In vé', newOrder: 'Mua thêm vé',
+        viewLeft: (s) => `Vé chỉ hiển thị thêm ${s} giây – hãy chụp màn hình hoặc ghi lại mã vé`,
+        viewExpiredTitle: 'Đã hết thời gian xem vé', viewExpiredNote: 'Vì lý do bảo mật, vé chỉ hiển thị 1 phút sau khi thanh toán. Để xem lại vé và mã QR, hãy nhập mã vé (TKT-...) vào ô "Tra cứu vé đã mua" bên dưới.',
         ticketTime: 'Khung giờ', ticketDate: 'Ngày', code: 'Mã vé', status: 'Trạng thái',
         st: { valid: 'Chưa sử dụng', used: 'Đã sử dụng', pending: 'Chờ thanh toán', cancelled: 'Đã hủy' },
         lookupTitle: 'Tra cứu vé đã mua', lookupDesc: 'Nhập mã vé để xem lại thông tin và mã QR.', lookup: 'Tra cứu', notFound: 'Không tìm thấy vé với mã này.',
@@ -191,6 +202,8 @@
         waiting: 'Waiting for staff to confirm your payment...', expired: 'This order expired before payment and was cancelled. Please book again.',
         cancelled: 'This order was cancelled. If you already paid, please contact the ticket desk.', payNew: 'Start a new order',
         ok: 'Payment confirmed – here are your tickets', okNote: 'Show the QR code at the gate. Each ticket can be used once, in the time slot you chose. Take a screenshot or print them.', print: 'Print tickets', newOrder: 'Buy more tickets',
+        viewLeft: (s) => `Tickets are shown for ${s} more seconds – take a screenshot or note the ticket codes`,
+        viewExpiredTitle: 'Ticket viewing time is over', viewExpiredNote: 'For security, tickets are only shown for 1 minute after payment. To see a ticket and its QR code again, enter the ticket code (TKT-...) in "Find your tickets" below.',
         ticketTime: 'Time slot', ticketDate: 'Date', code: 'Ticket code', status: 'Status',
         st: { valid: 'Not used', used: 'Used', pending: 'Awaiting payment', cancelled: 'Cancelled' },
         lookupTitle: 'Find your tickets', lookupDesc: 'Enter your ticket code to view it again with its QR code.', lookup: 'Find', notFound: 'No ticket found with this code.',
@@ -213,6 +226,8 @@
     let order = null;        // đơn đang thanh toán
     let pollTimer = null;
     let countdownTimer = null;
+    let viewTimer = null;    // đếm ngược thời gian còn được xem vé
+    let viewDeadline = 0;    // thời điểm (ms, theo đồng hồ máy khách) hết được xem vé
 
     // ---------- Gọi API ----------
     async function request(method, url, body) {
@@ -252,6 +267,8 @@
       document.getElementById('paySteps').replaceChildren(...s.paySteps.map((t) => el('li', '', t)));
       set('lookupTitle', s.lookupTitle); set('lookupDesc', s.lookupDesc); set('lookupBtn', s.lookup); set('footer', s.footer);
       set('resultTitle', s.ok); set('resultNote', s.okNote);
+      set('viewExpiredTitle', s.viewExpiredTitle); set('viewExpiredNote', s.viewExpiredNote);
+      renderViewTimer();
       document.getElementById('date').min = vnDate(0);
       document.getElementById('date').max = vnDate(60);
       if (order) renderPayment();
@@ -384,7 +401,7 @@
     function openOrder(data) {
       order = data;
       setUrl({ order: data.orderId });
-      if (data.status === 'paid' || data.status === 'confirmed') return showTickets(data.tickets);
+      if (data.status === 'paid' || data.status === 'confirmed') return showPaidOrder(data);
       show('booking', false); show('result', false); show('payment');
       renderPayment();
       startPolling();
@@ -430,7 +447,7 @@
         const data = (await request('GET', `/api/tickets/orders/${encodeURIComponent(order.orderId)}`)).data;
         const changed = data.status !== order.status;
         order = { ...data, payment: data.payment || order.payment };
-        if (data.status === 'paid' || data.status === 'confirmed') { stopPolling(); return showTickets(data.tickets); }
+        if (data.status === 'paid' || data.status === 'confirmed') { stopPolling(); return showPaidOrder(data); }
         if (changed || data.status !== 'pending') { renderPayment(); if (data.status !== 'pending') stopPolling(); }
       } catch (err) {
         if (err.status === 404) { stopPolling(); order = null; newOrder(); }
@@ -454,8 +471,45 @@
     }
 
     // ---------- Kết quả: vé có QR vào cổng ----------
-    function showTickets(tickets) {
-      stopPolling();
+
+    // Đơn đã thanh toán: chỉ hiện vé trong 60 giây đầu (server trả viewSecondsLeft), hết thì ẩn
+    function showPaidOrder(data) {
+      if (data.ticketsHidden || !data.tickets.length) return hideTickets();
+      showTickets(data.tickets, data.viewSecondsLeft);
+    }
+
+    function stopViewTimer() {
+      clearInterval(viewTimer);
+      viewTimer = null; viewDeadline = 0;
+      document.getElementById('viewTimer').classList.add('hidden');
+    }
+
+    function renderViewTimer() {
+      if (!viewDeadline) return;
+      const left = Math.max(0, Math.ceil((viewDeadline - Date.now()) / 1000));
+      const box = document.getElementById('viewTimer');
+      const i = document.createElement('i'); i.className = 'fa-solid fa-stopwatch';
+      box.replaceChildren(i, el('span', '', L().viewLeft(left)));
+      box.classList.remove('hidden');
+      if (left === 0) hideTickets();
+    }
+
+    // Hết thời gian xem: xóa vé khỏi trang, hướng dẫn tra cứu bằng mã vé
+    function hideTickets() {
+      stopPolling(); stopViewTimer();
+      setUrl({});
+      document.getElementById('tickets').replaceChildren();
+      document.getElementById('resultTitle').parentElement.classList.add('hidden');
+      show('viewExpired');
+      show('booking', false); show('payment', false); show('result');
+      document.getElementById('lookupCode').focus({ preventScroll: true });
+    }
+
+    // secondsLeft: có thì đếm ngược rồi ẩn vé; không có (tra cứu bằng mã vé) thì hiện bình thường
+    function showTickets(tickets, secondsLeft) {
+      stopPolling(); stopViewTimer();
+      document.getElementById('resultTitle').parentElement.classList.remove('hidden');
+      show('viewExpired', false);
       const box = document.getElementById('tickets');
       box.replaceChildren();
       tickets.forEach((t) => {
@@ -475,6 +529,12 @@
       });
       show('booking', false); show('payment', false); show('result');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (typeof secondsLeft === 'number' && secondsLeft > 0) {
+        viewDeadline = Date.now() + secondsLeft * 1000;
+        renderViewTimer();
+        viewTimer = setInterval(renderViewTimer, 1000);
+      }
     }
 
     function typeName(code) {
@@ -483,7 +543,8 @@
     }
 
     function newOrder() {
-      stopPolling();
+      stopPolling(); stopViewTimer();
+      show('viewExpired', false);
       order = null; chosen = null; quantities = {}; date = '';
       setUrl({});
       document.getElementById('date').value = '';

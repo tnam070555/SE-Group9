@@ -102,6 +102,29 @@ test('admin xác nhận → đơn paid, vé valid kèm QR vào cổng; xác nh�
     assert.strictEqual(again.status, 409);
 });
 
+test('vé chỉ hiện qua link đơn trong 60 giây sau thanh toán; tra cứu bằng mã vé vẫn xem được', async () => {
+    const o = (await order([{ type: 'ADULT', quantity: 1 }])).body.data;
+    await call('POST', `/api/admin/tickets/orders/${o.orderId}/confirm`, { token: adminToken });
+
+    const fresh = (await call('GET', `/api/tickets/orders/${o.orderId}`)).body.data;
+    assert.strictEqual(fresh.tickets.length, 1);
+    assert.strictEqual(fresh.ticketsHidden, false);
+    assert.ok(fresh.viewSecondsLeft > 55 && fresh.viewSecondsLeft <= 60, `còn ${fresh.viewSecondsLeft}s`);
+    const code = fresh.tickets[0].code;
+
+    // Giả lập đã thanh toán được 61 giây
+    await TicketOrder.updateOne({ _id: o.orderId }, { paidAt: new Date(Date.now() - 61 * 1000) });
+    const later = (await call('GET', `/api/tickets/orders/${o.orderId}`)).body.data;
+    assert.strictEqual(later.status, 'paid');
+    assert.deepStrictEqual(later.tickets, []);
+    assert.strictEqual(later.ticketsHidden, true);
+    assert.strictEqual(later.viewSecondsLeft, 0);
+
+    const lookup = await call('GET', `/api/tickets/${code}`);
+    assert.strictEqual(lookup.status, 200);
+    assert.match(lookup.body.data.qr, /^data:image\/png;base64,/);
+});
+
 test('API admin đòi đăng nhập', async () => {
     assert.strictEqual((await call('GET', '/api/admin/tickets/orders')).status, 401);
 });

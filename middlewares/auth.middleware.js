@@ -16,12 +16,25 @@ function verifyToken(req, res, next) {
     }
 }
 
-// Chỉ cho phép vai trò admin
+// Chỉ cho phép vai trò admin, và mật khẩu chưa hết hạn
 function requireAdmin(req, res, next) {
+    if (!req.admin || req.admin.role !== 'admin') {
+        return next(new AppError(403, 'Không đủ quyền'));
+    }
+    // pwdExp (giây) = lúc mật khẩu hết hạn, ghi vào token khi đăng nhập / đổi mật khẩu.
+    // Chặn cả phiên đang mở: quá mốc này là phải đổi mật khẩu mới dùng tiếp được.
+    if (req.admin.pwdExp && req.admin.pwdExp * 1000 <= Date.now()) {
+        return next(new AppError(403, 'Mật khẩu đã hết hạn, vui lòng đổi mật khẩu mới', 'PASSWORD_EXPIRED'));
+    }
+    next();
+}
+
+// Như requireAdmin nhưng vẫn cho qua khi mật khẩu đã hết hạn (chỉ dùng cho API đổi mật khẩu)
+function requireAdminAllowExpiredPassword(req, res, next) {
     if (!req.admin || req.admin.role !== 'admin') {
         return next(new AppError(403, 'Không đủ quyền'));
     }
     next();
 }
 
-module.exports = { verifyToken, requireAdmin };
+module.exports = { verifyToken, requireAdmin, requireAdminAllowExpiredPassword };

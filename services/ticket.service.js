@@ -11,6 +11,9 @@ const MAX_DAYS_AHEAD = 60;
 // Thời gian giữ chỗ chờ thanh toán (phút). Quá hạn → đơn tự hủy, trả lại chỗ.
 const PAYMENT_TIMEOUT_MIN = Number(process.env.TICKET_PAYMENT_TIMEOUT_MIN) || 15;
 const TIME_ZONE = 'Asia/Ho_Chi_Minh';
+// Sau khi thanh toán, trang đơn hàng chỉ hiện vé + QR vào cổng trong ngần này giây.
+// Hết thời gian thì phải tra cứu bằng mã vé (khách cần chụp màn hình / ghi lại mã).
+const TICKET_VIEW_SECONDS = Number(process.env.TICKET_VIEW_SECONDS) || 60;
 
 // Khung giờ mặc định cho mỗi ngày
 const DEFAULT_SLOTS = [
@@ -101,9 +104,23 @@ function paymentQr(order) {
     return QRCode.toDataURL(content, { width: 280, margin: 1 });
 }
 
-/** Dạng trả về cho khách của một đơn. Vé + QR vào cổng chỉ có khi đã thanh toán. */
+/**
+ * Số giây còn được xem vé qua link đơn hàng (0 = đã hết).
+ * Đơn cũ không có paidAt thì coi như đã hết thời gian xem.
+ */
+function viewSecondsLeft(order, now = Date.now()) {
+    if (!order.paidAt) return 0;
+    const ms = new Date(order.paidAt).getTime() + TICKET_VIEW_SECONDS * 1000 - now;
+    return Math.max(0, Math.ceil(ms / 1000));
+}
+
+/**
+ * Dạng trả về cho khách của một đơn. Vé + QR vào cổng chỉ có khi đã thanh toán,
+ * và chỉ trong TICKET_VIEW_SECONDS giây đầu sau khi thanh toán.
+ */
 async function toOrderView(order) {
     const paid = PAID_STATUSES.includes(order.status);
+    const secondsLeft = paid ? viewSecondsLeft(order) : 0;
     const view = {
         orderId:    order._id,
         orderCode:  order.orderCode,
@@ -116,6 +133,10 @@ async function toOrderView(order) {
         paidAt:     order.paidAt || null,
         tickets:    [],
         payment:    null,
+        // Thời gian còn được xem vé (giây). ticketsHidden = đã thanh toán nhưng hết thời gian xem
+        viewSecondsLeft: secondsLeft,
+        viewSeconds:     TICKET_VIEW_SECONDS,
+        ticketsHidden:   paid && secondsLeft === 0,
     };
     if (order.status === 'pending') {
         view.payment = {
@@ -125,7 +146,7 @@ async function toOrderView(order) {
             qr:      await paymentQr(order),
         };
     }
-    if (paid) {
+    if (paid && secondsLeft > 0) {
         view.tickets = await Promise.all(order.tickets.map(async (t) => ({
             code:   t.code,
             type:   t.type,
@@ -168,6 +189,7 @@ function releaseSeats(order) {
 const ticketService = {
     MAX_PER_ORDER,
     PAYMENT_TIMEOUT_MIN,
+    TICKET_VIEW_SECONDS,
 
     /**
      * Hủy các đơn chờ thanh toán đã quá hạn và trả lại chỗ.

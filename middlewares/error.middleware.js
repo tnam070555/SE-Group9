@@ -8,7 +8,9 @@ function notFound(req, res, next) {
 // Chuyển mọi lỗi thành mã HTTP và thông báo phù hợp
 function errorHandler(err, req, res, next) {
     if (err instanceof AppError) {
-        return res.status(err.status).json({ success: false, message: err.message });
+        const body = { success: false, message: err.message };
+        if (err.code) body.code = err.code;
+        return res.status(err.status).json(body);
     }
     if (err.type === 'entity.parse.failed') {
         return res.status(400).json({ success: false, message: 'Dữ liệu JSON không hợp lệ' });
