@@ -185,7 +185,8 @@
       // Ước tính thời gian đọc: ~3 ký tự/giây cho tiếng Việt, 5 ký tự/giây cho latinh
       const text = (current && current.description) || '';
       const rate = ['ja','zh','ko'].includes(lang) ? 4 : 3;
-      const totalMs = Math.max((text.length / rate) * 1000, 3000);
+      const fileSec = guideDuration();
+      const totalMs = fileSec ? fileSec * 1000 : Math.max((text.length / rate) * 1000, 3000);
       const start = Date.now();
       clearInterval(progressTimer);
       progressTimer = setInterval(() => {
@@ -193,7 +194,7 @@
         document.getElementById('progress-bar').style.width = pct + '%';
         const remaining = Math.max(0, Math.round((totalMs - (Date.now() - start)) / 1000));
         document.getElementById('progress-label').textContent = remaining + 's';
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        if (!isGuidePlaying()) {
           clearInterval(progressTimer);
           document.getElementById('progress-bar').style.width = '100%';
           setTimeout(() => setPlayState(false), 500);
@@ -302,13 +303,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('play-btn').addEventListener('click', () => {
+      document.getElementById('play-btn').addEventListener('click', async () => {
         if (!current) return;
         if (isPlaying) { stopSpeech(); setPlayState(false); return; }
         const sLang = speechOf(current.language || lang);
-        const ok = speak(current.description || '', sLang);
-        if (!ok) { setNote('speech-note', ds('noSpeech')); return; }
-        if (hasVoice && hasVoice(sLang) === false) { setNote('speech-note', ds('noVoice')); }
+        const mode = await playGuide(current.code, current.language || lang, current.description || '', sLang);
+        if (!mode) { setNote('speech-note', ds('noSpeech')); return; }
+        if (mode === 'tts' && hasVoice && hasVoice(sLang) === false) { setNote('speech-note', ds('noVoice')); }
         else { setNote('speech-note', ''); }
         setPlayState(true);
         startProgressSim();

@@ -1,0 +1,94 @@
+### Dùng với extension "REST Client" của VS Code.
+### Điền mật khẩu admin (ADMIN_PASSWORD trong .env) vào biến bên dưới, KHÔNG commit mật khẩu thật.
+@base = http://localhost:5000
+@adminUser = admin
+@adminPassword = DIEN_MAT_KHAU_ADMIN
+
+### 1. Kiểm tra server
+GET {{base}}/
+
+### 2. Danh sách hiện vật (công khai)
+GET {{base}}/api/artifacts
+
+### 2b. Danh sách ngôn ngữ hỗ trợ
+GET {{base}}/api/languages
+
+### 2c. Danh sách bằng tiếng Nhật (thử en, ja, ko, zh)
+GET {{base}}/api/artifacts?lang=ja
+
+### 3. Thêm khi chưa đăng nhập (mong đợi 401)
+POST {{base}}/api/artifacts
+Content-Type: application/json
+
+{"name": "Phòng Khánh Tiết", "code": "DDL-01"}
+
+### 4. Đăng nhập, lấy token (mong đợi 200)
+# @name login
+POST {{base}}/api/admin/login
+Content-Type: application/json
+
+{"username": "{{adminUser}}", "password": "{{adminPassword}}"}
+
+### 5. Thêm công trình có token (mong đợi 201, tự sinh QR)
+# @name created
+POST {{base}}/api/artifacts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "Phòng Khánh Tiết",
+  "code": "DDL-01",
+  "description": "Mô tả thuyết minh bằng tiếng Việt.",
+  "location": "Tầng trệt - Dinh Độc Lập"
+}
+
+### 6. Thiếu tên (mong đợi 400)
+POST {{base}}/api/artifacts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{"code": "DDL-99"}
+
+### 7. Trùng code (mong đợi 409)
+POST {{base}}/api/artifacts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{"name": "Trùng mã", "code": "DDL-01"}
+
+### 8. Xem chi tiết theo id
+GET {{base}}/api/artifacts/{{created.response.body.data._id}}
+
+### 8b. Xem chi tiết theo mã (trang quét QR dùng API này)
+GET {{base}}/api/artifacts/code/DDL-01
+
+### 8c. Ảnh QR của công trình (mở bằng trình duyệt: {{base}}/api/artifacts/code/DDL-01/qr?base=http://192.168.1.10:5000)
+GET {{base}}/api/artifacts/code/DDL-01/qr?base=http://192.168.1.10:5000
+
+### 9. Sửa (cần token)
+PUT {{base}}/api/artifacts/{{created.response.body.data._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{"description": "Mô tả đã chỉnh sửa."}
+
+### 10. Xóa (cần token)
+DELETE {{base}}/api/artifacts/{{created.response.body.data._id}}
+Authorization: Bearer {{login.response.body.token}}
+
+### 11. Dịch tự động phần còn thiếu sang en, ja (cần token; cần mạng + TRANSLATE_PROVIDER)
+POST {{base}}/api/artifacts/{{created.response.body.data._id}}/translate
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{"languages": ["en", "ja"]}
+
+### 12. Sửa tay bản dịch tiếng Hàn (cần token)
+PUT {{base}}/api/artifacts/{{created.response.body.data._id}}/translations/ko
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{"name": "대연회장", "description": "번역 내용"}
+
+### 13. Xem công trình theo mã bằng tiếng Hàn
+GET {{base}}/api/artifacts/code/DDL-01?lang=ko

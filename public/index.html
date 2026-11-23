@@ -677,16 +677,15 @@
       i.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
     }
 
-    function togglePlay() {
+    async function togglePlay() {
       if (!current) return;
       if (playing) { stopSpeech(); playing = false; setPlayIcon(); return; }
-      const ok = speak(current.description || '', speechOf(current.language || lang));
+      const ok = await playGuide(current.code, current.language || lang, current.description || '', speechOf(current.language || lang));
       if (!ok) { const n = document.getElementById('speechNote'); n.textContent = S().noSpeech; n.classList.remove('hidden'); return; }
       playing = true; setPlayIcon();
       // Ghi nhận lượt nghe (ẩn danh), lỗi bị bỏ qua
       trackEvent(current.code, current.language || lang, 'play');
-      const u = window.speechSynthesis;
-      const check = setInterval(() => { if (!u.speaking && !u.pending) { playing = false; setPlayIcon(); clearInterval(check); } }, 400);
+      const check = setInterval(() => { if (!isGuidePlaying()) { playing = false; setPlayIcon(); clearInterval(check); } }, 400);
     }
 
     // ---------- Dữ liệu ----------

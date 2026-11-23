@@ -198,7 +198,48 @@ function speak(text, lang = 'vi-VN', rate = 0.95) {
   return true;
 }
 
+// ---------- Thuyết minh bằng file audio ----------
+
+// Thư mục chứa file thuyết minh: {AUDIO_BASE}/{ngôn ngữ}/{mã công trình}.mp3
+// Đổi giá trị này để trỏ sang thư mục khác (vd: '/audio' -> '/media/guide').
+const AUDIO_BASE = '/audio';
+
+let guideAudio = null;
+
+function audioUrlFor(code, lang) {
+  return `${AUDIO_BASE}/${encodeURIComponent(lang)}/${encodeURIComponent(code)}.mp3`;
+}
+
+// Phát file thuyết minh; nếu file không có/không phát được thì đọc bằng giọng trình duyệt.
+// Trả về Promise: 'file' | 'tts' | false (thiết bị không hỗ trợ gì).
+async function playGuide(code, lang, text, speechLang) {
+  stopSpeech();
+  if (code && lang) {
+    const audio = new Audio(audioUrlFor(code, lang));
+    audio.preload = 'auto';
+    guideAudio = audio;
+    try {
+      await audio.play();
+      return 'file';
+    } catch (err) {
+      if (guideAudio === audio) guideAudio = null; // 404, sai định dạng... -> đọc bằng giọng trình duyệt
+    }
+  }
+  return speak(text, speechLang) ? 'tts' : false;
+}
+
+// Đang phát (file audio hoặc giọng đọc)
+function isGuidePlaying() {
+  if (guideAudio) return !guideAudio.paused && !guideAudio.ended;
+  return 'speechSynthesis' in window && (window.speechSynthesis.speaking || window.speechSynthesis.pending);
+}
+
+// Thời lượng file audio (giây), null nếu đang đọc bằng giọng trình duyệt / chưa biết
+function guideDuration() {
+  return guideAudio && isFinite(guideAudio.duration) ? guideAudio.duration : null;
+}
+
 function stopSpeech() {
+  if (guideAudio) { guideAudio.pause(); guideAudio = null; }
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  
 }
